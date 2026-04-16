@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  clerkOrgId  String   @unique
+  name        String
+  createdAt   DateTime @default(now())
+
+  users        User[]
+  connections  Connection[]
+  agents       Agent[]
+  traces       Trace[]
+  incidents    Incident[]
+  alertPrefs   AlertPref[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  clerkUserId  String   @unique
+  email        String
+  createdAt    DateTime @default(now())
+
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+
+  feedbacks    Feedback[]
+}
+
+enum ConnectionType {
+  zapier
+  oauth
+  builder
+}
+
+enum ConnectionStatus {
+  active
+  revoked
+}
+
+model Connection {
+  id                String           @id @default(cuid())
+  type              ConnectionType
+  projectTokenHash  String           @unique
+  providerMeta      Json?
+  status            ConnectionStatus @default(active)
+  revokedAt         DateTime?
+  createdAt         DateTime         @default(now())
+
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+}
+
+model Agent {
+  id           String   @id @default(cuid())
+  externalId   String
+  displayName  String
+  platform     String?
+  lastSeenAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+
+  traces     Trace[]
+  incidents  Incident[]
+  alertPrefs AlertPref[]
+
+  @@unique([orgId, externalId])
+}
+
+enum TraceStatus {
+  received
+  evaluated
+  translated
+  failed
+}
+
+model Trace {
+  id                  String      @id @default(cuid())
+  externalTraceId     String
+  timestamp           DateTime
+  redactedPrompt      String
+  redactedResponse    String
+  toolCalls           Json        @default("[]")
+  tokenCount          Int?
+  costCents           Float?
+  rawRedactedPayload  Json
+  summary             String?
+  status              TraceStatus @default(received)
+  createdAt           DateTime    @default(now())
+
+  orgId    String
+  org      Organization @relation(fields: [orgId], references: [id])
+  agentId  String
+  agent    Agent        @relation(fields: [agentId], references: [id])
+
+  evaluation  Evaluation?
+  incident    Incident?
+
+  @@index([orgId, agentId, timestamp(sort: Desc)])
+}
+
+model Evaluation {
+  id         String   @id @default(cuid())
+  pass       Boolean
+  confidence Float
+  reason     String
+  model      String
+  createdAt  DateTime @default(now())
+
+  traceId  String @unique
+  trace    Trace  @relation(fields: [traceId], references: [id])
+}
+
+enum IncidentSeverity {
+  warning
+  critical
+}
+
+model Incident {
+  id        String           @id @default(cuid())
+  severity  IncidentSeverity
+  summary   String
+  dedupKey  String
+  createdAt DateTime         @default(now())
+
+  traceId  String @unique
+  trace    Trace  @relation(fields: [traceId], references: [id])
+  agentId  String
+  agent    Agent  @relation(fields: [agentId], references: [id])
+  orgId    String
+  org      Organization @relation(fields: [orgId], references: [id])
+
+  alerts    Alert[]
+  feedbacks Feedback[]
+}
+
+enum AlertChannel {
+  email
+}
+
+enum AlertStatus {
+  sent
+  failed
+}
+
+model Alert {
+  id         String       @id @default(cuid())
+  channel    AlertChannel
+  sentAt     DateTime
+  status     AlertStatus
+
+  incidentId  String
+  incident    Incident @relation(fields: [incidentId], references: [id])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  correct   Boolean
+  note      String?
+  createdAt DateTime @default(now())
+
+  incidentId  String
+  incident    Incident @relation(fields: [incidentId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+enum AlertMode {
+  immediate
+  digest
+  off
+}
+
+model AlertPref {
+  id            String    @id @default(cuid())
+  mode          AlertMode @default(immediate)
+  severityFloor IncidentSeverity @default(warning)
+
+  orgId    String
+  org      Organization @relation(fields: [orgId], references: [id])
+  agentId  String?
+  agent    Agent?       @relation(fields: [agentId], references: [id])
+}

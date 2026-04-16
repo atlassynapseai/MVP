@@ -16,6 +16,7 @@ paths:
 - `.claude/rules/*.md` — path-scoped rules loaded by Claude Code
 - `.claude/skills/<name>/SKILL.md` — OpenSkills format, YAML frontmatter required
 - `.claude/hooks/*.sh` — caliber lifecycle hooks (wired via `.claude/settings.json`)
+- `caveman/` — caveman mode plugin with skills, rules, evals, and hooks
 
 ## Editing Rules
 - Keep `CLAUDE.md` under 400 lines — dense references, not prose

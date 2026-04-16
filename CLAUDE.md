@@ -1,11 +1,37 @@
 # MVP — Claude Code Context
 
 ## Project
-AtlasSynapse MVP. Greenfield — no source files yet. Add stack details here as the project grows.
+AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
+
+## Stack
+- **Monorepo**: pnpm + Turborepo
+- **Web**: Next.js 15 App Router, TypeScript strict, Tailwind + shadcn/ui + lucide-icons, Clerk auth (`@atlas/web`)
+- **Edge**: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
+- **DB**: Postgres/Supabase + Prisma ORM, pg-boss queue (`@atlas/db`)
+- **Shared**: HMAC, PII utils, Zod schemas (`@atlas/shared`)
+- **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
+- **Testing**: Vitest + Playwright
+- **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
+
+## Setup
+```bash
+pnpm install
+cp .env.example .env.local  # fill values
+
+# DB
+pnpm --filter @atlas/db migrate
+pnpm --filter @atlas/db generate
+
+# Dev servers
+pnpm --filter @atlas/web dev      # localhost:3000
+pnpm --filter @atlas/edge dev     # localhost:8787
+
+# Test
+pnpm test
+```
 
 ## Commands
 ```bash
-# Update these as stack is chosen
 # caliber refresh
 /opt/homebrew/bin/caliber refresh
 
@@ -20,17 +46,34 @@ AtlasSynapse MVP. Greenfield — no source files yet. Add stack details here as 
 ```
 
 ## Architecture
-- **Root**: `README.md` — project overview (currently minimal)
+- **Root**: `README.md` — project overview
 - **Agent config**: `CLAUDE.md` (Claude), `AGENTS.md` (Codex)
+- **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
+  - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
+  - `apps/web/app/api/ingest/` — ingest API route
+  - `apps/web/components/` — shared UI components (sidebar, etc.)
+  - `apps/web/middleware.ts` — Clerk auth middleware
+- **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)
+- **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
+- **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts` (`@atlas/shared`)
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - **Claude rules**: `.claude/rules/` — path-scoped conventions
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
+- **Caveman plugin**: `caveman/` — terse caveman mode (skills, rules, evals, hooks)
+
+## Key Patterns
+- Add dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`
+- DB queries via `packages/db/src/index.ts` (Prisma client re-export)
+- Ingest payload validation: `packages/shared/src/schemas.ts` (Zod)
+- PII redaction: `packages/shared/src/pii.ts`
+- HMAC token verification: `packages/shared/src/hmac.ts`
+- Edge routes in `apps/edge/src/index.ts` (Hono)
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`
 - Branches: feature branches off `main`; name as `feat/<short-slug>` or `fix/<short-slug>`
 - PRs: description must explain *why*, not *what*; link issues
-- No `any` in TypeScript (when added) — use `unknown`
+- No `any` in TypeScript — use `unknown`
 - Prefer explicit over implicit — name things clearly
 
 ## Agent Config Sync
@@ -82,12 +125,6 @@ BRANCH: feat/<slug>
 - `python-development`, `javascript-typescript`, `backend-development`
 - `kubernetes-operations`, `cloud-infrastructure`, `security-scanning`
 - `comprehensive-review`, `full-stack-orchestration`
-
-## Adding Stack Context
-When a tech stack is chosen, update this file with:
-- `## Setup` — install + build + test commands
-- `## Architecture` — actual `src/` structure
-- `## Key Patterns` — how to add routes, components, DB queries
 
 ## Before Committing
 

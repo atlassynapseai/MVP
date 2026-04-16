@@ -1,0 +1,12 @@
+[
+  {
+    "id": "has_executable_content",
+    "reason": "Markdown-only repo, no build system or commands exist",
+    "dismissedAt": "2026-04-16T04:24:21.664Z"
+  },
+  {
+    "id": "references_valid",
+    "reason": "No source files to reference",
+    "dismissedAt": "2026-04-16T04:24:21.664Z"
+  }
+]

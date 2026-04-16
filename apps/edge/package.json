@@ -1,0 +1,25 @@
+{
+  "name": "@atlas/edge",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "hono": "^4.5.0",
+    "zod": "^3.23.0",
+    "@atlas/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "wrangler": "^3.65.0",
+    "vitest": "^2.0.0",
+    "typescript": "^5.5.0",
+    "@cloudflare/workers-types": "^4.20240725.0"
+  }
+}

@@ -1,15 +1,27 @@
 # MVP — Codex Agent Context
 
 ## Project
-AtlasSynapse MVP. Greenfield — no source files yet.
+AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
+
+## Stack
+- Monorepo: pnpm + Turborepo
+- Web: Next.js 15 App Router, TypeScript strict, Tailwind, Clerk auth (`@atlas/web`)
+- Edge: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
+- DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
+- Shared: HMAC, PII utils, Zod schemas (`@atlas/shared`)
+- Tests: Vitest
 
 ## Commands
 ```bash
+pnpm install
+pnpm --filter @atlas/db migrate
+pnpm --filter @atlas/db generate
+pnpm --filter @atlas/web dev      # localhost:3000
+pnpm --filter @atlas/edge dev     # localhost:8787
+pnpm test
+
 # Caliber refresh (agent config)
 /opt/homebrew/bin/caliber refresh
-
-# Search community skills
-/opt/homebrew/bin/caliber skills --query "<technology>"
 
 # Save a project learning
 /opt/homebrew/bin/caliber learn add "<learning>"
@@ -19,15 +31,31 @@ AtlasSynapse MVP. Greenfield — no source files yet.
 - `README.md` — project overview
 - `CLAUDE.md` — Claude Code context
 - `AGENTS.md` — this file (Codex context)
+- `apps/web/` — Next.js 15 web app
+  - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
+  - `app/api/ingest/` — ingest API route
+  - `components/` — shared UI components
+  - `middleware.ts` — Clerk auth middleware
+- `apps/edge/src/` — Hono edge worker (ingest + PII strip)
+- `packages/db/` — Prisma schema + client
+- `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
-- `.agents/skills/` — Codex-specific skills (mirror of `.claude/skills/`)
+- `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
+
+## Key Patterns
+- Dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`
+- DB queries: `packages/db/src/index.ts` (Prisma client re-export)
+- Ingest validation: `packages/shared/src/schemas.ts` (Zod)
+- PII redaction: `packages/shared/src/pii.ts`
+- HMAC verification: `packages/shared/src/hmac.ts`
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`
 - Branches: `feat/<slug>`, `fix/<slug>` off `main`
 - PRs: explain *why* in body, link issues
 - No force-push to `main`
+- No `any` in TypeScript — use `unknown`
 
 ## Agent Sync
 - Edit `AGENTS.md` to update Codex context

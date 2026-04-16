@@ -1,2 +1,9 @@
-# Caliber local state
-.caliber/
+node_modules/
+.next/
+dist/
+.turbo/
+*.env
+.env.local
+.env.*.local
+.wrangler/
+prisma/generated/

@@ -1,0 +1,16 @@
+{
+  "name": "@atlas/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio",
+    "validate": "prisma validate"
+  },
+  "dependencies": { "@prisma/client": "^5.16.0" },
+  "devDependencies": { "prisma": "^5.16.0", "typescript": "^5.5.0", "@types/node": "^22.0.0" }
+}

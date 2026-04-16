@@ -56,9 +56,10 @@ pnpm test
 - `packages/sdk-python/tests/` — Python SDK tests (pytest)
 - `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
 - `scripts/test-n8n-scenario.md` — n8n integration scenario doc
+- `scripts/seed-connection.mjs` — seed a Connection row for local ingest testing
 - `public/templates/n8n-atlas-reporter.json` — n8n HTTP reporter workflow template
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
-- `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`, `middleware.md`)
+- `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`, `middleware.md`, `security-patterns.md`)
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
 - `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
 

@@ -1,4 +1,23 @@
-import { timingSafeEqual } from "node:crypto";
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  const arr = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return arr;
+}
+
+function safeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i]! ^ b[i]!;
+  return diff === 0;
+}
 
 export async function sign(payload: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
@@ -10,21 +29,16 @@ export async function sign(payload: string, secret: string): Promise<string> {
     ["sign"]
   );
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(payload));
-  return Buffer.from(sig).toString("hex");
+  return toHex(sig);
 }
 
 export async function verify(payload: string, signature: string, secret: string): Promise<boolean> {
   const expected = await sign(payload, secret);
-  let expectedBuf: Buffer;
-  let signatureBuf: Buffer;
   try {
-    expectedBuf = Buffer.from(expected, "hex");
-    signatureBuf = Buffer.from(signature, "hex");
+    return safeEqual(hexToBytes(expected), hexToBytes(signature));
   } catch {
     return false;
   }
-  if (expectedBuf.length !== signatureBuf.length) return false;
-  return timingSafeEqual(expectedBuf, signatureBuf);
 }
 
 export async function signWithTimestamp(

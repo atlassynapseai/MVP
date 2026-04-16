@@ -69,10 +69,10 @@ pnpm test
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
 - **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`; tests in `packages/sdk-python/tests/`
-- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test; `scripts/test-n8n-scenario.md` — n8n scenario doc
+- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test; `scripts/test-n8n-scenario.md` — n8n scenario doc; `scripts/seed-connection.mjs` — seed a Connection row for local ingest testing
 - **N8N template**: `public/templates/n8n-atlas-reporter.json` — n8n HTTP reporter workflow template
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
-- **Claude rules**: `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`, `middleware.md`)
+- **Claude rules**: `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`, `middleware.md`, `security-patterns.md`)
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
 - **Caveman plugin**: `caveman/` — terse caveman mode (skills, rules, evals, hooks)
 - **Deployment**: `vercel.json` — Vercel env bindings + cron schedule (`* * * * *` → `/api/cron/evaluate`)

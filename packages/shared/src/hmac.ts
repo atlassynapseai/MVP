@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 export async function sign(payload: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -13,11 +15,35 @@ export async function sign(payload: string, secret: string): Promise<string> {
 
 export async function verify(payload: string, signature: string, secret: string): Promise<boolean> {
   const expected = await sign(payload, secret);
-  if (expected.length !== signature.length) return false;
-  // constant-time compare
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  let expectedBuf: Buffer;
+  let signatureBuf: Buffer;
+  try {
+    expectedBuf = Buffer.from(expected, "hex");
+    signatureBuf = Buffer.from(signature, "hex");
+  } catch {
+    return false;
   }
-  return diff === 0;
+  if (expectedBuf.length !== signatureBuf.length) return false;
+  return timingSafeEqual(expectedBuf, signatureBuf);
+}
+
+export async function signWithTimestamp(
+  payload: string,
+  secret: string
+): Promise<{ sig: string; ts: number }> {
+  const ts = Date.now();
+  const sig = await sign(`${ts}.${payload}`, secret);
+  return { sig, ts };
+}
+
+export async function verifyWithTimestamp(
+  payload: string,
+  sig: string,
+  ts: number,
+  secret: string,
+  maxSkewMs = 300_000
+): Promise<boolean> {
+  const now = Date.now();
+  if (Math.abs(now - ts) > maxSkewMs) return false;
+  return verify(`${ts}.${payload}`, sig, secret);
 }

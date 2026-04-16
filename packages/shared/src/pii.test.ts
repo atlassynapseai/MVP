@@ -26,8 +26,14 @@ describe("piiStrip", () => {
     expect(piiStrip("12-345")).toBe("12-345");
   });
 
-  it("redacts 16-digit card", () => {
+  it("redacts 16-digit card (Luhn-valid)", () => {
+    // 4111111111111111 is a well-known Luhn-valid Visa test number
     expect(piiStrip("card 4111111111111111 declined")).toBe("card [CARD] declined");
+  });
+
+  it("does NOT redact Luhn-invalid 16-digit number", () => {
+    // 1234567890123456 fails Luhn
+    expect(piiStrip("number 1234567890123456 here")).toBe("number 1234567890123456 here");
   });
 
   it("redacts street address", () => {
@@ -40,5 +46,25 @@ describe("piiStrip", () => {
     expect(out).toContain("[EMAIL]");
     expect(out).toContain("[PHONE]");
     expect(out).toContain("[SSN]");
+  });
+
+  it("redacts JWT token", () => {
+    const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+    expect(piiStrip(`token is ${jwt} here`)).toBe("token is [JWT] here");
+  });
+
+  it("redacts OpenAI API key", () => {
+    const key = "sk-abcdefghijklmnopqrstu";
+    expect(piiStrip(`key: ${key}`)).toBe("key: [API_KEY]");
+  });
+
+  it("redacts GitHub personal access token", () => {
+    const key = "ghp_" + "A".repeat(36);
+    expect(piiStrip(`token ${key} used`)).toBe("token [API_KEY] used");
+  });
+
+  it("redacts AWS access key", () => {
+    const key = "AKIA" + "A".repeat(16);
+    expect(piiStrip(`aws key ${key} found`)).toBe("aws key [API_KEY] found");
   });
 });

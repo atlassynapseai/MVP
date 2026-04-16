@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@atlas/db";
-import { verify } from "@atlas/shared";
+import { createHash } from "node:crypto";
+import { prisma, Prisma } from "@atlas/db";
+import { verify, ToolCallSchema } from "@atlas/shared";
 import { z } from "zod";
 
+const MAX_BODY_BYTES = 262_144;
+
 const RedactedIngestSchema = z.object({
-  projectToken: z.string().min(1),
-  agentId: z.string().min(1),
-  externalTraceId: z.string().min(1),
+  projectToken: z.string().min(32).max(128),
+  agentId: z.string().min(1).max(256),
+  externalTraceId: z.string().min(1).max(256),
   timestamp: z.string().datetime(),
-  redactedPrompt: z.string(),
-  redactedResponse: z.string(),
-  toolCalls: z.array(z.record(z.unknown())).optional().default([]),
+  redactedPrompt: z.string().max(50_000),
+  redactedResponse: z.string().max(50_000),
+  toolCalls: z.array(ToolCallSchema).optional().default([]),
   tokenCount: z.number().int().nonnegative().optional(),
   costCents: z.number().nonnegative().optional(),
   rawRedactedPayload: z.record(z.unknown()),
@@ -22,7 +25,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
+  const contentLength = req.headers.get("Content-Length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
+
   const rawBody = await req.text();
+  if (rawBody.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
+
   const signature = req.headers.get("X-Atlas-Signature") ?? "";
 
   const valid = await verify(rawBody, signature, workerSecret);
@@ -30,56 +42,73 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const parsed = RedactedIngestSchema.safeParse(JSON.parse(rawBody));
+  let body: unknown;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const parsed = RedactedIngestSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
   const data = parsed.data;
 
-  // Look up connection by hashed project token
-  const crypto = await import("crypto");
-  const tokenHash = crypto.createHash("sha256").update(data.projectToken).digest("hex");
+  try {
+    // Look up connection by hashed project token
+    const tokenHash = createHash("sha256").update(data.projectToken).digest("hex");
 
-  const connection = await prisma.connection.findUnique({
-    where: { projectTokenHash: tokenHash },
-    include: { org: true },
-  });
+    const connection = await prisma.connection.findUnique({
+      where: { projectTokenHash: tokenHash },
+      include: { org: true },
+    });
 
-  if (!connection || connection.status !== "active") {
-    return NextResponse.json({ error: "Invalid project token" }, { status: 403 });
+    if (!connection || connection.status !== "active") {
+      return NextResponse.json({ error: "Invalid project token" }, { status: 403 });
+    }
+
+    const orgId = connection.orgId;
+
+    // Upsert agent — use server time for lastSeenAt
+    const agent = await prisma.agent.upsert({
+      where: { orgId_externalId: { orgId, externalId: data.agentId } },
+      update: { lastSeenAt: new Date() },
+      create: {
+        orgId,
+        externalId: data.agentId,
+        displayName: data.agentId,
+        lastSeenAt: new Date(),
+      },
+    });
+
+    // Upsert trace — idempotent on (agentId, externalTraceId)
+    // The @@unique([agentId, externalTraceId]) constraint is added in schema.prisma;
+    // after migration, replace with prisma.trace.upsert on that compound key.
+    const existing = await prisma.trace.findFirst({
+      where: { agentId: agent.id, externalTraceId: data.externalTraceId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      const traceData: Prisma.TraceCreateInput = {
+        org: { connect: { id: orgId } },
+        agent: { connect: { id: agent.id } },
+        externalTraceId: data.externalTraceId,
+        timestamp: new Date(data.timestamp),
+        redactedPrompt: data.redactedPrompt,
+        redactedResponse: data.redactedResponse,
+        toolCalls: data.toolCalls as Prisma.InputJsonValue,
+        rawRedactedPayload: data.rawRedactedPayload as Prisma.InputJsonValue,
+        status: "received",
+        ...(data.tokenCount !== undefined ? { tokenCount: data.tokenCount } : {}),
+      };
+      await prisma.trace.create({ data: traceData });
+    }
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const orgId = connection.orgId;
-
-  // Upsert agent
-  const agent = await prisma.agent.upsert({
-    where: { orgId_externalId: { orgId, externalId: data.agentId } },
-    update: { lastSeenAt: new Date(data.timestamp) },
-    create: {
-      orgId,
-      externalId: data.agentId,
-      displayName: data.agentId,
-      lastSeenAt: new Date(data.timestamp),
-    },
-  });
-
-  // Insert trace (append-only)
-  await prisma.trace.create({
-    data: {
-      orgId,
-      agentId: agent.id,
-      externalTraceId: data.externalTraceId,
-      timestamp: new Date(data.timestamp),
-      redactedPrompt: data.redactedPrompt,
-      redactedResponse: data.redactedResponse,
-      toolCalls: data.toolCalls,
-      tokenCount: data.tokenCount,
-      costCents: data.costCents,
-      rawRedactedPayload: data.rawRedactedPayload,
-      status: "received",
-    },
-  });
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

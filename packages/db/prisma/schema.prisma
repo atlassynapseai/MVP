@@ -25,7 +25,7 @@ model Organization {
 model User {
   id           String   @id @default(cuid())
   clerkUserId  String   @unique
-  email        String
+  email        String   @unique
   createdAt    DateTime @default(now())
 
   orgId  String
@@ -56,6 +56,8 @@ model Connection {
 
   orgId  String
   org    Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
 }
 
 model Agent {
@@ -91,33 +93,38 @@ model Trace {
   redactedResponse    String
   toolCalls           Json        @default("[]")
   tokenCount          Int?
-  costCents           Float?
+  costMicroUsd        Int?
   rawRedactedPayload  Json
   summary             String?
   status              TraceStatus @default(received)
+  redactionVersion    String      @default("v1")
+  statusUpdatedAt     DateTime    @default(now())
+  evaluationAttempts  Int         @default(0)
+  nextEvaluationAt    DateTime?
   createdAt           DateTime    @default(now())
 
   orgId    String
-  org      Organization @relation(fields: [orgId], references: [id])
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   agentId  String
-  agent    Agent        @relation(fields: [agentId], references: [id])
+  agent    Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
   evaluation  Evaluation?
   incident    Incident?
 
+  @@unique([agentId, externalTraceId])
   @@index([orgId, agentId, timestamp(sort: Desc)])
 }
 
 model Evaluation {
   id         String   @id @default(cuid())
   pass       Boolean
-  confidence Float
+  confidence Float    // must be 0.0–1.0, enforced at app layer
   reason     String
   model      String
   createdAt  DateTime @default(now())
 
   traceId  String @unique
-  trace    Trace  @relation(fields: [traceId], references: [id])
+  trace    Trace  @relation(fields: [traceId], references: [id], onDelete: Cascade)
 }
 
 enum IncidentSeverity {
@@ -133,14 +140,16 @@ model Incident {
   createdAt DateTime         @default(now())
 
   traceId  String @unique
-  trace    Trace  @relation(fields: [traceId], references: [id])
+  trace    Trace  @relation(fields: [traceId], references: [id], onDelete: Cascade)
   agentId  String
-  agent    Agent  @relation(fields: [agentId], references: [id])
+  agent    Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   orgId    String
-  org      Organization @relation(fields: [orgId], references: [id])
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   alerts    Alert[]
   feedbacks Feedback[]
+
+  @@index([orgId, createdAt(sort: Desc)])
 }
 
 enum AlertChannel {
@@ -159,7 +168,7 @@ model Alert {
   status     AlertStatus
 
   incidentId  String
-  incident    Incident @relation(fields: [incidentId], references: [id])
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
 }
 
 model Feedback {
@@ -169,9 +178,9 @@ model Feedback {
   createdAt DateTime @default(now())
 
   incidentId  String
-  incident    Incident @relation(fields: [incidentId], references: [id])
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum AlertMode {
@@ -186,7 +195,9 @@ model AlertPref {
   severityFloor IncidentSeverity @default(warning)
 
   orgId    String
-  org      Organization @relation(fields: [orgId], references: [id])
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   agentId  String?
   agent    Agent?       @relation(fields: [agentId], references: [id])
+
+  @@unique([orgId, agentId])
 }

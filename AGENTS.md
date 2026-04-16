@@ -33,6 +33,7 @@ pnpm test
 - `README.md` — project overview
 - `CLAUDE.md` — Claude Code context
 - `AGENTS.md` — this file (Codex context)
+- `docs/DEVELOPER_GUIDE.md` — extended developer documentation
 - `vercel.json` — Vercel env bindings + cron schedule
 - `apps/web/` — Next.js 15 web app
   - `.eslintrc.json` — ESLint config; required for `next lint` to run non-interactively in CI

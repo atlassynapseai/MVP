@@ -41,3 +41,4 @@ jobs:
         run: pnpm --filter @atlas/db validate
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test"
+          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/test"

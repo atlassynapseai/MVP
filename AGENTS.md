@@ -5,8 +5,8 @@ AtlasSynapse MVP. Greenfield — no source files yet.
 
 ## Commands
 ```bash
-# Caliber sync (agent config)
-/opt/homebrew/bin/caliber sync
+# Caliber refresh (agent config)
+/opt/homebrew/bin/caliber refresh
 
 # Search community skills
 /opt/homebrew/bin/caliber skills --query "<technology>"
@@ -31,7 +31,7 @@ AtlasSynapse MVP. Greenfield — no source files yet.
 
 ## Agent Sync
 - Edit `AGENTS.md` to update Codex context
-- Run `/opt/homebrew/bin/caliber sync` after changes
+- Run `/opt/homebrew/bin/caliber refresh` after changes
 - Learnings stored in `CALIBER_LEARNINGS.md`
 
 <!-- caliber:managed:pre-commit -->

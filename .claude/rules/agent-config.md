@@ -20,12 +20,12 @@ paths:
 ## Editing Rules
 - Keep `CLAUDE.md` under 400 lines — dense references, not prose
 - Every file path in backticks
-- Run `/opt/homebrew/bin/caliber sync` after editing to propagate changes
+- Run `/opt/homebrew/bin/caliber refresh` after editing to propagate changes
 - Add new skills via `/opt/homebrew/bin/caliber skills --install <slug>`
 
 ## Sync
 ```bash
-/opt/homebrew/bin/caliber sync
+/opt/homebrew/bin/caliber refresh
 /opt/homebrew/bin/caliber learn add "<learning>"
 git add CLAUDE.md AGENTS.md && git commit -m "chore: update agent config"
 ```

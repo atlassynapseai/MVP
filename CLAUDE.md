@@ -6,8 +6,8 @@ AtlasSynapse MVP. Greenfield — no source files yet. Add stack details here as 
 ## Commands
 ```bash
 # Update these as stack is chosen
-# caliber sync
-/opt/homebrew/bin/caliber sync
+# caliber refresh
+/opt/homebrew/bin/caliber refresh
 
 # Search community skills
 /opt/homebrew/bin/caliber skills --query "<technology>"
@@ -76,7 +76,7 @@ BRANCH: feat/<slug>
 - `filesystem` — repo-scoped file access (shared)
 - `github` — PRs/issues/branches (Claude primary)
 - Config: `.mcp.json`
-- Add servers: edit `.mcp.json`, run `caliber sync`
+- Add servers: edit `.mcp.json`, run `caliber refresh`
 
 ## wshobson/agents Plugins Active
 - `python-development`, `javascript-typescript`, `backend-development`

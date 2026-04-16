@@ -8,7 +8,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **Web**: Next.js 15 App Router, TypeScript strict, Tailwind + shadcn/ui + lucide-icons, Clerk auth (`@atlas/web`)
 - **Edge**: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
 - **DB**: Postgres/Supabase + Prisma ORM, pg-boss queue (`@atlas/db`)
-- **Shared**: HMAC, PII utils, Zod schemas (`@atlas/shared`)
+- **Shared**: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
 - **Testing**: Vitest + Playwright
 - **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
@@ -57,7 +57,7 @@ pnpm test
   - `apps/web/middleware.ts` — Clerk auth middleware
 - **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)
 - **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
-- **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts` (`@atlas/shared`)
+- **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - **Claude rules**: `.claude/rules/` — path-scoped conventions
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
@@ -69,6 +69,7 @@ pnpm test
 - Ingest payload validation: `packages/shared/src/schemas.ts` (Zod)
 - PII redaction: `packages/shared/src/pii.ts`
 - HMAC token verification: `packages/shared/src/hmac.ts`
+- Shared types: `packages/shared/src/types.ts`
 - Edge routes in `apps/edge/src/index.ts` (Hono)
 
 ## Conventions

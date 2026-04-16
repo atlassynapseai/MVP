@@ -8,7 +8,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - Web: Next.js 15 App Router, TypeScript strict, Tailwind, Clerk auth (`@atlas/web`)
 - Edge: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
-- Shared: HMAC, PII utils, Zod schemas (`@atlas/shared`)
+- Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - Tests: Vitest
 
 ## Commands
@@ -40,7 +40,7 @@ pnpm test
   - `middleware.ts` — Clerk auth middleware
 - `apps/edge/src/` — Hono edge worker (ingest + PII strip)
 - `packages/db/` — Prisma schema + client
-- `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`
+- `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts`
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
 - `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
@@ -51,6 +51,7 @@ pnpm test
 - Ingest validation: `packages/shared/src/schemas.ts` (Zod)
 - PII redaction: `packages/shared/src/pii.ts`
 - HMAC verification: `packages/shared/src/hmac.ts`
+- Shared types: `packages/shared/src/types.ts`
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

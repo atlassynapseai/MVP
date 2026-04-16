@@ -61,7 +61,7 @@ model Connection {
 }
 
 model Agent {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   externalId   String
   displayName  String
   platform     String?
@@ -80,8 +80,11 @@ model Agent {
 
 enum TraceStatus {
   received
+  processing
+  pass
   evaluated
   translated
+  alerted
   failed
 }
 
@@ -113,15 +116,24 @@ model Trace {
 
   @@unique([agentId, externalTraceId])
   @@index([orgId, agentId, timestamp(sort: Desc)])
+  @@index([status, nextEvaluationAt])
 }
 
 model Evaluation {
-  id         String   @id @default(cuid())
-  pass       Boolean
-  confidence Float    // must be 0.0–1.0, enforced at app layer
-  reason     String
-  model      String
-  createdAt  DateTime @default(now())
+  id              String   @id @default(cuid())
+  // Legacy field — keep for backwards compat, derived from outcome
+  pass            Boolean
+  // New structured fields
+  outcome         String   // "pass" | "anomaly" | "failure"
+  category        String?  // IncidentCategory value; null when outcome=pass
+  confidence      Float    // 0.0–1.0, enforced at app layer
+  // Legacy reason field — kept for P2, deprecated in P3
+  reason          String
+  // New business-language fields
+  businessImpact  String?  // plain-English impact for non-technical operators
+  technicalReason String   // detailed reason for debugging
+  model           String
+  createdAt       DateTime @default(now())
 
   traceId  String @unique
   trace    Trace  @relation(fields: [traceId], references: [id], onDelete: Cascade)
@@ -135,7 +147,8 @@ enum IncidentSeverity {
 model Incident {
   id        String           @id @default(cuid())
   severity  IncidentSeverity
-  summary   String
+  category  String           // IncidentCategory value
+  summary   String           // incidentSummary from IncidentRendering
   dedupKey  String
   createdAt DateTime         @default(now())
 
@@ -150,6 +163,7 @@ model Incident {
   feedbacks Feedback[]
 
   @@index([orgId, createdAt(sort: Desc)])
+  @@index([dedupKey])
 }
 
 enum AlertChannel {
@@ -172,10 +186,12 @@ model Alert {
 }
 
 model Feedback {
-  id        String   @id @default(cuid())
-  correct   Boolean
-  note      String?
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  correct          Boolean
+  correctCategory  String?  // IncidentCategory value the user thinks it actually was
+  correctSeverity  String?  // "warning" | "critical" | "none"
+  note             String?
+  createdAt        DateTime @default(now())
 
   incidentId  String
   incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
@@ -190,8 +206,8 @@ enum AlertMode {
 }
 
 model AlertPref {
-  id            String    @id @default(cuid())
-  mode          AlertMode @default(immediate)
+  id            String           @id @default(cuid())
+  mode          AlertMode        @default(immediate)
   severityFloor IncidentSeverity @default(warning)
 
   orgId    String

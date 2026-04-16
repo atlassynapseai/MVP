@@ -16,6 +16,8 @@ export const TraceIngestSchema = z.object({
   toolCalls: z.array(ToolCallSchema).optional().default([]),
   tokenCount: z.number().int().nonnegative().optional(),
   costCents: z.number().nonnegative().optional(),
+  /** Connector adapter identifier — not evaluated, used for display and routing. */
+  platform: z.enum(["anthropic", "n8n", "generic"]).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 

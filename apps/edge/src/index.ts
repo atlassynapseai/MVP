@@ -40,6 +40,7 @@ app.post("/ingest", async (c) => {
     toolCalls: sanitizedToolCalls,
     tokenCount: raw.tokenCount,
     costCents: raw.costCents,
+    platform: raw.platform,
     rawRedactedPayload: {
       prompt: redactedPrompt,
       response: redactedResponse,

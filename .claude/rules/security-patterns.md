@@ -16,6 +16,7 @@ paths:
 ## HMAC
 - Use `timingSafeEqual` for all HMAC digest comparisons — prevents timing attacks
 - Never use `===` to compare digests
+- Implementation uses Web Crypto API (`SubtleCrypto`) — no Node.js `Buffer` dependency; edge-compatible with Cloudflare Workers
 - Implementation in `packages/shared/src/hmac.ts`
 
 ## PII Redaction

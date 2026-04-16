@@ -52,7 +52,10 @@ pnpm test
 - **Agent config**: `CLAUDE.md` (Claude), `AGENTS.md` (Codex)
 - **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
+    - `apps/web/app/dashboard/incidents/[id]/` — incident detail page with feedback form
   - `apps/web/app/api/ingest/` — ingest API route
+  - `apps/web/app/api/alert-prefs/` — alert preferences API route
+  - `apps/web/app/api/feedback/` — feedback submission API route
   - `apps/web/app/api/webhooks/` — Clerk webhook handler
   - `apps/web/app/api/cron/` — Vercel Cron handler (evaluate, every 60s)
   - `apps/web/app/sign-in/` — Clerk sign-in page

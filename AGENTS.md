@@ -36,7 +36,10 @@ pnpm test
 - `vercel.json` — Vercel env bindings + cron schedule
 - `apps/web/` — Next.js 15 web app
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
+    - `app/dashboard/incidents/[id]/` — incident detail page with feedback form
   - `app/api/ingest/` — ingest API route
+  - `app/api/alert-prefs/` — alert preferences API route
+  - `app/api/feedback/` — feedback submission API route
   - `app/api/webhooks/` — Clerk webhook handler
   - `app/api/cron/` — Vercel Cron evaluate route (every 60s)
   - `app/sign-in/` — Clerk sign-in page

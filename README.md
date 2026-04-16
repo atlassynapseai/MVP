@@ -6,6 +6,7 @@ HR for Your AI — monitor AI agents like employees.
 
 - Node >= 20
 - pnpm >= 9
+- Python >= 3.12 (for Python SDK)
 - Postgres (Supabase free tier or local)
 - Cloudflare account (for edge worker)
 - Clerk account (auth)
@@ -57,6 +58,11 @@ Run specific package:
 pnpm --filter @atlas/shared test
 ```
 
+Run Python SDK tests:
+```bash
+cd packages/sdk-python && PYTHONPATH=src python3 -m pytest tests/
+```
+
 ## End-to-End Ingest Test
 
 1. Start both dev servers.
@@ -79,6 +85,23 @@ pnpm --filter @atlas/shared test
 ## Architecture
 
 See `.claude/plans/` for full architecture decisions.
+
+```
+packages/
+  sdk-python/          # Python SDK (atlas-synapse) — client, hooks, mapper
+  evaluator/           # eval, alert, dedup, translate (@atlas/evaluator)
+  db/                  # Prisma schema + client (@atlas/db)
+  shared/              # HMAC, PII, Zod schemas, types (@atlas/shared)
+apps/
+  web/                 # Next.js 15 App Router (@atlas/web)
+  edge/                # Cloudflare Worker + Hono (@atlas/edge)
+scripts/
+  test-anthropic-agent.py  # Anthropic agent integration smoke test
+  test-n8n-scenario.md     # n8n integration scenario doc
+public/
+  templates/
+    n8n-atlas-reporter.json  # n8n HTTP reporter workflow template
+```
 
 ## CI
 

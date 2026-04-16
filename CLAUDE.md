@@ -51,6 +51,7 @@ pnpm test
 - **Root**: `README.md` — project overview
 - **Agent config**: `CLAUDE.md` (Claude), `AGENTS.md` (Codex)
 - **Developer docs**: `docs/DEVELOPER_GUIDE.md` — extended developer documentation
+- **Roadmap**: `MVPRoadmap/ROADMAP.md` — project roadmap
 - **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
   - `apps/web/.eslintrc.json` — ESLint config; required for `next lint` to run non-interactively in CI
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency

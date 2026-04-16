@@ -35,6 +35,7 @@ pnpm test
 - `AGENTS.md` — this file (Codex context)
 - `vercel.json` — Vercel env bindings + cron schedule
 - `apps/web/` — Next.js 15 web app
+  - `.eslintrc.json` — ESLint config; required for `next lint` to run non-interactively in CI
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
     - `app/dashboard/incidents/[id]/` — incident detail page with feedback form
     - `app/dashboard/settings/` — alert preference form (`alert-pref-form.tsx`)

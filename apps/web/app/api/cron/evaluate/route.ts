@@ -19,13 +19,16 @@ function addMinutes(date: Date, minutes: number): Date {
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  // Guard: only Vercel Cron or internal callers with the secret
+  // Guard: only Vercel Cron or internal callers with the secret.
+  // Fail-closed: if CRON_SECRET is not configured, refuse all requests —
+  // never allow unauthenticated access to the evaluation pipeline.
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!cronSecret) {
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
@@ -259,7 +262,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
       }
 
-      console.error(`[cron/evaluate] trace ${trace.id} failed (attempt ${attempts}):`, err);
+      // Log only a short, non-sensitive message; never the full error object,
+      // which may contain redactedPrompt/redactedResponse inside Anthropic or
+      // Prisma error payloads.
+      const errMsg =
+        err instanceof Error ? err.name + ": " + err.message.slice(0, 200) : "unknown error";
+      console.error(`[cron/evaluate] trace ${trace.id} failed (attempt ${attempts}): ${errMsg}`);
     }
   }
 

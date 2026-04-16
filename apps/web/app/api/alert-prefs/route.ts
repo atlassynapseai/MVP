@@ -29,6 +29,17 @@ export async function GET(req: NextRequest) {
 
   const agentId = req.nextUrl.searchParams.get("agentId") ?? null;
 
+  // If agentId provided, verify it belongs to the caller's org (prevent IDOR).
+  if (agentId) {
+    const agent = await prisma.agent.findFirst({
+      where: { id: agentId, orgId: org.id },
+      select: { id: true },
+    });
+    if (!agent) {
+      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+    }
+  }
+
   const pref = await prisma.alertPref.findFirst({
     where: { orgId: org.id, agentId },
   });
@@ -65,6 +76,17 @@ export async function PUT(req: NextRequest) {
   const org = await resolveOrg(clerkOrgId);
   if (!org) {
     return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+  }
+
+  // If agentId provided, verify it belongs to the caller's org (prevent IDOR).
+  if (resolvedAgentId) {
+    const agent = await prisma.agent.findFirst({
+      where: { id: resolvedAgentId, orgId: org.id },
+      select: { id: true },
+    });
+    if (!agent) {
+      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+    }
   }
 
   const existing = await prisma.alertPref.findFirst({

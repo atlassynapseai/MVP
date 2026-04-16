@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@atlas/db";
+import { INCIDENT_CATEGORIES } from "@atlas/shared";
 import { z } from "zod";
 
+// Constrain correctCategory to the known IncidentCategory enum plus "none"
+// (the UI's "not an incident" choice). Prevents unbounded user strings from
+// landing in the DB and polluting analytics/reporting.
+const ALLOWED_CORRECT_CATEGORIES = new Set<string>([...INCIDENT_CATEGORIES, "none"]);
+
 const FeedbackSchema = z.object({
-  incidentId: z.string().min(1),
+  incidentId: z.string().min(1).max(64),
   correct: z.boolean(),
-  correctCategory: z.string().optional(),
+  correctCategory: z
+    .string()
+    .refine((v) => ALLOWED_CORRECT_CATEGORIES.has(v), "invalid category")
+    .optional(),
   correctSeverity: z.enum(["warning", "critical", "none"]).optional(),
   note: z.string().max(1000).optional(),
 });

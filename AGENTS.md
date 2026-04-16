@@ -37,6 +37,7 @@ pnpm test
 - `apps/web/` — Next.js 15 web app
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
     - `app/dashboard/incidents/[id]/` — incident detail page with feedback form
+    - `app/dashboard/settings/` — alert preference form (`alert-pref-form.tsx`)
   - `app/api/ingest/` — ingest API route
   - `app/api/alert-prefs/` — alert preferences API route
   - `app/api/feedback/` — feedback submission API route
@@ -62,6 +63,7 @@ pnpm test
 
 ## Key Patterns
 - Dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`
+- Dashboard forms: co-locate as `<page>/<form-name>-form.tsx` (e.g. `settings/alert-pref-form.tsx`)
 - DB queries: `packages/db/src/index.ts` (Prisma client re-export)
 - Ingest validation: `packages/shared/src/schemas.ts` (Zod)
 - PII redaction: `packages/shared/src/pii.ts`

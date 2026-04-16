@@ -1,0 +1,21 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/evaluate",
+      "schedule": "* * * * *"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "DIRECT_URL": "@direct-url",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "@clerk-publishable-key",
+    "CLERK_SECRET_KEY": "@clerk-secret-key",
+    "INGEST_WORKER_SECRET": "@ingest-worker-secret",
+    "ANTHROPIC_API_KEY": "@anthropic-api-key",
+    "RESEND_API_KEY": "@resend-api-key",
+    "RESEND_FROM_EMAIL": "@resend-from-email",
+    "CLERK_WEBHOOK_SECRET": "@clerk-webhook-secret",
+    "CRON_SECRET": "@cron-secret",
+    "NEXT_PUBLIC_APP_URL": "@app-url"
+  }
+}

@@ -7,7 +7,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **Monorepo**: pnpm + Turborepo
 - **Web**: Next.js 15 App Router, TypeScript strict, Tailwind + shadcn/ui + lucide-icons, Clerk auth (`@atlas/web`)
 - **Edge**: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
-- **DB**: Postgres/Supabase + Prisma ORM, pg-boss queue (`@atlas/db`)
+- **DB**: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - **Shared**: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
 - **Evaluator**: `packages/evaluator/` — eval, alert, dedup, translate (`@atlas/evaluator`)
@@ -53,6 +53,7 @@ pnpm test
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
   - `apps/web/app/api/ingest/` — ingest API route
   - `apps/web/app/api/webhooks/` — Clerk webhook handler
+  - `apps/web/app/api/cron/` — Vercel Cron handler (evaluate, every 60s)
   - `apps/web/app/sign-in/` — Clerk sign-in page
   - `apps/web/app/sign-up/` — Clerk sign-up page
   - `apps/web/components/` — shared UI components (sidebar, etc.)
@@ -65,6 +66,7 @@ pnpm test
 - **Claude rules**: `.claude/rules/` — path-scoped conventions
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
 - **Caveman plugin**: `caveman/` — terse caveman mode (skills, rules, evals, hooks)
+- **Deployment**: `vercel.json` — Vercel env bindings + cron schedule (`* * * * *` → `/api/cron/evaluate`)
 
 ## Key Patterns
 - Add dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`
@@ -76,6 +78,7 @@ pnpm test
 - Edge routes in `apps/edge/src/index.ts` (Hono)
 - Clerk webhooks in `apps/web/app/api/webhooks/clerk/route.ts` — upsert Org before User; membership events can arrive before `organization.created`
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
+- Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`; schedule in `vercel.json`
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

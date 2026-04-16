@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@atlas/db": "workspace:*",
+    "@atlas/evaluator": "workspace:*",
     "@atlas/shared": "workspace:*",
     "@clerk/nextjs": "^5.7.0",
     "clsx": "^2.1.1",

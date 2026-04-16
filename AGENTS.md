@@ -32,10 +32,12 @@ pnpm test
 - `README.md` — project overview
 - `CLAUDE.md` — Claude Code context
 - `AGENTS.md` — this file (Codex context)
+- `vercel.json` — Vercel env bindings + cron schedule
 - `apps/web/` — Next.js 15 web app
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
   - `app/api/ingest/` — ingest API route
   - `app/api/webhooks/` — Clerk webhook handler
+  - `app/api/cron/` — Vercel Cron evaluate route (every 60s)
   - `app/sign-in/` — Clerk sign-in page
   - `app/sign-up/` — Clerk sign-up page
   - `components/` — shared UI components
@@ -57,6 +59,7 @@ pnpm test
 - Shared types: `packages/shared/src/types.ts`
 - Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
+- Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

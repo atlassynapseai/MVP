@@ -33,7 +33,10 @@ pnpm test
 - `AGENTS.md` — this file (Codex context)
 - `apps/web/` — Next.js 15 web app
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
-  - `app/api/ingest/` — ingest API route
+  - `app/dashboard/layout.tsx` — dashboard layout wrapper
+  - `app/api/ingest/route.ts` — ingest API route
+  - `app/sign-in/` — Clerk sign-in page
+  - `app/sign-up/` — Clerk sign-up page
   - `components/` — shared UI components
   - `middleware.ts` — Clerk auth middleware
 - `apps/edge/src/` — Hono edge worker (ingest + PII strip)

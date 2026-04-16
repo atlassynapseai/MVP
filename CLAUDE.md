@@ -50,7 +50,10 @@ pnpm test
 - **Agent config**: `CLAUDE.md` (Claude), `AGENTS.md` (Codex)
 - **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
-  - `apps/web/app/api/ingest/` — ingest API route
+  - `apps/web/app/dashboard/layout.tsx` — dashboard layout wrapper
+  - `apps/web/app/api/ingest/route.ts` — ingest API route
+  - `apps/web/app/sign-in/` — Clerk sign-in page
+  - `apps/web/app/sign-up/` — Clerk sign-up page
   - `apps/web/components/` — shared UI components (sidebar, etc.)
   - `apps/web/middleware.ts` — Clerk auth middleware
 - **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)

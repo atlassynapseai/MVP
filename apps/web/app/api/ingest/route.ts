@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
-import { prisma, Prisma } from "@atlas/db";
+import { prisma } from "@atlas/db";
 import { verify, ToolCallSchema } from "@atlas/shared";
 import { z } from "zod";
 
@@ -92,19 +92,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (!existing) {
-      const traceData: Prisma.TraceCreateInput = {
-        org: { connect: { id: orgId } },
-        agent: { connect: { id: agent.id } },
-        externalTraceId: data.externalTraceId,
-        timestamp: new Date(data.timestamp),
-        redactedPrompt: data.redactedPrompt,
-        redactedResponse: data.redactedResponse,
-        toolCalls: data.toolCalls as Prisma.InputJsonValue,
-        rawRedactedPayload: data.rawRedactedPayload as Prisma.InputJsonValue,
-        status: "received",
-        ...(data.tokenCount !== undefined ? { tokenCount: data.tokenCount } : {}),
-      };
-      await prisma.trace.create({ data: traceData });
+      await prisma.trace.create({
+        data: {
+          org: { connect: { id: orgId } },
+          agent: { connect: { id: agent.id } },
+          externalTraceId: data.externalTraceId,
+          timestamp: new Date(data.timestamp),
+          redactedPrompt: data.redactedPrompt,
+          redactedResponse: data.redactedResponse,
+          toolCalls: data.toolCalls as unknown as object,
+          rawRedactedPayload: data.rawRedactedPayload as unknown as object,
+          status: "received",
+          ...(data.tokenCount !== undefined ? { tokenCount: data.tokenCount } : {}),
+        },
+      });
     }
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

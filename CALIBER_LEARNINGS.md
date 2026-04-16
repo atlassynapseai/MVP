@@ -3,7 +3,6 @@
 Accumulated patterns and anti-patterns from development sessions.
 Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not edit manually.
 
-- **[env]** MCP github server requires `GITHUB_TOKEN` exported in the shell — `.mcp.json` uses `${GITHUB_TOKEN}` env substitution. If unset, all `mcp__github__*` tools will fail. Export before starting Claude Code: `export GITHUB_TOKEN=<pat>`.
 - **[convention]** GitHub remote: `https://github.com/atlassynapseai/MVP.git` (org: `atlassynapseai`, repo: `MVP`).
 - **[pattern]** Stack locked for MVP: pnpm + Turborepo monorepo, Next.js 15 App Router (TypeScript strict), Tailwind + shadcn/ui + lucide-icons, Clerk auth, Postgres/Supabase + Prisma ORM, Cloudflare Workers + Hono (edge ingest/PII strip), pg-boss queue (Postgres-backed), Anthropic Claude Sonnet 4.5 (eval + translate), Resend email, Vitest + Playwright tests. Hosting: Vercel (web), Cloudflare (worker), Supabase (db).
 - **[convention]** Codex handoff format (user-defined): GOAL / ARCHITECTURE / PLAN / RISKS / CODEX HANDOFF with fields TASK, SCOPE, OUT_OF_SCOPE, ACCEPTANCE, BRANCH. Always include all six sections — Codex must build without guessing major decisions.
@@ -33,3 +32,4 @@ Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not
 - **[convention]** pnpm workspaces: packages without eslint installed (`@atlas/shared`, `@atlas/edge`) must use `"lint": "tsc --noEmit"` not `"lint": "eslint src"` — eslint is not installed in those packages, causing CI failures with `No files matching the pattern "src" were found`.
 - **[gotcha]** `tsconfig.base.json` enables `noUncheckedIndexedAccess: true` — array index access (`arr[i]`) returns `T | undefined`, not `T`. Always use `?? fallback` for positional array indexing (e.g., `digits[i] ?? "0"`). This silently breaks code written for standard TS.
 - **[convention]** Import `Prisma` namespace types from `@atlas/db`, not directly from `@prisma/client` — `packages/db/src/index.ts` re-exports everything via `export * from "@prisma/client"`. Use `import { prisma, Prisma } from "@atlas/db"` in `apps/web/` to avoid duplicate resolution in the turbo monorepo.
+- **[convention]** CI must run 'pnpm --filter @atlas/db generate' (with dummy DATABASE_URL + DIRECT_URL env vars) BEFORE typecheck step — Prisma types don't exist until generate runs, causing TS2694 errors on every schema change

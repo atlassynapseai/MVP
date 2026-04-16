@@ -9,6 +9,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - Edge: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
+- Evaluator: eval, alert, dedup, translate — Anthropic + Resend (`@atlas/evaluator`)
 - Tests: Vitest
 
 ## Commands
@@ -42,6 +43,7 @@ pnpm test
 - `apps/edge/src/` — Hono edge worker (ingest + PII strip)
 - `packages/db/` — Prisma schema + client
 - `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts`
+- `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts`
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
 - `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
@@ -54,6 +56,7 @@ pnpm test
 - HMAC verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
 - Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
+- Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

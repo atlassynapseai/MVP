@@ -3,7 +3,6 @@
 Accumulated patterns and anti-patterns from development sessions.
 Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not edit manually.
 
-- **[env]** Clerk env vars in `apps/web/.env.local` must NOT have surrounding quotes on values.
 - **[convention]** pnpm workspaces: packages without eslint installed should use `"lint": "tsc --noEmit"` not `"lint": "eslint src"`.
 - **[pattern]** Supabase + Prisma: always add `directUrl = env("DIRECT_URL")` to datasource block for connection pooler compatibility.
 - **[convention]** caveman ultra mode must be active at all times — never revert.
@@ -33,3 +32,4 @@ Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not
 - **[fix:project]** `pnpm --filter @atlas/db exec prisma migrate dev --name <name> --create-only` silently returns empty `{}` bash output (no error, no feedback) when `DATABASE_URL`/`DIRECT_URL` env vars are absent. Fix: either set vars in `packages/db/.env` OR manually create `packages/db/prisma/migrations/<timestamp>_<name>/migration.sql` + `packages/db/prisma/migrations/migration_lock.toml` (content: `provider = "postgresql"`).
 - **[gotcha:project]** N8N AI Agent nodes have no native outbound execution webhook — a reporter HTTP Request node must be manually added to each N8N workflow to send execution data to AtlasSynapse. N8N does not expose token counts natively; always set `tokenCount: null` for N8N traces.
 - **[pattern:project]** On Agent upsert in `/api/ingest`, write `platform` field on `create` only (not on `update`) — prevents overwriting a previously set platform value when the same agent sends subsequent traces.
+- **[fix:project]** Vitest ESM mock pattern for `@anthropic-ai/sdk`: place `vi.mock("@anthropic-ai/sdk", ...)` before all static `import` statements — Vitest hoists it. Do NOT use `await import()` inside synchronous helper functions after mock setup. Access the mock's `create` fn via `new MockedConstructor().messages.create`. Initial test with top-level `await import()` in sync helpers caused silent tsc failure (empty `{}` output from typecheck tool).

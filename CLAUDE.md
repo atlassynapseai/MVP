@@ -10,6 +10,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **DB**: Postgres/Supabase + Prisma ORM, pg-boss queue (`@atlas/db`)
 - **Shared**: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
+- **Evaluator**: `packages/evaluator/` — eval, alert, dedup, translate (`@atlas/evaluator`)
 - **Testing**: Vitest + Playwright
 - **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
 
@@ -59,6 +60,7 @@ pnpm test
 - **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)
 - **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
+- **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - **Claude rules**: `.claude/rules/` — path-scoped conventions
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
@@ -73,6 +75,7 @@ pnpm test
 - Shared types: `packages/shared/src/types.ts`
 - Edge routes in `apps/edge/src/index.ts` (Hono)
 - Clerk webhooks in `apps/web/app/api/webhooks/clerk/route.ts` — upsert Org before User; membership events can arrive before `organization.created`
+- Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

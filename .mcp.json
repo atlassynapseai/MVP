@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/muhammadhamzah/Desktop/AtlasSynapse/MVP"],
+      "description": "Repo-scoped file access. Claude + Codex both use.",
+      "scope": "shared"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API — PRs, issues, branches. Claude orchestrates.",
+      "scope": "claude-primary"
+    }
+  },
+  "_design": {
+    "control_plane": "Claude — orchestration, architecture, PR review, task delegation",
+    "execution_plane": "Codex — scoped feature implementation, file edits, tests",
+    "default_mode": "caveman-ultra after setup complete",
+    "handoff_format": "See CLAUDE.md ## Delegation section",
+    "trust_boundary": "Codex never pushes to main. Claude approves merges."
+  }
+}

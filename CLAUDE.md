@@ -64,9 +64,10 @@ pnpm test
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
 - **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`; tests in `packages/sdk-python/tests/`
-- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
+- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test; `scripts/test-n8n-scenario.md` — n8n scenario doc
+- **N8N template**: `public/templates/n8n-atlas-reporter.json` — n8n HTTP reporter workflow template
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
-- **Claude rules**: `.claude/rules/` — path-scoped conventions
+- **Claude rules**: `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`)
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
 - **Caveman plugin**: `caveman/` — terse caveman mode (skills, rules, evals, hooks)
 - **Deployment**: `vercel.json` — Vercel env bindings + cron schedule (`* * * * *` → `/api/cron/evaluate`)
@@ -83,6 +84,7 @@ pnpm test
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`; schedule in `vercel.json`
 - Python SDK: mapper in `packages/sdk-python/src/atlas_synapse/mapper.py` transforms Anthropic SDK events → AtlasSynapse ingest payload; hooks wrap Anthropic client
+- N8N: import `public/templates/n8n-atlas-reporter.json`; add HTTP Request reporter node per workflow; always set `tokenCount: null` (n8n has no native token count exposure)
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

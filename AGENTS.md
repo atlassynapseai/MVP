@@ -50,7 +50,10 @@ pnpm test
 - `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`
 - `packages/sdk-python/tests/` — Python SDK tests (pytest)
 - `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
+- `scripts/test-n8n-scenario.md` — n8n integration scenario doc
+- `public/templates/n8n-atlas-reporter.json` — n8n HTTP reporter workflow template
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
+- `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`)
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
 - `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
 
@@ -65,6 +68,7 @@ pnpm test
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
 - Python SDK: `packages/sdk-python/src/atlas_synapse/` — mapper transforms Anthropic SDK events to AtlasSynapse ingest payload; hooks wrap Anthropic client
+- N8N: use `public/templates/n8n-atlas-reporter.json` template; add HTTP Request reporter node to each workflow; set `tokenCount: null` (n8n exposes no native token counts)
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

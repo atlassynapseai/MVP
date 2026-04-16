@@ -10,7 +10,8 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - Evaluator: eval, alert, dedup, translate — Anthropic + Resend (`@atlas/evaluator`)
-- Tests: Vitest
+- Python SDK: `packages/sdk-python/` — `atlas-synapse` Python client (`@atlas/sdk-python`)
+- Tests: Vitest + pytest
 
 ## Commands
 ```bash
@@ -46,6 +47,9 @@ pnpm test
 - `packages/db/` — Prisma schema + client
 - `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts`
 - `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts`
+- `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`
+- `packages/sdk-python/tests/` — Python SDK tests (pytest)
+- `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
 - `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - `.claude/hooks/` — caliber lifecycle hooks (session, stop, notify)
 - `caveman/` — caveman mode plugin (skills, rules, evals, hooks)
@@ -60,6 +64,7 @@ pnpm test
 - Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
+- Python SDK: `packages/sdk-python/src/atlas_synapse/` — mapper transforms Anthropic SDK events to AtlasSynapse ingest payload; hooks wrap Anthropic client
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

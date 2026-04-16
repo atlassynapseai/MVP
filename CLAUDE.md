@@ -11,7 +11,8 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **Shared**: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
 - **Evaluator**: `packages/evaluator/` — eval, alert, dedup, translate (`@atlas/evaluator`)
-- **Testing**: Vitest + Playwright
+- **Python SDK**: `packages/sdk-python/` — `atlas-synapse` Python client with hooks, mapper, Anthropic agent support
+- **Testing**: Vitest + Playwright + pytest
 - **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
 
 ## Setup
@@ -62,6 +63,8 @@ pnpm test
 - **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
+- **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`; tests in `packages/sdk-python/tests/`
+- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
 - **Claude rules**: `.claude/rules/` — path-scoped conventions
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
@@ -79,6 +82,7 @@ pnpm test
 - Clerk webhooks in `apps/web/app/api/webhooks/clerk/route.ts` — upsert Org before User; membership events can arrive before `organization.created`
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`; schedule in `vercel.json`
+- Python SDK: mapper in `packages/sdk-python/src/atlas_synapse/mapper.py` transforms Anthropic SDK events → AtlasSynapse ingest payload; hooks wrap Anthropic client
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

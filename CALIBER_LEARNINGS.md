@@ -3,8 +3,6 @@
 Accumulated patterns and anti-patterns from development sessions.
 Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not edit manually.
 
-- **[convention]** pnpm workspaces: packages without eslint installed should use `"lint": "tsc --noEmit"` not `"lint": "eslint src"`.
-- **[pattern]** Supabase + Prisma: always add `directUrl = env("DIRECT_URL")` to datasource block for connection pooler compatibility.
 - **[convention]** caveman ultra mode must be active at all times — never revert.
 - **[workflow]** Before every commit: run `comprehensive-review:full-review` + `security-scanning:security-sast` + save learnings via `save-learning` skill.
 - **[workflow]** Always push to GitHub after every commit: `git push origin main`.
@@ -33,3 +31,5 @@ Auto-managed by [caliber](https://github.com/caliber-ai-org/ai-setup) — do not
 - **[gotcha:project]** N8N AI Agent nodes have no native outbound execution webhook — a reporter HTTP Request node must be manually added to each N8N workflow to send execution data to AtlasSynapse. N8N does not expose token counts natively; always set `tokenCount: null` for N8N traces.
 - **[pattern:project]** On Agent upsert in `/api/ingest`, write `platform` field on `create` only (not on `update`) — prevents overwriting a previously set platform value when the same agent sends subsequent traces.
 - **[fix:project]** Vitest ESM mock pattern for `@anthropic-ai/sdk`: place `vi.mock("@anthropic-ai/sdk", ...)` before all static `import` statements — Vitest hoists it. Do NOT use `await import()` inside synchronous helper functions after mock setup. Access the mock's `create` fn via `new MockedConstructor().messages.create`. Initial test with top-level `await import()` in sync helpers caused silent tsc failure (empty `{}` output from typecheck tool).
+- **[gotcha:project]** Prisma optional nullable fields: use `null` not `undefined` in `create`/`update` data objects — `field ?? undefined` fails TS because `undefined` is not assignable to `T | null`. Always write `field ?? null` for optional nullable Prisma columns.
+- **[env:project]** Python SDK tests in `packages/sdk-python/`: run as `PYTHONPATH=src python3 -m pytest tests/` — editable install (`pip install -e .`) fails on macOS system Python 3.9 (pip 21 doesn't support pyproject.toml-only builds without setuptools). The `PYTHONPATH=src` workaround is documented in `pyproject.toml`.

@@ -34,6 +34,7 @@ pnpm test
 - `apps/web/` — Next.js 15 web app
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
   - `app/api/ingest/` — ingest API route
+  - `app/api/webhooks/` — Clerk webhook handler
   - `app/sign-in/` — Clerk sign-in page
   - `app/sign-up/` — Clerk sign-up page
   - `components/` — shared UI components
@@ -52,6 +53,7 @@ pnpm test
 - PII redaction: `packages/shared/src/pii.ts`
 - HMAC verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
+- Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

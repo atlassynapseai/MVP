@@ -51,6 +51,7 @@ pnpm test
 - **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
   - `apps/web/app/api/ingest/` — ingest API route
+  - `apps/web/app/api/webhooks/` — Clerk webhook handler
   - `apps/web/app/sign-in/` — Clerk sign-in page
   - `apps/web/app/sign-up/` — Clerk sign-up page
   - `apps/web/components/` — shared UI components (sidebar, etc.)
@@ -71,6 +72,7 @@ pnpm test
 - HMAC token verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
 - Edge routes in `apps/edge/src/index.ts` (Hono)
+- Clerk webhooks in `apps/web/app/api/webhooks/clerk/route.ts` — upsert Org before User; membership events can arrive before `organization.created`
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

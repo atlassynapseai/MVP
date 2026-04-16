@@ -3,7 +3,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api/ingest",   // worker calls this — authenticated via HMAC not Clerk
+  "/api/ingest",                // worker calls this — authenticated via HMAC not Clerk
+  "/api/webhooks/(.*)",         // Clerk/Svix webhooks — authenticated via Svix signature
+  "/api/cron/(.*)",             // Vercel Cron — authenticated via CRON_SECRET bearer header
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

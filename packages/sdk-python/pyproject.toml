@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "atlas-synapse-sdk"
+version = "0.1.0"
+description = "AtlasSynapse SDK for Anthropic Claude Agent SDK integration"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+anthropic = [
+    "anthropic>=0.49",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "anthropic>=0.49",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/atlas_synapse"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+# Run as: PYTHONPATH=src python3 -m pytest tests/

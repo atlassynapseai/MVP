@@ -1,0 +1,93 @@
+{
+  "name": "AtlasSynapse Reporter",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "atlas-agent-name",
+              "name": "ATLAS_AGENT_NAME",
+              "value": "my-n8n-agent",
+              "type": "string"
+            },
+            {
+              "id": "atlas-project-token",
+              "name": "ATLAS_PROJECT_TOKEN",
+              "value": "={{ $env.ATLAS_PROJECT_TOKEN }}",
+              "type": "string"
+            },
+            {
+              "id": "atlas-ingest-url",
+              "name": "ATLAS_INGEST_URL",
+              "value": "={{ $env.ATLAS_INGEST_URL || 'https://your-worker.workers.dev' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "atlas-config",
+      "name": "AtlasSynapse Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [0, 0],
+      "notes": "Configure your AtlasSynapse agent name and connection here.\n\nSet these env vars in N8N:\n  ATLAS_PROJECT_TOKEN — your project token from AtlasSynapse dashboard\n  ATLAS_INGEST_URL — your edge worker URL (e.g. https://your-worker.workers.dev)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('AtlasSynapse Config').first().json.ATLAS_INGEST_URL }}/ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"projectToken\": \"{{ $('AtlasSynapse Config').first().json.ATLAS_PROJECT_TOKEN }}\",\n  \"agentId\": \"{{ $('AtlasSynapse Config').first().json.ATLAS_AGENT_NAME }}\",\n  \"externalTraceId\": \"{{ $execution.id }}\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\",\n  \"prompt\": \"{{ $json.prompt || $json.chatInput || $json.input || '' }}\",\n  \"response\": \"{{ $json.output || $json.text || $json.response || '' }}\",\n  \"toolCalls\": {{ JSON.stringify($json.intermediateSteps || []) }},\n  \"platform\": \"n8n\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "atlas-reporter",
+      "name": "AtlasSynapse Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, 0],
+      "continueOnFail": true,
+      "notes": "Reports the agent trace to AtlasSynapse.\n\nThis node continues even if reporting fails — it will never block your workflow.\n\nThe node expects the preceding AI Agent node output to be in scope.\nIf your AI Agent node has 'Return Intermediate Steps' enabled, tool calls are captured automatically."
+    }
+  ],
+  "connections": {
+    "AtlasSynapse Config": {
+      "main": [
+        [{"node": "AtlasSynapse Report", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "atlas-synapse-reporter-v1"
+  },
+  "id": "atlas-reporter-template",
+  "tags": ["atlassynapse", "monitoring", "observability"]
+}

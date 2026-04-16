@@ -7,10 +7,12 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **Monorepo**: pnpm + Turborepo
 - **Web**: Next.js 15 App Router, TypeScript strict, Tailwind + shadcn/ui + lucide-icons, Clerk auth (`@atlas/web`)
 - **Edge**: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
-- **DB**: Postgres/Supabase + Prisma ORM, pg-boss queue (`@atlas/db`)
-- **Shared**: HMAC, PII utils, Zod schemas (`@atlas/shared`)
+- **DB**: Postgres/Supabase + Prisma ORM (`@atlas/db`)
+- **Shared**: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
-- **Testing**: Vitest + Playwright
+- **Evaluator**: `packages/evaluator/` — eval, alert, dedup, translate (`@atlas/evaluator`)
+- **Python SDK**: `packages/sdk-python/` — `atlas-synapse` Python client with hooks, mapper, Anthropic agent support
+- **Testing**: Vitest + Playwright + pytest
 - **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
 
 ## Setup
@@ -50,26 +52,44 @@ pnpm test
 - **Agent config**: `CLAUDE.md` (Claude), `AGENTS.md` (Codex)
 - **Web app**: `apps/web/` — Next.js 15 App Router (`@atlas/web`)
   - `apps/web/app/dashboard/` — dashboard pages: agents, incidents, settings, data-transparency
+    - `apps/web/app/dashboard/incidents/[id]/` — incident detail page with feedback form
+    - `apps/web/app/dashboard/settings/` — alert preference form (`alert-pref-form.tsx`)
   - `apps/web/app/api/ingest/` — ingest API route
+  - `apps/web/app/api/alert-prefs/` — alert preferences API route
+  - `apps/web/app/api/feedback/` — feedback submission API route
+  - `apps/web/app/api/webhooks/` — Clerk webhook handler
+  - `apps/web/app/api/cron/` — Vercel Cron handler (evaluate, every 60s)
   - `apps/web/app/sign-in/` — Clerk sign-in page
   - `apps/web/app/sign-up/` — Clerk sign-up page
   - `apps/web/components/` — shared UI components (sidebar, etc.)
   - `apps/web/middleware.ts` — Clerk auth middleware
 - **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)
 - **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
-- **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts` (`@atlas/shared`)
+- **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
+- **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
+- **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`; tests in `packages/sdk-python/tests/`
+- **Scripts**: `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test; `scripts/test-n8n-scenario.md` — n8n scenario doc
+- **N8N template**: `public/templates/n8n-atlas-reporter.json` — n8n HTTP reporter workflow template
 - **Claude skills**: `.claude/skills/` — `find-skills/`, `save-learning/`, `setup-caliber/`
-- **Claude rules**: `.claude/rules/` — path-scoped conventions
+- **Claude rules**: `.claude/rules/` — path-scoped conventions (`cron.md`, `webhooks.md`, `git-conventions.md`)
 - **Claude hooks**: `.claude/hooks/` — `caliber-session-freshness.sh`, `caliber-check-sync.sh`, `caliber-freshness-notify.sh`
 - **Caveman plugin**: `caveman/` — terse caveman mode (skills, rules, evals, hooks)
+- **Deployment**: `vercel.json` — Vercel env bindings + cron schedule (`* * * * *` → `/api/cron/evaluate`)
 
 ## Key Patterns
 - Add dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`
+- Dashboard forms: co-locate as `<page>/<form-name>-form.tsx` (e.g. `settings/alert-pref-form.tsx`, `incidents/[id]/feedback-form.tsx`)
 - DB queries via `packages/db/src/index.ts` (Prisma client re-export)
 - Ingest payload validation: `packages/shared/src/schemas.ts` (Zod)
 - PII redaction: `packages/shared/src/pii.ts`
 - HMAC token verification: `packages/shared/src/hmac.ts`
+- Shared types: `packages/shared/src/types.ts`
 - Edge routes in `apps/edge/src/index.ts` (Hono)
+- Clerk webhooks in `apps/web/app/api/webhooks/clerk/route.ts` — upsert Org before User; membership events can arrive before `organization.created`
+- Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
+- Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`; schedule in `vercel.json`
+- Python SDK: mapper in `packages/sdk-python/src/atlas_synapse/mapper.py` transforms Anthropic SDK events → AtlasSynapse ingest payload; hooks wrap Anthropic client
+- N8N: import `public/templates/n8n-atlas-reporter.json`; add HTTP Request reporter node per workflow; always set `tokenCount: null` (n8n has no native token count exposure)
 
 ## Conventions
 - Commits: conventional commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

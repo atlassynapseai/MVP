@@ -16,6 +16,7 @@ const RedactedIngestSchema = z.object({
   toolCalls: z.array(ToolCallSchema).optional().default([]),
   tokenCount: z.number().int().nonnegative().optional(),
   costCents: z.number().nonnegative().optional(),
+  platform: z.enum(["anthropic", "n8n", "generic"]).optional(),
   rawRedactedPayload: z.record(z.unknown()),
 });
 
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     const orgId = connection.orgId;
 
-    // Upsert agent — use server time for lastSeenAt
+    // Upsert agent — use server time for lastSeenAt; write platform on create only
     const agent = await prisma.agent.upsert({
       where: { orgId_externalId: { orgId, externalId: data.agentId } },
       update: { lastSeenAt: new Date() },
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         externalId: data.agentId,
         displayName: data.agentId,
         lastSeenAt: new Date(),
+        ...(data.platform ? { platform: data.platform } : {}),
       },
     });
 

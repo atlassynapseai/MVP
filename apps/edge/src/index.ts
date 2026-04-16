@@ -15,7 +15,9 @@ app.post("/ingest", async (c) => {
 
   const parsed = TraceIngestSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
+    // Never leak Zod issue details — they expose schema structure and can
+    // echo attacker-controlled substrings back to the caller.
+    return c.json({ error: "Invalid payload" }, 400);
   }
 
   const raw = parsed.data;
@@ -40,6 +42,7 @@ app.post("/ingest", async (c) => {
     toolCalls: sanitizedToolCalls,
     tokenCount: raw.tokenCount,
     costCents: raw.costCents,
+    platform: raw.platform,
     rawRedactedPayload: {
       prompt: redactedPrompt,
       response: redactedResponse,

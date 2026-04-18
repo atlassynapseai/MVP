@@ -4,7 +4,7 @@ compatibility_date = "2024-07-25"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-WEB_INGEST_URL = "https://atlas-synapse-7ug2cq5me-stevegeorge2002s-projects.vercel.app/api/ingest"
+WEB_INGEST_URL = "https://atlas-synapse-nine.vercel.app/api/ingest"
 
 # Production secrets (set via: wrangler secret put INGEST_WORKER_SECRET)
 # INGEST_WORKER_SECRET

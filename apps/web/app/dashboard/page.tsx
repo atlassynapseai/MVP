@@ -3,46 +3,7 @@ import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
 import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
-import { CATEGORY_LABELS } from "@atlas/shared";
-import type { IncidentCategory } from "@atlas/shared";
-
-interface AgentRow {
-  id: string;
-  displayName: string;
-  platform: string | null;
-  lastSeenAt: Date | null;
-  _count: { traces: number; incidents: number };
-  incidents: Array<{ severity: string; category: string | null }>;
-}
-
-function HealthBadge({ status }: { status: "healthy" | "warning" | "critical" }) {
-  const styles = {
-    healthy: "bg-emerald-900/40 text-emerald-400 border-emerald-800",
-    warning: "bg-yellow-900/40 text-yellow-400 border-yellow-800",
-    critical: "bg-red-900/40 text-red-400 border-red-800",
-  };
-  const labels = { healthy: "Healthy", warning: "Needs Attention", critical: "Critical" };
-  return (
-    <span className={`px-2 py-0.5 text-xs rounded border ${styles[status]}`}>
-      {labels[status]}
-    </span>
-  );
-}
-
-function PlatformBadge({ platform }: { platform: string | null }) {
-  if (!platform) return null;
-  const styles: Record<string, string> = {
-    anthropic: "bg-purple-900/40 text-purple-300 border-purple-800",
-    n8n: "bg-blue-900/40 text-blue-300 border-blue-800",
-    generic: "bg-gray-800 text-gray-400 border-gray-700",
-  };
-  const style = styles[platform] ?? styles["generic"]!;
-  return (
-    <span className={`px-2 py-0.5 text-xs rounded border ${style}`}>
-      {platform}
-    </span>
-  );
-}
+import { ActivityFeed } from "./activity-feed";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -50,82 +11,88 @@ export default async function DashboardPage() {
   if (!user) redirect(`${appUrl}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const agents = await prisma.agent.findMany({
-    where: { orgId },
-    include: {
-      _count: { select: { traces: true, incidents: true } },
-      incidents: {
-        where: { createdAt: { gte: sevenDaysAgo } },
-        select: { severity: true, category: true },
-        orderBy: { createdAt: "desc" },
-        take: 20,
-      },
-    },
-    orderBy: { lastSeenAt: "desc" },
-  });
+  const [agentCount, tracesToday, evalStats, activeIncidents] = await Promise.all([
+    prisma.agent.count({ where: { orgId } }),
+    prisma.trace.count({ where: { orgId, createdAt: { gte: today } } }),
+    prisma.evaluation.aggregate({
+      where: { trace: { orgId } },
+      _count: { id: true },
+    }).then(async (total) => {
+      const passed = await prisma.evaluation.count({
+        where: { trace: { orgId }, pass: true },
+      });
+      return { total: total._count.id, passed };
+    }),
+    prisma.incident.count({ where: { orgId, createdAt: { gte: sevenDaysAgo } } }),
+  ]);
 
-  if (agents.length === 0) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Your AI Workforce</h1>
-        <p className="text-gray-400 text-sm mb-6">All your AI agents at a glance.</p>
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
-          No agents connected yet. Use the SDK or N8N template to report your first trace.
-        </div>
-      </div>
-    );
-  }
+  const passRate =
+    evalStats.total > 0 ? Math.round((evalStats.passed / evalStats.total) * 100) : null;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-100 mb-1">Your AI Workforce</h1>
-      <p className="text-gray-400 text-sm mb-6">Agent health at a glance — last 7 days.</p>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(agents as AgentRow[]).map((agent) => {
-          const openIncidents = agent.incidents.length;
-          const criticalCount = agent.incidents.filter((i) => i.severity === "critical").length;
-          const health: "healthy" | "warning" | "critical" =
-            criticalCount > 0 ? "critical" : openIncidents > 0 ? "warning" : "healthy";
-
-          // Most common category this week
-          const categoryFreq: Record<string, number> = {};
-          for (const inc of agent.incidents) {
-            if (inc.category) categoryFreq[inc.category] = (categoryFreq[inc.category] ?? 0) + 1;
-          }
-          const topCategory = Object.entries(categoryFreq).sort((a, b) => b[1] - a[1])[0]?.[0] as IncidentCategory | undefined;
-
-          return (
-            <div key={agent.id} className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-semibold text-gray-100 text-sm">{agent.displayName}</p>
-                  <PlatformBadge platform={agent.platform} />
-                </div>
-                <HealthBadge status={health} />
-              </div>
-              <div className="space-y-1 text-xs text-gray-400">
-                <div className="flex justify-between">
-                  <span>Open incidents</span>
-                  <span className={openIncidents > 0 ? "text-yellow-400" : "text-gray-500"}>{openIncidents}</span>
-                </div>
-                {topCategory && (
-                  <div className="flex justify-between">
-                    <span>Top issue type</span>
-                    <span className="text-gray-300">{CATEGORY_LABELS[topCategory]}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>Last active</span>
-                  <span>{agent.lastSeenAt ? new Date(agent.lastSeenAt).toLocaleDateString() : "—"}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-100 mb-1">Your AI Workforce</h1>
+        <p className="text-gray-400 text-sm">Monitor your AI agents — last 7 days.</p>
       </div>
+
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total Agents" value={agentCount.toString()} />
+        <StatCard label="Traces Today" value={tracesToday.toString()} />
+        <StatCard
+          label="Pass Rate"
+          value={passRate !== null ? `${passRate}%` : "—"}
+          valueClass={
+            passRate === null
+              ? "text-gray-500"
+              : passRate >= 90
+              ? "text-emerald-400"
+              : passRate >= 70
+              ? "text-yellow-400"
+              : "text-red-400"
+          }
+        />
+        <StatCard
+          label="Active Incidents (7d)"
+          value={activeIncidents.toString()}
+          valueClass={activeIncidents > 0 ? "text-yellow-400" : "text-gray-100"}
+        />
+      </div>
+
+      {/* Empty state */}
+      {agentCount === 0 && (
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
+          No agents connected yet. Use a Connection token and the Python SDK or N8N template to send your first trace.
+        </div>
+      )}
+
+      {/* Recent Activity */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Recent Activity</h2>
+        <ActivityFeed />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  valueClass = "text-gray-100",
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</p>
+      <p className={`text-3xl font-bold ${valueClass}`}>{value}</p>
     </div>
   );
 }

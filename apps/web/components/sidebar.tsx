@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut } from "lucide-react";
+import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut, Activity, ClipboardCheck } from "lucide-react";
 import { clsx } from "clsx";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { basePath } from "@/lib/app-path";
@@ -9,6 +9,8 @@ import { basePath } from "@/lib/app-path";
 const NAV = [
   { href: `${basePath}/dashboard`, label: "Overview", icon: LayoutDashboard },
   { href: `${basePath}/dashboard/agents`, label: "Agents", icon: Bot },
+  { href: `${basePath}/dashboard/traces`, label: "Traces", icon: Activity },
+  { href: `${basePath}/dashboard/evaluations`, label: "Evaluations", icon: ClipboardCheck },
   { href: `${basePath}/dashboard/incidents`, label: "Incidents", icon: AlertTriangle },
   { href: `${basePath}/dashboard/connections`, label: "Connections", icon: Plug },
   { href: `${basePath}/dashboard/settings`, label: "Settings", icon: Settings },
@@ -32,11 +34,17 @@ export function Sidebar({ userEmail }: SidebarProps) {
 
   // Active check works whether usePathname returns the full path (e.g. /MVP/dashboard)
   // or the Vercel-rewritten path (e.g. /dashboard).
+  // Overview uses exact match; other routes also match child paths (e.g. /agents/[id]).
   function isActive(href: string): boolean {
-    if (pathname === href) return true;
-    // Strip basePath from href for comparison against rewritten pathname
     const stripped = basePath && href.startsWith(basePath) ? href.slice(basePath.length) || "/" : href;
-    return pathname === stripped;
+    const isOverview = href === `${basePath}/dashboard` || href === "/dashboard";
+    if (isOverview) return pathname === href || pathname === stripped;
+    return (
+      pathname === href ||
+      pathname === stripped ||
+      pathname.startsWith(href + "/") ||
+      pathname.startsWith(stripped + "/")
+    );
   }
 
   return (

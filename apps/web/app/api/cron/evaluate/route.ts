@@ -174,7 +174,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         await tx.trace.update({
           where: { id: trace.id },
-          data: { status: "translated", statusUpdatedAt: new Date() },
+          data: {
+            status: "translated",
+            statusUpdatedAt: new Date(),
+            // Store plain-English trace summary for dashboard activity feed
+            summary: rendering.traceSummary,
+          },
         });
 
         return inc;

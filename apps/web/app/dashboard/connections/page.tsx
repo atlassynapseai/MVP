@@ -1,13 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { ConnectionsClient } from "./connections-client";
 
 export default async function ConnectionsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
+  if (!user) redirect(`${appUrl}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
   const connections = await prisma.connection.findMany({

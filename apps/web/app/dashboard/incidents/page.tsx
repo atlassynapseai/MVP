@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
+import { appUrl, basePath } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
-import { basePath } from "@/lib/app-path";
 
 interface IncidentRow {
   id: string;
@@ -43,7 +43,7 @@ function timeAgo(date: Date): string {
 export default async function IncidentsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
+  if (!user) redirect(`${appUrl}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
   const incidents = await prisma.incident.findMany({

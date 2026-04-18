@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 function getPublicPrefixes(): string[] {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").trim();
   const base = appUrl ? new URL(appUrl).pathname.replace(/\/$/, "") : "";
   const routes = ["/login", "/auth/callback", "/api/ingest", "/api/cron/"];
   if (base) {
@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 
   if (!user && !isPublic) {
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
+    return NextResponse.redirect(`${(process.env.NEXT_PUBLIC_APP_URL ?? "").trim()}/login`);
   }
 
   return supabaseResponse;

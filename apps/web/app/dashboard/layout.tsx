@@ -1,11 +1,12 @@
 import { Sidebar } from "@/components/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { appUrl } from "@/lib/app-path";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
+  if (!user) redirect(`${appUrl}/login`);
 
   return (
     <div className="flex h-screen overflow-hidden">

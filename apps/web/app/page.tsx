@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import { appUrl } from "@/lib/app-path";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`);
+  redirect(`${appUrl}/dashboard`);
 }

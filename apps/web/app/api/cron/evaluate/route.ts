@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@atlas/db";
 import type { IncidentCategory } from "@atlas/shared";
-import { evaluateTrace, translate, buildDedupKey, sendImmediateAlert } from "@atlas/evaluator";
+import { evaluateTrace, translate, buildDedupKey, sendImmediateAlert, sendSlackAlert } from "@atlas/evaluator";
 
 // Allow up to 60s on Vercel (hobby tier max)
 export const maxDuration = 60;
@@ -234,6 +234,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           });
 
           if (alertResult.status === "sent") alerted++;
+
+          // Send Slack alert if webhook configured
+          if (alertPref?.slackWebhookUrl) {
+            await sendSlackAlert(
+              {
+                id: incident.id,
+                severity,
+                category,
+                summary: rendering.incidentSummary,
+                agentName: trace.agent.displayName,
+              },
+              alertPref.slackWebhookUrl,
+            ).catch(() => undefined); // fire-and-forget, never fail cron
+          }
         }
       }
 

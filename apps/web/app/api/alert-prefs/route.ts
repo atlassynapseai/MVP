@@ -7,6 +7,7 @@ import { z } from "zod";
 const AlertPrefUpdateSchema = z.object({
   mode: z.enum(["immediate", "off"]),
   severityFloor: z.enum(["warning", "critical"]),
+  slackWebhookUrl: z.string().url().optional().or(z.literal("")),
   agentId: z.string().optional(),
 });
 
@@ -43,8 +44,9 @@ export async function PUT(req: NextRequest) {
   const parsed = AlertPrefUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
-  const { mode, severityFloor, agentId } = parsed.data;
+  const { mode, severityFloor, agentId, slackWebhookUrl } = parsed.data;
   const resolvedAgentId = agentId ?? null;
+  const resolvedSlack = slackWebhookUrl || null;
 
   if (resolvedAgentId) {
     const agent = await prisma.agent.findFirst({ where: { id: resolvedAgentId, orgId }, select: { id: true } });
@@ -53,9 +55,9 @@ export async function PUT(req: NextRequest) {
 
   const existing = await prisma.alertPref.findFirst({ where: { orgId, agentId: resolvedAgentId }, select: { id: true } });
   if (existing) {
-    await prisma.alertPref.update({ where: { id: existing.id }, data: { mode, severityFloor } });
+    await prisma.alertPref.update({ where: { id: existing.id }, data: { mode, severityFloor, slackWebhookUrl: resolvedSlack } });
   } else {
-    await prisma.alertPref.create({ data: { orgId, agentId: resolvedAgentId, mode, severityFloor } });
+    await prisma.alertPref.create({ data: { orgId, agentId: resolvedAgentId, mode, severityFloor, slackWebhookUrl: resolvedSlack } });
   }
 
   return NextResponse.json({ ok: true });

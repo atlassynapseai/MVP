@@ -8,6 +8,25 @@ type Env = {
 
 const app = new Hono<{ Bindings: Env }>();
 
+// In-memory rate limiter: 60 req/min per project token
+// Uses a sliding window stored per isolate instance — resets on cold start.
+// Good enough for abuse prevention; not a hard guarantee across all instances.
+const rateLimitWindows = new Map<string, { count: number; windowStart: number }>();
+const RATE_LIMIT = 60;
+const WINDOW_MS = 60_000;
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitWindows.get(key);
+  if (!entry || now - entry.windowStart > WINDOW_MS) {
+    rateLimitWindows.set(key, { count: 1, windowStart: now });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
 app.get("/health", (c) => c.json({ ok: true }));
 
 app.post("/ingest", async (c) => {
@@ -15,12 +34,16 @@ app.post("/ingest", async (c) => {
 
   const parsed = TraceIngestSchema.safeParse(body);
   if (!parsed.success) {
-    // Never leak Zod issue details — they expose schema structure and can
-    // echo attacker-controlled substrings back to the caller.
     return c.json({ error: "Invalid payload" }, 400);
   }
 
   const raw = parsed.data;
+
+  // Rate limit per project token (first 16 chars as key)
+  const rateLimitKey = raw.projectToken.slice(0, 16);
+  if (!checkRateLimit(rateLimitKey)) {
+    return c.json({ error: "Rate limit exceeded" }, 429);
+  }
 
   // PII strip prompt + response
   const redactedPrompt = piiStrip(raw.prompt);

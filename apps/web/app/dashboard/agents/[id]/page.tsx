@@ -6,6 +6,7 @@ import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
+import { AgentPerfCharts } from "./agent-perf-charts";
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -70,8 +71,9 @@ export default async function AgentDetailPage({
   if (!agent) notFound();
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-  const [recentTraces, recentIncidents, evalStats] = await Promise.all([
+  const [recentTraces, recentIncidents, evalStats, last14dTraces, last14dIncidents] = await Promise.all([
     prisma.trace.findMany({
       where: { agentId: id },
       include: {
@@ -94,7 +96,54 @@ export default async function AgentDetailPage({
       });
       return { total: total._count.id, passed };
     }),
+    prisma.trace.findMany({
+      where: { agentId: id, createdAt: { gte: fourteenDaysAgo } },
+      select: { createdAt: true, evaluation: { select: { pass: true } } },
+    }),
+    prisma.incident.findMany({
+      where: { agentId: id, createdAt: { gte: fourteenDaysAgo } },
+      select: { createdAt: true, category: true },
+    }),
   ]);
+
+  // Build 14-day daily stats
+  const dailyMap = new Map<string, { traces: number; passed: number; evaluated: number; incidents: number }>();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = d.toISOString().slice(5, 10); // MM-DD
+    dailyMap.set(key, { traces: 0, passed: 0, evaluated: 0, incidents: 0 });
+  }
+  for (const t of last14dTraces) {
+    const key = new Date(t.createdAt).toISOString().slice(5, 10);
+    const entry = dailyMap.get(key);
+    if (entry) {
+      entry.traces++;
+      if (t.evaluation) {
+        entry.evaluated++;
+        if (t.evaluation.pass) entry.passed++;
+      }
+    }
+  }
+  for (const inc of last14dIncidents) {
+    const key = new Date(inc.createdAt).toISOString().slice(5, 10);
+    const entry = dailyMap.get(key);
+    if (entry) entry.incidents++;
+  }
+  const dailyStats = Array.from(dailyMap.entries()).map(([date, v]) => ({
+    date,
+    traces: v.traces,
+    incidents: v.incidents,
+    passRate: v.evaluated > 0 ? Math.round((v.passed / v.evaluated) * 100) : null,
+  }));
+
+  // Category breakdown
+  const catMap = new Map<string, number>();
+  for (const inc of last14dIncidents) {
+    catMap.set(inc.category, (catMap.get(inc.category) ?? 0) + 1);
+  }
+  const categoryBreakdown = Array.from(catMap.entries())
+    .map(([category, count]) => ({ category: (CATEGORY_LABELS[category as IncidentCategory] ?? category).slice(0, 16), count }))
+    .sort((a, b) => b.count - a.count);
 
   const criticalCount = recentIncidents.filter((i) => i.severity === "critical").length;
   const health: "healthy" | "warning" | "critical" =
@@ -153,6 +202,12 @@ export default async function AgentDetailPage({
             {recentIncidents.length}
           </p>
         </div>
+      </div>
+
+      {/* Performance Charts */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Performance Trends</h2>
+        <AgentPerfCharts dailyStats={dailyStats} categoryBreakdown={categoryBreakdown} />
       </div>
 
       {/* Recent Incidents */}

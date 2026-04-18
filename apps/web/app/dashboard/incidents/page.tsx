@@ -6,13 +6,15 @@ import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
+import { ExportButton } from "@/components/export-button";
 
-interface IncidentRow {
+  interface IncidentRow {
   id: string;
   severity: "warning" | "critical";
   category: string;
   summary: string;
   createdAt: Date;
+  resolvedAt: Date | null;
   agent: { displayName: string };
 }
 
@@ -60,7 +62,10 @@ export default async function IncidentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-100 mb-1">Active Issues</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-gray-100">Active Issues</h1>
+        <ExportButton type="incidents" />
+      </div>
       <p className="text-gray-400 text-sm mb-6">Agent failures in plain English — click any row to see details.</p>
 
       {incidents.length === 0 ? (
@@ -76,11 +81,12 @@ export default async function IncidentsPage() {
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Issue Type</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">What Happened</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Severity</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">When</th>
               </tr>
             </thead>
             <tbody>
-              {(incidents as IncidentRow[]).map((incident) => {
+              {(incidents as unknown as IncidentRow[]).map((incident) => {
                 const category = incident.category as IncidentCategory;
                 const label = CATEGORY_LABELS[category] ?? incident.category;
                 const summary = incident.summary.length > 120
@@ -90,7 +96,9 @@ export default async function IncidentsPage() {
                 return (
                   <tr
                     key={incident.id}
-                    className="border-b border-gray-800 bg-gray-950 hover:bg-gray-900 transition-colors"
+                    className={`border-b border-gray-800 hover:bg-gray-900 transition-colors ${
+                      incident.resolvedAt ? "bg-gray-900/50 opacity-60" : "bg-gray-950"
+                    }`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
                       <Link href={`${basePath}/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
@@ -107,6 +115,13 @@ export default async function IncidentsPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <SeverityBadge severity={incident.severity} />
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {incident.resolvedAt ? (
+                        <span className="px-2 py-0.5 text-xs rounded border bg-emerald-900/40 text-emerald-400 border-emerald-800">Resolved</span>
+                      ) : (
+                        <span className="px-2 py-0.5 text-xs rounded border bg-gray-800 text-gray-500 border-gray-700">Open</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
                       {timeAgo(new Date(incident.createdAt))}

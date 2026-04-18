@@ -124,3 +124,69 @@ export async function sendImmediateAlert(
     return { status: "failed", error: message };
   }
 }
+
+/**
+ * Send a Slack alert via an incoming webhook URL.
+ * Returns {status: "sent"} on success, {status: "failed", error} on failure.
+ * Never throws.
+ */
+export async function sendSlackAlert(
+  incident: IncidentData,
+  webhookUrl: string,
+): Promise<AlertResult> {
+  const severityEmoji = incident.severity === "critical" ? "🔴" : "🟡";
+  const incidentUrl = `${DASHBOARD_BASE_URL}/dashboard/incidents/${encodeURIComponent(incident.id)}`;
+
+  // Slack mrkdwn — escape & < > only (no HTML)
+  const safeAgentName = incident.agentName.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const safeSummary = incident.summary.slice(0, 500).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const body = {
+    blocks: [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: `${severityEmoji} ${incident.severity === "critical" ? "Critical" : "Warning"} — ${incident.category}`,
+        },
+      },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*Agent*\n${safeAgentName}` },
+          { type: "mrkdwn", text: `*Severity*\n${incident.severity}` },
+        ],
+      },
+      {
+        type: "section",
+        text: { type: "mrkdwn", text: safeSummary },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "View Incident" },
+            url: incidentUrl,
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { status: "failed", error: `Slack ${res.status}: ${text.slice(0, 200)}` };
+    }
+    return { status: "sent" };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return { status: "failed", error: message };
+  }
+}

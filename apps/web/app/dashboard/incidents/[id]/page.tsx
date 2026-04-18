@@ -6,6 +6,7 @@ import type { IncidentCategory } from "@atlas/shared";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { FeedbackForm } from "./feedback-form";
+import { ResolveButton } from "./resolve-button";
 import { basePath } from "@/lib/app-path";
 
 function SeverityBadge({ severity }: { severity: "warning" | "critical" }) {
@@ -78,6 +79,7 @@ export default async function IncidentDetailPage({ params }: Props) {
           <span className="px-2 py-0.5 text-xs rounded border bg-gray-800 text-gray-400 border-gray-700">
             {categoryLabel}
           </span>
+          <ResolveButton incidentId={incident.id} initialResolved={!!incident.resolvedAt} />
         </div>
         <p className="text-xs text-gray-500">
           {new Date(incident.createdAt).toLocaleString()}

@@ -5,11 +5,13 @@ import { useState } from "react";
 interface AlertPrefFormProps {
   initialMode: "immediate" | "off";
   initialSeverityFloor: "warning" | "critical";
+  initialSlackWebhookUrl?: string;
 }
 
-export function AlertPrefForm({ initialMode, initialSeverityFloor }: AlertPrefFormProps) {
+export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackWebhookUrl }: AlertPrefFormProps) {
   const [mode, setMode] = useState<"immediate" | "off">(initialMode);
   const [severityFloor, setSeverityFloor] = useState<"warning" | "critical">(initialSeverityFloor);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState(initialSlackWebhookUrl ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   async function handleSave(e: React.FormEvent) {
@@ -20,7 +22,7 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor }: AlertPrefFo
       const res = await fetch("/api/alert-prefs", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, severityFloor }),
+        body: JSON.stringify({ mode, severityFloor, slackWebhookUrl }),
       });
 
       if (!res.ok) {
@@ -103,6 +105,30 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor }: AlertPrefFo
           </p>
         </div>
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Slack Webhook <span className="text-gray-500 font-normal">(optional)</span>
+        </label>
+        <input
+          type="url"
+          value={slackWebhookUrl}
+          onChange={(e) => setSlackWebhookUrl(e.target.value)}
+          placeholder="https://hooks.slack.com/services/T.../B.../..."
+          className="w-full px-3 py-2 text-sm rounded border border-gray-700 bg-gray-950 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-700 transition-colors"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Incidents will be posted to this Slack channel when alerts fire.{" "}
+          <a
+            href="https://api.slack.com/messaging/webhooks"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-400 hover:text-purple-300"
+          >
+            How to create a webhook →
+          </a>
+        </p>
+      </div>
 
       {status === "error" && (
         <p className="text-sm text-red-400">Failed to save. Please try again.</p>

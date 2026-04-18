@@ -145,12 +145,14 @@ enum IncidentSeverity {
 }
 
 model Incident {
-  id        String           @id @default(cuid())
-  severity  IncidentSeverity
-  category  String           // IncidentCategory value
-  summary   String           // incidentSummary from IncidentRendering
-  dedupKey  String
-  createdAt DateTime         @default(now())
+  id          String           @id @default(cuid())
+  severity    IncidentSeverity
+  category    String           // IncidentCategory value
+  summary     String           // incidentSummary from IncidentRendering
+  dedupKey    String
+  createdAt   DateTime         @default(now())
+  resolvedAt  DateTime?        // null = open, set = resolved
+  resolvedBy  String?          // supabaseUserId of resolver
 
   traceId  String @unique
   trace    Trace  @relation(fields: [traceId], references: [id], onDelete: Cascade)
@@ -206,9 +208,10 @@ enum AlertMode {
 }
 
 model AlertPref {
-  id            String           @id @default(cuid())
-  mode          AlertMode        @default(immediate)
-  severityFloor IncidentSeverity @default(warning)
+  id              String           @id @default(cuid())
+  mode            AlertMode        @default(immediate)
+  severityFloor   IncidentSeverity @default(warning)
+  slackWebhookUrl String?          // optional Slack incoming webhook URL
 
   orgId    String
   org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)

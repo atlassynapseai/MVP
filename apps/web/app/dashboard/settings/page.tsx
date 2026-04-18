@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { appUrl, basePath } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { AlertPrefForm } from "./alert-pref-form";
+import { InviteForm } from "./invite-form";
 import Link from "next/link";
 
 function timeAgo(date: Date): string {
@@ -44,6 +45,7 @@ export default async function SettingsPage() {
 
   const initialMode = (pref?.mode ?? "immediate") as "immediate" | "off";
   const initialSeverityFloor = (pref?.severityFloor ?? "warning") as "warning" | "critical";
+  const initialSlackWebhookUrl = pref?.slackWebhookUrl ?? "";
 
   return (
     <div className="max-w-xl space-y-8">
@@ -67,12 +69,20 @@ export default async function SettingsPage() {
         </div>
       </div>
 
+      {/* Invite teammates */}
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
+        <h2 className="text-sm font-semibold text-gray-300 mb-1">Invite Teammates</h2>
+        <p className="text-xs text-gray-500 mb-4">They&apos;ll receive an email with a link to join your workspace.</p>
+        <InviteForm />
+      </div>
+
       {/* Alert preferences */}
       <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
         <h2 className="text-sm font-semibold text-gray-300 mb-6">Alert Preferences</h2>
         <AlertPrefForm
           initialMode={initialMode}
           initialSeverityFloor={initialSeverityFloor}
+          initialSlackWebhookUrl={initialSlackWebhookUrl}
         />
       </div>
 

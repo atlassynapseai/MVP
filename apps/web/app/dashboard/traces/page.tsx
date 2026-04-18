@@ -103,7 +103,12 @@ export default async function TracesPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
-                    {timeAgo(new Date(trace.createdAt))}
+                    <Link
+                      href={`${basePath}/dashboard/traces/${trace.id}`}
+                      className="hover:text-purple-300 transition-colors"
+                    >
+                      {timeAgo(new Date(trace.createdAt))}
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-400 max-w-[160px]">
                     <span className="truncate block" title={trace.redactedPrompt}>

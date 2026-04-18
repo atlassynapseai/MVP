@@ -76,8 +76,7 @@ export function ActivityFeed() {
           key={trace.id}
           href={`${basePath}/dashboard/traces/${trace.id}`}
           className="flex items-start gap-3 p-3 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors"
-        >
-          <div className="flex-1 min-w-0">
+        >          <div className="flex-1 min-w-0">
             <span className="font-medium text-gray-200 text-sm">{trace.agent.displayName}</span>
             <span className="text-gray-600 text-sm mx-2">—</span>
             <span className="text-gray-400 text-sm">

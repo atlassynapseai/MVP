@@ -7,7 +7,7 @@ import { ConnectionsClient } from "./connections-client";
 export default async function ConnectionsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
   const connections = await prisma.connection.findMany({

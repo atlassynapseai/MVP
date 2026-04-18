@@ -1,12 +1,17 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PREFIXES = [
-  "/login",
-  "/auth/callback",
-  "/api/ingest",
-  "/api/cron/",
-];
+function getPublicPrefixes(): string[] {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const base = appUrl ? new URL(appUrl).pathname.replace(/\/$/, "") : "";
+  const routes = ["/login", "/auth/callback", "/api/ingest", "/api/cron/"];
+  if (base) {
+    return [...routes, ...routes.map((r) => `${base}${r}`)];
+  }
+  return routes;
+}
+
+const PUBLIC_PREFIXES = getPublicPrefixes();
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -39,9 +44,7 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 
   if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
   }
 
   return supabaseResponse;

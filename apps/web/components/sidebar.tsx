@@ -4,14 +4,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut } from "lucide-react";
 import { clsx } from "clsx";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { basePath } from "@/lib/app-path";
 
 const NAV = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/agents", label: "Agents", icon: Bot },
-  { href: "/dashboard/incidents", label: "Incidents", icon: AlertTriangle },
-  { href: "/dashboard/connections", label: "Connections", icon: Plug },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-  { href: "/dashboard/data-transparency", label: "Data Transparency", icon: Shield },
+  { href: `${basePath}/dashboard`, label: "Overview", icon: LayoutDashboard },
+  { href: `${basePath}/dashboard/agents`, label: "Agents", icon: Bot },
+  { href: `${basePath}/dashboard/incidents`, label: "Incidents", icon: AlertTriangle },
+  { href: `${basePath}/dashboard/connections`, label: "Connections", icon: Plug },
+  { href: `${basePath}/dashboard/settings`, label: "Settings", icon: Settings },
+  { href: `${basePath}/dashboard/data-transparency`, label: "Data Transparency", icon: Shield },
 ];
 
 interface SidebarProps {
@@ -25,8 +26,17 @@ export function Sidebar({ userEmail }: SidebarProps) {
   async function handleSignOut() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push(`${basePath}/login`);
     router.refresh();
+  }
+
+  // Active check works whether usePathname returns the full path (e.g. /MVP/dashboard)
+  // or the Vercel-rewritten path (e.g. /dashboard).
+  function isActive(href: string): boolean {
+    if (pathname === href) return true;
+    // Strip basePath from href for comparison against rewritten pathname
+    const stripped = basePath && href.startsWith(basePath) ? href.slice(basePath.length) || "/" : href;
+    return pathname === stripped;
   }
 
   return (
@@ -42,7 +52,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
             href={href}
             className={clsx(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              pathname === href
+              isActive(href)
                 ? "bg-purple-900/50 text-purple-300"
                 : "text-gray-400 hover:bg-gray-800 hover:text-gray-100"
             )}

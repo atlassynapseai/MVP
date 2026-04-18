@@ -5,6 +5,7 @@ import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
+import { basePath } from "@/lib/app-path";
 
 interface IncidentRow {
   id: string;
@@ -42,7 +43,7 @@ function timeAgo(date: Date): string {
 export default async function IncidentsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
   const incidents = await prisma.incident.findMany({
@@ -92,7 +93,7 @@ export default async function IncidentsPage() {
                     className="border-b border-gray-800 bg-gray-950 hover:bg-gray-900 transition-colors"
                   >
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
-                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
+                      <Link href={`${basePath}/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
                         {incident.agent.displayName}
                       </Link>
                     </td>
@@ -100,7 +101,7 @@ export default async function IncidentsPage() {
                       <span className="text-gray-300">{label}</span>
                     </td>
                     <td className="px-4 py-3 text-gray-400 max-w-sm">
-                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors">
+                      <Link href={`${basePath}/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors">
                         {summary}
                       </Link>
                     </td>

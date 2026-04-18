@@ -46,7 +46,7 @@ function PlatformBadge({ platform }: { platform: string | null }) {
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

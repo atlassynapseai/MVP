@@ -19,9 +19,10 @@ const NAV = [
 
 interface SidebarProps {
   userEmail: string;
+  onNavigate?: () => void;
 }
 
-export function Sidebar({ userEmail }: SidebarProps) {
+export function Sidebar({ userEmail, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -58,6 +59,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
           <Link
             key={href}
             href={href}
+            {...(onNavigate ? { onClick: onNavigate } : {})}
             className={clsx(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
               isActive(href)

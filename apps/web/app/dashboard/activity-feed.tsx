@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { basePath } from "@/lib/app-path";
-
 interface ActivityTrace {
   id: string;
   createdAt: string;
@@ -34,7 +33,7 @@ export function ActivityFeed() {
 
   async function fetchActivity() {
     try {
-      const res = await fetch(`${basePath}/api/activity`);
+      const res = await fetch(`/api/activity`);
       if (res.ok) {
         const data = await res.json() as { traces: ActivityTrace[] };
         setTraces(data.traces);

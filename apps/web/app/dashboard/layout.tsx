@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/sidebar";
+import { MobileSidebarWrapper } from "@/components/mobile-sidebar-wrapper";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { appUrl } from "@/lib/app-path";
@@ -10,8 +10,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar userEmail={user.email ?? ""} />
-      <main className="flex-1 overflow-y-auto bg-gray-950 p-6">{children}</main>
+      <MobileSidebarWrapper userEmail={user.email ?? ""} />
+      <main className="flex-1 overflow-y-auto bg-gray-950 p-4 pt-16 md:p-6 md:pt-6">{children}</main>
     </div>
   );
 }

@@ -22,6 +22,7 @@ model Organization {
   alertPrefs   AlertPref[]
   webhooks     Webhook[]
   auditLogs    AuditLog[]
+  slaRules     SlaRule[]
 }
 
 model User {
@@ -76,6 +77,7 @@ model Agent {
   traces     Trace[]
   incidents  Incident[]
   alertPrefs AlertPref[]
+  slaRules   SlaRule[]
 
   @@unique([orgId, externalId])
 }
@@ -248,4 +250,23 @@ model AuditLog {
   org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   userId  String?      // null for system actions
   agentId String?
+}
+
+/// Per-agent (or org-wide) SLA rule. Triggers a critical incident when
+/// the agent's error rate exceeds `maxErrorRatePct` within `windowMinutes`.
+model SlaRule {
+  id               String   @id @default(cuid())
+  maxErrorRatePct  Int      // 1–100: alert when error % > this over the window
+  windowMinutes    Int      @default(60)   // rolling evaluation window
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orgId   String
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  agentId String?      // null = applies to all agents in the org
+  agent   Agent?       @relation(fields: [agentId], references: [id])
+
+  @@unique([orgId, agentId])
+  @@index([orgId])
 }

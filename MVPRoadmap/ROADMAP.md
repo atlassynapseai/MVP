@@ -11,8 +11,8 @@
 | P1 | Ingest Pipeline | ✅ Complete |
 | P2 | Eval Engine + Dashboard | ✅ Complete |
 | P3 | Agent Integrations + Polish | ✅ Complete |
-| P4 | Production Deploy + First Users | 🔲 In Progress |
-| P5 | Analytics + Team Features | 🔲 In Progress |
+| P4 | Production Deploy + First Users | 🔲 In Progress (manual steps remain) |
+| P5 | Analytics + Team Features | ✅ Complete |
 | P6 | Scale + Advanced Evals | 🔲 In Progress |
 
 ---
@@ -50,7 +50,7 @@
 
 ---
 
-## P3 — Agent Integrations + Polish 🔲
+## P3 — Agent Integrations + Polish ✅
 
 **Goal:** Real agents connect easily. Product is demo-ready.
 
@@ -74,7 +74,7 @@
 
 **To build:**
 - [ ] Deploy to Vercel — production environment, custom domain
-- [ ] Deploy edge worker — `wrangler deploy` to Cloudflare, stable ingest URL
+- [x] Deploy edge worker — `wrangler deploy` to Cloudflare, stable ingest URL
 - [ ] Clerk production instance — switch from dev to prod Clerk app
 - [ ] Supabase production project — separate from dev DB
 - [x] User invite flow — org owner can invite teammates (Clerk handles this, just wire UI)
@@ -97,7 +97,7 @@
 - [x] Incident resolution flow — mark incident as resolved, track MTTR
 - [x] Team notifications — Slack integration for alerts (not just email)
 - [x] Weekly digest email — summary of agent activity per org
-- [ ] Custom eval criteria — let users define what counts as a problem for their use case
+- [x] Custom eval criteria — let users define what counts as a problem for their use case
 - [x] Agent comparison — side-by-side health scores across agents
 - [x] Export — CSV download of incidents/traces for compliance
 
@@ -110,7 +110,7 @@
 **Goal:** Platform handles enterprise workloads and advanced monitoring needs.
 
 **To build:**
-- [ ] SLA monitoring — define uptime/response time thresholds per agent, alert on breach
+- [x] SLA monitoring — define uptime/response time thresholds per agent, alert on breach
 - [x] Custom evaluator prompts — per-org eval criteria, not just global defaults
 - [x] Audit log — immutable record of all agent actions (compliance)
 - [ ] SSO / SAML — enterprise auth

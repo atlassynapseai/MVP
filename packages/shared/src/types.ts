@@ -4,7 +4,7 @@
  * used across @atlas/evaluator and @atlas/web cron routes.
  */
 
-/** Stable 8-category taxonomy for incident classification. */
+/** Stable 9-category taxonomy for incident classification. */
 export type IncidentCategory =
   | "task_failure"         // agent didn't complete the requested task
   | "harmful_output"       // potentially harmful or inappropriate content
@@ -13,7 +13,8 @@ export type IncidentCategory =
   | "data_handling_error"  // potential data exposure risk or mishandling
   | "reasoning_error"      // clear logical or factual failure
   | "cost_anomaly"         // token/cost spike (only when tokenCount available)
-  | "silent_refusal";      // agent stopped without completing or explaining
+  | "silent_refusal"       // agent stopped without completing or explaining
+  | "sla_breach";          // error rate exceeded org-defined SLA threshold
 
 export const INCIDENT_CATEGORIES: IncidentCategory[] = [
   "task_failure",
@@ -24,6 +25,7 @@ export const INCIDENT_CATEGORIES: IncidentCategory[] = [
   "reasoning_error",
   "cost_anomaly",
   "silent_refusal",
+  "sla_breach",
 ];
 
 /** Human-readable labels for each category (for dashboard display). */
@@ -36,6 +38,7 @@ export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   reasoning_error:     "Reasoning Error",
   cost_anomaly:        "Cost Anomaly",
   silent_refusal:      "Silent Refusal",
+  sla_breach:          "SLA Breach",
 };
 
 /** Output contract from evaluateTrace(). */

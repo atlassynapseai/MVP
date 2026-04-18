@@ -69,7 +69,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   });
 
   if (candidates.length === 0) {
-    return NextResponse.json({ processed: 0, passed: 0, incidents: 0, alerted: 0, errors: 0 });
+    return NextResponse.json({ processed: 0, passed: 0, incidents: 0, alerted: 0, errors: 0, slaBreaches: 0 });
   }
 
   // Fetch full trace data for claimed rows
@@ -328,5 +328,117 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     incidents,
     alerted,
     errors,
+    slaBreaches: await checkSlaRules(traces.map((t) => ({ orgId: t.orgId, agentId: t.agentId }))),
   });
+}
+
+/**
+ * After each eval batch, check SLA rules for all affected orgs.
+ * Creates a critical "sla_breach" incident when error rate exceeds threshold.
+ * Fire-and-forget style — never throws, errors are swallowed to keep cron alive.
+ */
+async function checkSlaRules(
+  processed: Array<{ agentId?: string; orgId?: string }>,
+): Promise<number> {
+  // Collect unique orgIds from the processed batch
+  const orgIds = [...new Set(processed.map((t) => t.orgId).filter(Boolean))] as string[];
+  if (orgIds.length === 0) return 0;
+
+  let breaches = 0;
+  try {
+    const rules = await prisma.slaRule.findMany({
+      where: { orgId: { in: orgIds }, enabled: true },
+    });
+
+    for (const rule of rules) {
+      try {
+        const windowStart = new Date(Date.now() - rule.windowMinutes * 60_000);
+
+        // Count evaluations in window for this org/agent scope
+        const evalFilter = {
+          trace: {
+            orgId: rule.orgId,
+            ...(rule.agentId ? { agentId: rule.agentId } : {}),
+            timestamp: { gte: windowStart },
+          },
+        };
+
+        const [total, failures] = await Promise.all([
+          prisma.evaluation.count({ where: evalFilter }),
+          prisma.evaluation.count({
+            where: { ...evalFilter, outcome: { in: ["anomaly", "failure"] } },
+          }),
+        ]);
+
+        if (total < 5) continue; // too few data points — skip
+
+        const errorRatePct = Math.round((failures / total) * 100);
+        if (errorRatePct <= rule.maxErrorRatePct) continue;
+
+        // Build dedup key — one SLA breach incident per org/agent per hour
+        const windowKey = Math.floor(Date.now() / (60 * 60_000)); // hourly bucket
+        const dedupKey = `sla_breach:${rule.orgId}:${rule.agentId ?? "all"}:${windowKey}`;
+
+        const existing = await prisma.incident.findFirst({ where: { dedupKey } });
+        if (existing) continue;
+
+        // Need a representative trace to attach the incident to
+        const repTrace = await prisma.trace.findFirst({
+          where: {
+            orgId: rule.orgId,
+            ...(rule.agentId ? { agentId: rule.agentId } : {}),
+            timestamp: { gte: windowStart },
+          },
+          orderBy: { timestamp: "desc" },
+          include: { agent: { select: { id: true, displayName: true } } },
+        });
+        if (!repTrace) continue;
+
+        const summary = `SLA breach: ${errorRatePct}% error rate over the last ${rule.windowMinutes} min (threshold: ${rule.maxErrorRatePct}%). ${failures} failures out of ${total} traces.`;
+
+        await prisma.incident.create({
+          data: {
+            traceId: repTrace.id,
+            agentId: repTrace.agentId,
+            orgId: rule.orgId,
+            severity: "critical",
+            category: "sla_breach",
+            summary,
+            dedupKey,
+          },
+        });
+
+        // Alert org owner
+        const orgUser = await prisma.user.findFirst({
+          where: { orgId: rule.orgId },
+          select: { email: true },
+        });
+        const alertPref = await prisma.alertPref.findFirst({
+          where: { orgId: rule.orgId, OR: [{ agentId: repTrace.agentId }, { agentId: null }] },
+          orderBy: { agentId: "desc" },
+        });
+
+        if (orgUser?.email && (!alertPref || alertPref.mode === "immediate")) {
+          await sendImmediateAlert(
+            {
+              id: dedupKey,
+              severity: "critical",
+              category: "sla_breach",
+              summary,
+              agentName: repTrace.agent.displayName,
+            },
+            orgUser.email,
+            `SLA threshold exceeded for agent "${repTrace.agent.displayName}": ${errorRatePct}% error rate (limit ${rule.maxErrorRatePct}%). Check the dashboard for details.`,
+          ).catch(() => undefined);
+        }
+
+        breaches++;
+      } catch {
+        // Per-rule errors must never kill the loop
+      }
+    }
+  } catch {
+    // Outer errors must never kill the cron
+  }
+  return breaches;
 }

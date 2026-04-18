@@ -6,6 +6,7 @@ import { prisma } from "@atlas/db";
 import { AlertPrefForm } from "./alert-pref-form";
 import { InviteForm } from "./invite-form";
 import { WebhookForm } from "./webhook-form";
+import { SlaRuleForm } from "./sla-rule-form";
 import type { SerializedWebhook } from "./webhook-form";
 import Link from "next/link";
 
@@ -25,7 +26,7 @@ export default async function SettingsPage() {
   if (!user) redirect(`${appUrl}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
-  const [pref, alertHistory, org, rawWebhooks] = await Promise.all([
+  const [pref, alertHistory, org, rawWebhooks, rawSlaRules] = await Promise.all([
     prisma.alertPref.findFirst({ where: { orgId, agentId: null } }),
     prisma.alert.findMany({
       where: { incident: { orgId } },
@@ -47,6 +48,11 @@ export default async function SettingsPage() {
       where: { orgId },
       select: { id: true, url: true, events: true, active: true, createdAt: true },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.slaRule.findMany({
+      where: { orgId },
+      include: { agent: { select: { id: true, displayName: true } } },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
@@ -98,6 +104,15 @@ export default async function SettingsPage() {
           initialSlackWebhookUrl={initialSlackWebhookUrl}
           initialCustomEvalCriteria={pref?.customEvalCriteria ?? ""}
         />
+      </div>
+
+      {/* SLA Monitoring */}
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
+        <h2 className="text-sm font-semibold text-gray-300 mb-1">SLA Monitoring</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Trigger a critical incident when an agent&apos;s error rate exceeds your threshold. Requires at least 5 traces in the window.
+        </p>
+        <SlaRuleForm initialRules={rawSlaRules.map((r) => ({ ...r, updatedAt: undefined }))} />
       </div>
 
       {/* Outbound webhooks */}

@@ -16,17 +16,29 @@ export async function POST(
 
   const incident = await prisma.incident.findFirst({
     where: { id, orgId },
-    select: { id: true, resolvedAt: true },
+    select: { id: true, resolvedAt: true, severity: true, agentId: true },
   });
   if (!incident) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const nowResolved = !incident.resolvedAt;
 
   const updated = await prisma.incident.update({
     where: { id },
     data: {
-      resolvedAt: incident.resolvedAt ? null : new Date(),
-      resolvedBy: incident.resolvedAt ? null : user.id,
+      resolvedAt: nowResolved ? new Date() : null,
+      resolvedBy: nowResolved ? user.id : null,
     },
     select: { resolvedAt: true },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      orgId,
+      userId: user.id,
+      agentId: incident.agentId,
+      action: nowResolved ? "incident.resolved" : "incident.reopened",
+      details: { incidentId: incident.id, severity: incident.severity },
+    },
   });
 
   return NextResponse.json({ resolved: updated.resolvedAt !== null });

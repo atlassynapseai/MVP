@@ -5,6 +5,8 @@ import { appUrl, basePath } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { AlertPrefForm } from "./alert-pref-form";
 import { InviteForm } from "./invite-form";
+import { WebhookForm } from "./webhook-form";
+import type { SerializedWebhook } from "./webhook-form";
 import Link from "next/link";
 
 function timeAgo(date: Date): string {
@@ -23,7 +25,7 @@ export default async function SettingsPage() {
   if (!user) redirect(`${appUrl}/login`);
   const { orgId } = await getOrCreateOrg(user);
 
-  const [pref, alertHistory, org] = await Promise.all([
+  const [pref, alertHistory, org, rawWebhooks] = await Promise.all([
     prisma.alertPref.findFirst({ where: { orgId, agentId: null } }),
     prisma.alert.findMany({
       where: { incident: { orgId } },
@@ -41,7 +43,18 @@ export default async function SettingsPage() {
       take: 20,
     }),
     prisma.organization.findUnique({ where: { id: orgId }, select: { name: true } }),
+    prisma.webhook.findMany({
+      where: { orgId },
+      select: { id: true, url: true, events: true, active: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  // Serialize dates for client component
+  const webhooks: SerializedWebhook[] = rawWebhooks.map((wh) => ({
+    ...wh,
+    createdAt: wh.createdAt.toISOString(),
+  }));
 
   const initialMode = (pref?.mode ?? "immediate") as "immediate" | "off";
   const initialSeverityFloor = (pref?.severityFloor ?? "warning") as "warning" | "critical";
@@ -83,7 +96,19 @@ export default async function SettingsPage() {
           initialMode={initialMode}
           initialSeverityFloor={initialSeverityFloor}
           initialSlackWebhookUrl={initialSlackWebhookUrl}
+          initialCustomEvalCriteria={pref?.customEvalCriteria ?? ""}
         />
+      </div>
+
+      {/* Outbound webhooks */}
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
+        <h2 className="text-sm font-semibold text-gray-300 mb-1">Outbound Webhooks</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Receive HTTP POST notifications when incidents are created or resolved.
+          Requests are signed with HMAC-SHA256 — verify using the{" "}
+          <code className="text-gray-400">X-AtlasSynapse-Signature</code> header.
+        </p>
+        <WebhookForm initialWebhooks={webhooks} />
       </div>
 
       {/* Alert history */}

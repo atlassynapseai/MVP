@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut, Activity, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut, Activity, ClipboardCheck, ScrollText } from "lucide-react";
 import { clsx } from "clsx";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { basePath } from "@/lib/app-path";
@@ -14,6 +14,7 @@ const NAV = [
   { href: `${basePath}/dashboard/incidents`, label: "Incidents", icon: AlertTriangle },
   { href: `${basePath}/dashboard/connections`, label: "Connections", icon: Plug },
   { href: `${basePath}/dashboard/settings`, label: "Settings", icon: Settings },
+  { href: `${basePath}/dashboard/audit`, label: "Audit Log", icon: ScrollText },
   { href: `${basePath}/dashboard/data-transparency`, label: "Data Transparency", icon: Shield },
 ];
 

@@ -9,6 +9,7 @@ const AlertPrefUpdateSchema = z.object({
   severityFloor: z.enum(["warning", "critical"]),
   slackWebhookUrl: z.string().url().optional().or(z.literal("")),
   agentId: z.string().optional(),
+  customEvalCriteria: z.string().max(1000).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -44,7 +45,7 @@ export async function PUT(req: NextRequest) {
   const parsed = AlertPrefUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
-  const { mode, severityFloor, agentId, slackWebhookUrl } = parsed.data;
+  const { mode, severityFloor, agentId, slackWebhookUrl, customEvalCriteria } = parsed.data;
   const resolvedAgentId = agentId ?? null;
   const resolvedSlack = slackWebhookUrl || null;
 
@@ -55,10 +56,19 @@ export async function PUT(req: NextRequest) {
 
   const existing = await prisma.alertPref.findFirst({ where: { orgId, agentId: resolvedAgentId }, select: { id: true } });
   if (existing) {
-    await prisma.alertPref.update({ where: { id: existing.id }, data: { mode, severityFloor, slackWebhookUrl: resolvedSlack } });
+    await prisma.alertPref.update({ where: { id: existing.id }, data: { mode, severityFloor, slackWebhookUrl: resolvedSlack, customEvalCriteria: customEvalCriteria ?? null } });
   } else {
-    await prisma.alertPref.create({ data: { orgId, agentId: resolvedAgentId, mode, severityFloor, slackWebhookUrl: resolvedSlack } });
+    await prisma.alertPref.create({ data: { orgId, agentId: resolvedAgentId, mode, severityFloor, slackWebhookUrl: resolvedSlack, customEvalCriteria: customEvalCriteria ?? null } });
   }
+
+  await prisma.auditLog.create({
+    data: {
+      orgId,
+      userId: user.id,
+      action: "alert_pref.updated",
+      details: { mode, severityFloor },
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

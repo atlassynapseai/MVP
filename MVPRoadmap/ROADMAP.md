@@ -10,10 +10,10 @@
 |-------|------|--------|
 | P1 | Ingest Pipeline | ✅ Complete |
 | P2 | Eval Engine + Dashboard | ✅ Complete |
-| P3 | Agent Integrations + Polish | 🔲 Next |
-| P4 | Production Deploy + First Users | 🔲 Planned |
-| P5 | Analytics + Team Features | 🔲 Planned |
-| P6 | Scale + Advanced Evals | 🔲 Future |
+| P3 | Agent Integrations + Polish | ✅ Complete |
+| P4 | Production Deploy + First Users | 🔲 In Progress |
+| P5 | Analytics + Team Features | 🔲 In Progress |
+| P6 | Scale + Advanced Evals | 🔲 In Progress |
 
 ---
 
@@ -55,14 +55,14 @@
 **Goal:** Real agents connect easily. Product is demo-ready.
 
 **To build:**
-- [ ] Python SDK polish — publish to PyPI as `atlas-synapse`, add README + examples
-- [ ] n8n template — test end-to-end, document setup in 3 steps
-- [ ] LangChain integration — hook wrapper for LangChain agents
-- [ ] Connection management UI — generate/revoke project tokens in dashboard (currently only via DB seed script)
-- [ ] Onboarding flow — first-time user sees "connect your agent" wizard, not empty dashboard
-- [ ] Data Transparency page — complete (currently placeholder)
-- [ ] Dashboard empty states — better UX when no agents/incidents yet
-- [ ] Error handling UX — user-facing error pages, not raw crashes
+- [x] Python SDK polish — publish to PyPI as `atlas-synapse`, add README + examples
+- [x] n8n template — test end-to-end, document setup in 3 steps
+- [x] LangChain integration — hook wrapper for LangChain agents
+- [x] Connection management UI — generate/revoke project tokens in dashboard (currently only via DB seed script)
+- [x] Onboarding flow — first-time user sees "connect your agent" wizard, not empty dashboard
+- [x] Data Transparency page — complete (currently placeholder)
+- [x] Dashboard empty states — better UX when no agents/incidents yet
+- [x] Error handling UX — user-facing error pages, not raw crashes
 
 **Exit condition:** Someone unfamiliar with the codebase can connect a real agent and see incidents in < 30 minutes, following only the UI.
 
@@ -77,11 +77,11 @@
 - [ ] Deploy edge worker — `wrangler deploy` to Cloudflare, stable ingest URL
 - [ ] Clerk production instance — switch from dev to prod Clerk app
 - [ ] Supabase production project — separate from dev DB
-- [ ] User invite flow — org owner can invite teammates (Clerk handles this, just wire UI)
-- [ ] Multi-agent support — ensure dashboard scales to 10+ agents per org cleanly
-- [ ] Basic rate limiting — protect ingest route from abuse
+- [x] User invite flow — org owner can invite teammates (Clerk handles this, just wire UI)
+- [x] Multi-agent support — ensure dashboard scales to 10+ agents per org cleanly
+- [x] Basic rate limiting — protect ingest route from abuse
 - [ ] Monitoring — Vercel logs + Supabase metrics, set up alerts for cron failures
-- [ ] Privacy policy + terms — required before external users
+- [x] Privacy policy + terms — required before external users
 
 **Exit condition:** 3 external users actively sending traces from real agents for ≥ 1 week.
 
@@ -92,14 +92,14 @@
 **Goal:** Dashboard becomes the place teams actually use to review agent performance.
 
 **To build:**
-- [ ] Agent performance trends — charts: incidents over time, severity breakdown, category distribution
-- [ ] Trace explorer — search/filter traces by agent, date, category, severity
-- [ ] Incident resolution flow — mark incident as resolved, track MTTR
-- [ ] Team notifications — Slack integration for alerts (not just email)
-- [ ] Weekly digest email — summary of agent activity per org
+- [x] Agent performance trends — charts: incidents over time, severity breakdown, category distribution
+- [x] Trace explorer — search/filter traces by agent, date, category, severity
+- [x] Incident resolution flow — mark incident as resolved, track MTTR
+- [x] Team notifications — Slack integration for alerts (not just email)
+- [x] Weekly digest email — summary of agent activity per org
 - [ ] Custom eval criteria — let users define what counts as a problem for their use case
-- [ ] Agent comparison — side-by-side health scores across agents
-- [ ] Export — CSV download of incidents/traces for compliance
+- [x] Agent comparison — side-by-side health scores across agents
+- [x] Export — CSV download of incidents/traces for compliance
 
 **Exit condition:** Teams use the dashboard in their weekly AI review meetings without prompting.
 
@@ -111,11 +111,11 @@
 
 **To build:**
 - [ ] SLA monitoring — define uptime/response time thresholds per agent, alert on breach
-- [ ] Custom evaluator prompts — per-org eval criteria, not just global defaults
-- [ ] Audit log — immutable record of all agent actions (compliance)
+- [x] Custom evaluator prompts — per-org eval criteria, not just global defaults
+- [x] Audit log — immutable record of all agent actions (compliance)
 - [ ] SSO / SAML — enterprise auth
 - [ ] Higher volume ingest — queue-based (Cloudflare Queues or similar), not direct HTTP chain
-- [ ] Webhook outbound — let orgs subscribe to incident events (push to their systems)
+- [x] Webhook outbound — let orgs subscribe to incident events (push to their systems)
 - [ ] SDK for more platforms — LlamaIndex, AutoGen, CrewAI, Vercel AI SDK
 - [ ] White-label / embedded — offer dashboard embeddable in other SaaS products
 

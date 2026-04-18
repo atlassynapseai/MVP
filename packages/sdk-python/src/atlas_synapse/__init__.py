@@ -3,5 +3,12 @@
 from .client import AtlasSynapseSdk
 from .hooks import wrap_agent
 from .simple import AtlasSynapseClient
+from .openai import AsyncAtlasSynapseOpenAI, AtlasSynapseOpenAI
 
-__all__ = ["AtlasSynapseSdk", "AtlasSynapseClient", "wrap_agent"]
+__all__ = [
+    "AtlasSynapseSdk",
+    "AtlasSynapseClient",
+    "wrap_agent",
+    "AtlasSynapseOpenAI",
+    "AsyncAtlasSynapseOpenAI",
+]

@@ -20,6 +20,8 @@ model Organization {
   traces       Trace[]
   incidents    Incident[]
   alertPrefs   AlertPref[]
+  webhooks     Webhook[]
+  auditLogs    AuditLog[]
 }
 
 model User {
@@ -208,10 +210,11 @@ enum AlertMode {
 }
 
 model AlertPref {
-  id              String           @id @default(cuid())
-  mode            AlertMode        @default(immediate)
-  severityFloor   IncidentSeverity @default(warning)
-  slackWebhookUrl String?          // optional Slack incoming webhook URL
+  id                String           @id @default(cuid())
+  mode              AlertMode        @default(immediate)
+  severityFloor     IncidentSeverity @default(warning)
+  slackWebhookUrl   String?          // optional Slack incoming webhook URL
+  customEvalCriteria String?         // org-defined extra eval rules (plain text, ≤1000 chars)
 
   orgId    String
   org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
@@ -219,4 +222,30 @@ model AlertPref {
   agent    Agent?       @relation(fields: [agentId], references: [id])
 
   @@unique([orgId, agentId])
+}
+
+model Webhook {
+  id        String   @id @default(cuid())
+  url       String
+  secret    String   // HMAC-SHA256 signing secret
+  events    String[] // ["incident.created", "incident.resolved"]
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // e.g. "incident.resolved", "alert_pref.updated"
+  details   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  orgId   String
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId  String?      // null for system actions
+  agentId String?
 }

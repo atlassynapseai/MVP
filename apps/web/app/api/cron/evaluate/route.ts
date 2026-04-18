@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@atlas/db";
 import type { IncidentCategory } from "@atlas/shared";
-import { evaluateTrace, translate, buildDedupKey, sendImmediateAlert, sendSlackAlert } from "@atlas/evaluator";
+import { evaluateTrace, translate, buildDedupKey, sendImmediateAlert, sendSlackAlert, deliverWebhook } from "@atlas/evaluator";
 
 // Allow up to 60s on Vercel (hobby tier max)
 export const maxDuration = 60;
@@ -88,14 +88,28 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       // Build tool calls from JSON
       const toolCalls = Array.isArray(trace.toolCalls) ? trace.toolCalls as Array<{ name: string; input: Record<string, unknown>; output?: unknown }> : [];
 
-      // 1. Evaluate
-      const evalResult = await evaluateTrace({
-        redactedPrompt: trace.redactedPrompt,
-        redactedResponse: trace.redactedResponse,
-        toolCalls,
-        tokenCount: trace.tokenCount,
-        platform: trace.agent.platform,
+      // Fetch alert pref early so custom eval criteria can be passed to the evaluator
+      const alertPrefForEval = await prisma.alertPref.findFirst({
+        where: {
+          orgId: trace.orgId,
+          OR: [{ agentId: trace.agentId }, { agentId: null }],
+        },
+        orderBy: { agentId: "desc" },
+        select: { customEvalCriteria: true },
       });
+
+      // 1. Evaluate
+      const evalResult = await evaluateTrace(
+        {
+          redactedPrompt: trace.redactedPrompt,
+          redactedResponse: trace.redactedResponse,
+          toolCalls,
+          tokenCount: trace.tokenCount,
+          platform: trace.agent.platform,
+        },
+        undefined,
+        alertPrefForEval?.customEvalCriteria ?? undefined,
+      );
 
       // 2. Write Evaluation row
       await prisma.evaluation.create({
@@ -255,6 +269,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         where: { id: trace.id },
         data: { status: "alerted", statusUpdatedAt: new Date() },
       });
+
+      // 7. Fire outbound webhooks (fire-and-forget — never fail cron)
+      const outboundWebhooks = await prisma.webhook.findMany({
+        where: { orgId: trace.orgId, active: true, events: { has: "incident.created" } },
+        select: { url: true, secret: true },
+      });
+      for (const wh of outboundWebhooks) {
+        deliverWebhook(wh.url, wh.secret, {
+          event: "incident.created",
+          timestamp: new Date().toISOString(),
+          data: {
+            incidentId: incident.id,
+            severity,
+            category,
+            agentName: trace.agent.displayName,
+          },
+        }).catch(() => undefined);
+      }
 
     } catch (err) {
       errors++;

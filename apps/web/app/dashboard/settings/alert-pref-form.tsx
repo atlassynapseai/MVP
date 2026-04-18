@@ -6,12 +6,14 @@ interface AlertPrefFormProps {
   initialMode: "immediate" | "off";
   initialSeverityFloor: "warning" | "critical";
   initialSlackWebhookUrl?: string;
+  initialCustomEvalCriteria?: string;
 }
 
-export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackWebhookUrl }: AlertPrefFormProps) {
+export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackWebhookUrl, initialCustomEvalCriteria }: AlertPrefFormProps) {
   const [mode, setMode] = useState<"immediate" | "off">(initialMode);
   const [severityFloor, setSeverityFloor] = useState<"warning" | "critical">(initialSeverityFloor);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(initialSlackWebhookUrl ?? "");
+  const [customEvalCriteria, setCustomEvalCriteria] = useState(initialCustomEvalCriteria ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   async function handleSave(e: React.FormEvent) {
@@ -22,7 +24,7 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackW
       const res = await fetch("/api/alert-prefs", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, severityFloor, slackWebhookUrl }),
+        body: JSON.stringify({ mode, severityFloor, slackWebhookUrl, customEvalCriteria }),
       });
 
       if (!res.ok) {
@@ -127,6 +129,26 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackW
           >
             How to create a webhook →
           </a>
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Custom Evaluation Criteria <span className="text-gray-500 font-normal">(optional)</span>
+        </label>
+        <textarea
+          value={customEvalCriteria}
+          onChange={(e) => setCustomEvalCriteria(e.target.value.slice(0, 1000))}
+          placeholder="e.g. Flag any response that mentions competitor products. Treat tone mismatches as anomalies."
+          rows={4}
+          maxLength={1000}
+          className="w-full px-3 py-2 text-sm rounded border border-gray-700 bg-gray-950 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-700 transition-colors resize-none"
+        />
+        <p className="text-xs text-gray-500 mt-1 text-right">
+          {customEvalCriteria.length} / 1000
+        </p>
+        <p className="text-xs text-gray-500">
+          These criteria are appended to every trace evaluation as additional signals. They supplement but do not override the standard evaluation rules.
         </p>
       </div>
 

@@ -2,21 +2,10 @@
   "crons": [
     {
       "path": "/api/cron/evaluate",
-      "schedule": "* * * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "env": {
-    "DATABASE_URL": "@database-url",
-    "DIRECT_URL": "@direct-url",
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "@clerk-publishable-key",
-    "CLERK_SECRET_KEY": "@clerk-secret-key",
-    "INGEST_WORKER_SECRET": "@ingest-worker-secret",
-    "ANTHROPIC_API_KEY": "@anthropic-api-key",
-    "BREVO_API_KEY": "@brevo-api-key",
-    "BREVO_FROM_EMAIL": "@brevo-from-email",
-    "BREVO_FROM_NAME": "@brevo-from-name",
-    "CLERK_WEBHOOK_SECRET": "@clerk-webhook-secret",
-    "CRON_SECRET": "@cron-secret",
-    "NEXT_PUBLIC_APP_URL": "@app-url"
+    "NEXT_PUBLIC_APP_URL": "https://atlassynapseai.com/MVP"
   }
 }

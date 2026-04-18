@@ -4,6 +4,15 @@ import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
 
+interface IncidentRow {
+  id: string;
+  severity: "warning" | "critical";
+  category: string;
+  summary: string;
+  createdAt: Date;
+  agent: { displayName: string };
+}
+
 function SeverityBadge({ severity }: { severity: "warning" | "critical" }) {
   if (severity === "critical") {
     return (
@@ -89,7 +98,7 @@ export default async function IncidentsPage() {
               </tr>
             </thead>
             <tbody>
-              {incidents.map((incident) => {
+              {(incidents as IncidentRow[]).map((incident) => {
                 const category = incident.category as IncidentCategory;
                 const label = CATEGORY_LABELS[category] ?? incident.category;
                 const summary = incident.summary.length > 120

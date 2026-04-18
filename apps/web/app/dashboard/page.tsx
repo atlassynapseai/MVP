@@ -3,6 +3,15 @@ import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
 
+interface AgentRow {
+  id: string;
+  displayName: string;
+  platform: string | null;
+  lastSeenAt: Date | null;
+  _count: { traces: number; incidents: number };
+  incidents: Array<{ severity: string; category: string | null }>;
+}
+
 function HealthBadge({ status }: { status: "healthy" | "warning" | "critical" }) {
   const styles = {
     healthy: "bg-emerald-900/40 text-emerald-400 border-emerald-800",
@@ -90,7 +99,7 @@ export default async function DashboardPage() {
       <p className="text-gray-400 text-sm mb-6">Agent health at a glance — last 7 days.</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {agents.map((agent) => {
+        {(agents as AgentRow[]).map((agent) => {
           const openIncidents = agent.incidents.length;
           const criticalCount = agent.incidents.filter((i) => i.severity === "critical").length;
           const health: "healthy" | "warning" | "critical" =

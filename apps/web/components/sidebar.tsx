@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield } from "lucide-react";
+import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug } from "lucide-react";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { clsx } from "clsx";
 
@@ -9,6 +9,7 @@ const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/agents", label: "Agents", icon: Bot },
   { href: "/dashboard/incidents", label: "Incidents", icon: AlertTriangle },
+  { href: "/dashboard/connections", label: "Connections", icon: Plug },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/data-transparency", label: "Data Transparency", icon: Shield },
 ];

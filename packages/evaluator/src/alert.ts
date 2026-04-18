@@ -1,5 +1,3 @@
-import { Resend } from "resend";
-
 interface IncidentData {
   id: string;
   severity: "warning" | "critical";
@@ -13,8 +11,10 @@ interface AlertResult {
   error?: string;
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "alerts@atlassynapse.com";
+const FROM_EMAIL = process.env.BREVO_FROM_EMAIL ?? "alerts@atlassynapse.com";
+const FROM_NAME = process.env.BREVO_FROM_NAME ?? "Atlas Synapse";
 const DASHBOARD_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.atlassynapse.com";
+const BREVO_SEND_URL = "https://api.brevo.com/v3/smtp/email";
 
 /**
  * Escape HTML entities in user-controlled strings before rendering them
@@ -49,7 +49,7 @@ function safeHref(url: string): string {
 }
 
 /**
- * Send an immediate email alert for a new incident.
+ * Send an immediate email alert for a new incident via Brevo REST API.
  * Returns {status: "sent"} on success, {status: "failed", error} on failure.
  * Never throws — caller always writes Alert row regardless of outcome.
  */
@@ -57,9 +57,11 @@ export async function sendImmediateAlert(
   incident: IncidentData,
   toEmail: string,
   alertCopy: string,
-  client?: Resend,
 ): Promise<AlertResult> {
-  const resend = client ?? new Resend(process.env.RESEND_API_KEY);
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    return { status: "failed", error: "BREVO_API_KEY not configured" };
+  }
 
   // Severity label is a constant string (not user-controlled) — safe.
   const severityLabel = incident.severity === "critical" ? "🔴 Critical" : "🟡 Warning";
@@ -98,15 +100,23 @@ export async function sendImmediateAlert(
 </html>`;
 
   try {
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: toEmail,
-      subject,
-      html,
+    const res = await fetch(BREVO_SEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": apiKey,
+      },
+      body: JSON.stringify({
+        sender: { email: FROM_EMAIL, name: FROM_NAME },
+        to: [{ email: toEmail }],
+        subject,
+        htmlContent: html,
+      }),
     });
 
-    if (error) {
-      return { status: "failed", error: error.message };
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { status: "failed", error: `Brevo ${res.status}: ${text.slice(0, 200)}` };
     }
     return { status: "sent" };
   } catch (err) {

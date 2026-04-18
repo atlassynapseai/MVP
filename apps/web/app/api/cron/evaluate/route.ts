@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@atlas/db";
+import { prisma, Prisma } from "@atlas/db";
 import type { IncidentCategory } from "@atlas/shared";
 import { evaluateTrace, translate, buildDedupKey, sendImmediateAlert } from "@atlas/evaluator";
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   // Prisma doesn't support UPDATE...RETURNING, so we use a transaction:
   // 1. Find candidate trace IDs
   // 2. Update them to processing within the same tx
-  const candidates = await prisma.$transaction(async (tx) => {
+  const candidates = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const found = await tx.trace.findMany({
       where: {
         status: "received",
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (found.length === 0) return [];
 
-    const ids = found.map((t) => t.id);
+    const ids = (found as Array<{ id: string }>).map((t) => t.id);
     await tx.trace.updateMany({
       where: { id: { in: ids } },
       data: {
@@ -159,7 +159,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       // 5. Create incident in transaction with trace status update
       const severity: "warning" | "critical" = evalResult.confidence >= 0.85 ? "critical" : "warning";
 
-      const incident = await prisma.$transaction(async (tx) => {
+      const incident = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const inc = await tx.incident.create({
           data: {
             traceId: trace.id,

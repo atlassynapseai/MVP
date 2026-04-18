@@ -12,8 +12,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@atlas/shared": "workspace:*",
-    "resend": "^4.0.0"
+    "@atlas/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

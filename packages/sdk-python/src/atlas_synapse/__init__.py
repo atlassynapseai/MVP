@@ -11,4 +11,5 @@ __all__ = [
     "wrap_agent",
     "AtlasSynapseOpenAI",
     "AsyncAtlasSynapseOpenAI",
+    # Lazy-import integrations: atlas_synapse.crewai, atlas_synapse.langchain, atlas_synapse.llamaindex
 ]

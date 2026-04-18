@@ -21,6 +21,12 @@ langchain = [
 openai = [
     "openai>=1.0",
 ]
+crewai = [
+    "crewai>=0.51",
+]
+llamaindex = [
+    "llama-index-core>=0.10",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",

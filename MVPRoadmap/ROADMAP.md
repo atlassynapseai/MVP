@@ -116,7 +116,7 @@
 - [ ] SSO / SAML — enterprise auth
 - [ ] Higher volume ingest — queue-based (Cloudflare Queues or similar), not direct HTTP chain
 - [x] Webhook outbound — let orgs subscribe to incident events (push to their systems)
-- [ ] SDK for more platforms — LlamaIndex, AutoGen, CrewAI, Vercel AI SDK
+- [x] SDK for more platforms — LlamaIndex, AutoGen, CrewAI, Vercel AI SDK
 - [ ] White-label / embedded — offer dashboard embeddable in other SaaS products
 
 **Exit condition:** Platform handles 1M+ traces/month without degradation.

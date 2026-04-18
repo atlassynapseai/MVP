@@ -9,10 +9,10 @@ datasource db {
 }
 
 model Organization {
-  id          String   @id @default(cuid())
-  clerkOrgId  String   @unique
-  name        String
-  createdAt   DateTime @default(now())
+  id       String   @id @default(cuid())
+  ownerId  String   @unique  // Supabase auth user UUID of the workspace owner
+  name     String
+  createdAt DateTime @default(now())
 
   users        User[]
   connections  Connection[]
@@ -23,10 +23,10 @@ model Organization {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  clerkUserId  String   @unique
-  email        String   @unique
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  supabaseUserId String   @unique  // Supabase auth user UUID
+  email          String   @unique
+  createdAt      DateTime @default(now())
 
   orgId  String
   org    Organization @relation(fields: [orgId], references: [id])

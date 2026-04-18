@@ -1,32 +1,18 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateOrg } from "@/lib/get-auth-org";
+import { redirect } from "next/navigation";
 import { prisma } from "@atlas/db";
 import { AlertPrefForm } from "./alert-pref-form";
 
 export default async function SettingsPage() {
-  const { orgId } = await auth();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { orgId } = await getOrCreateOrg(user);
 
-  if (!orgId) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Settings</h1>
-        <div className="rounded-lg border border-yellow-800 bg-yellow-900/20 p-4 text-yellow-300 text-sm">
-          Create or select an organization to configure settings.
-        </div>
-      </div>
-    );
-  }
-
-  const org = await prisma.organization.findUnique({
-    where: { clerkOrgId: orgId },
-    select: { id: true },
+  const pref = await prisma.alertPref.findFirst({
+    where: { orgId, agentId: null },
   });
-
-  // Load org-level alert pref (agentId = null)
-  const pref = org
-    ? await prisma.alertPref.findFirst({
-        where: { orgId: org.id, agentId: null },
-      })
-    : null;
 
   const initialMode = (pref?.mode ?? "immediate") as "immediate" | "off";
   const initialSeverityFloor = (pref?.severityFloor ?? "warning") as "warning" | "critical";

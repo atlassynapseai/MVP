@@ -1,33 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateOrg } from "@/lib/get-auth-org";
+import { redirect } from "next/navigation";
 import { prisma } from "@atlas/db";
 import { ConnectionsClient } from "./connections-client";
 
 export default async function ConnectionsPage() {
-  const { orgId } = await auth();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { orgId } = await getOrCreateOrg(user);
 
-  if (!orgId) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Connections</h1>
-        <div className="rounded-lg border border-yellow-800 bg-yellow-900/20 p-4 text-yellow-300 text-sm">
-          Create or select an organization to manage connections.
-        </div>
-      </div>
-    );
-  }
-
-  const org = await prisma.organization.findUnique({
-    where: { clerkOrgId: orgId },
-    select: { id: true },
+  const connections = await prisma.connection.findMany({
+    where: { orgId },
+    select: { id: true, type: true, status: true, createdAt: true, revokedAt: true },
+    orderBy: { createdAt: "desc" },
   });
-
-  const connections = org
-    ? await prisma.connection.findMany({
-        where: { orgId: org.id },
-        select: { id: true, type: true, status: true, createdAt: true, revokedAt: true },
-        orderBy: { createdAt: "desc" },
-      })
-    : [];
 
   return (
     <div className="max-w-2xl">

@@ -1,4 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateOrg } from "@/lib/get-auth-org";
+import { redirect } from "next/navigation";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -38,34 +40,13 @@ function timeAgo(date: Date): string {
 }
 
 export default async function IncidentsPage() {
-  const { orgId } = await auth();
-
-  if (!orgId) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Active Issues</h1>
-        <div className="rounded-lg border border-yellow-800 bg-yellow-900/20 p-4 text-yellow-300 text-sm">
-          Create or select an organization to view incidents.
-        </div>
-      </div>
-    );
-  }
-
-  const org = await prisma.organization.findUnique({
-    where: { clerkOrgId: orgId },
-    select: { id: true },
-  });
-  if (!org) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Active Issues</h1>
-        <p className="text-gray-400 text-sm">Setting up your organization…</p>
-      </div>
-    );
-  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { orgId } = await getOrCreateOrg(user);
 
   const incidents = await prisma.incident.findMany({
-    where: { orgId: org.id },
+    where: { orgId },
     include: {
       agent: { select: { displayName: true } },
     },

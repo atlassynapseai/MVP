@@ -1,4 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -27,27 +28,13 @@ interface Props {
 
 export default async function IncidentDetailPage({ params }: Props) {
   const { id } = await params;
-  const { orgId, userId: clerkUserId } = await auth();
-
-  if (!orgId || !clerkUserId) {
-    return (
-      <div className="text-gray-400 text-sm">Unauthorized.</div>
-    );
-  }
-
-  const org = await prisma.organization.findUnique({
-    where: { clerkOrgId: orgId },
-    select: { id: true },
-  });
-  if (!org) notFound();
-
-  const user = await prisma.user.findUnique({
-    where: { clerkUserId },
-    select: { id: true },
-  });
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) notFound();
+  const { orgId, userId } = await getOrCreateOrg(authUser);
 
   const incident = await prisma.incident.findFirst({
-    where: { id, orgId: org.id },
+    where: { id, orgId },
     include: {
       agent: { select: { displayName: true, platform: true } },
       trace: {
@@ -59,9 +46,7 @@ export default async function IncidentDetailPage({ params }: Props) {
           },
         },
       },
-      feedbacks: user
-        ? { where: { userId: user.id }, select: { id: true }, take: 1 }
-        : false,
+      feedbacks: { where: { userId }, select: { id: true }, take: 1 },
     },
   });
 

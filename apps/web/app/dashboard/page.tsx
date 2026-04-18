@@ -1,4 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateOrg } from "@/lib/get-auth-org";
+import { redirect } from "next/navigation";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -42,33 +44,15 @@ function PlatformBadge({ platform }: { platform: string | null }) {
 }
 
 export default async function DashboardPage() {
-  const { orgId } = await auth();
-
-  if (!orgId) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Your AI Workforce</h1>
-        <div className="rounded-lg border border-yellow-800 bg-yellow-900/20 p-4 text-yellow-300 text-sm">
-          Create or select an organization to start monitoring agents.
-        </div>
-      </div>
-    );
-  }
-
-  const org = await prisma.organization.findUnique({ where: { clerkOrgId: orgId }, select: { id: true } });
-  if (!org) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-2">Your AI Workforce</h1>
-        <p className="text-gray-400 text-sm">Setting up your organization…</p>
-      </div>
-    );
-  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { orgId } = await getOrCreateOrg(user);
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const agents = await prisma.agent.findMany({
-    where: { orgId: org.id },
+    where: { orgId },
     include: {
       _count: { select: { traces: true, incidents: true } },
       incidents: {

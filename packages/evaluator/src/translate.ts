@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { EvaluationResult, IncidentRendering } from "@atlas/shared";
 import { CATEGORY_LABELS } from "@atlas/shared";
-import { TRANSLATE_SYSTEM_PROMPT, CATEGORY_DESCRIPTIONS } from "./prompts.js";
+import { TRANSLATE_SYSTEM_PROMPT, CATEGORY_DESCRIPTIONS } from "./prompts";
 
 const MODEL = "claude-sonnet-4-5";
 const MAX_TOKENS = 600;

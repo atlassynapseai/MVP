@@ -1,4 +1,4 @@
-export { evaluateTrace } from "./evaluate.js";
-export { translate } from "./translate.js";
-export { buildDedupKey } from "./dedup.js";
-export { sendImmediateAlert } from "./alert.js";
+export { evaluateTrace } from "./evaluate";
+export { translate } from "./translate";
+export { buildDedupKey } from "./dedup";
+export { sendImmediateAlert } from "./alert";

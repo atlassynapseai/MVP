@@ -11,6 +11,17 @@ const derivedBasePath = rawAppUrl
 const nextConfig: NextConfig = {
   transpilePackages: ["@atlas/shared", "@atlas/db"],
   ...(derivedBasePath ? { basePath: derivedBasePath } : {}),
+  async redirects() {
+    if (!derivedBasePath) return [];
+    return [
+      {
+        source: "/",
+        destination: `${rawAppUrl}`,
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

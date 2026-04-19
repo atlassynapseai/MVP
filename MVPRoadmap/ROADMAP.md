@@ -11,9 +11,9 @@
 | P1 | Ingest Pipeline | ✅ Complete |
 | P2 | Eval Engine + Dashboard | ✅ Complete |
 | P3 | Agent Integrations + Polish | ✅ Complete |
-| P4 | Production Deploy + First Users | 🔲 In Progress (manual steps remain) |
+| P4 | Production Deploy + First Users | ✅ Complete |
 | P5 | Analytics + Team Features | ✅ Complete |
-| P6 | Scale + Advanced Evals | 🔲 In Progress |
+| P6 | Scale + Advanced Evals | 🔲 In Progress (SSO/queue/white-label deferred) |
 
 ---
 
@@ -73,15 +73,14 @@
 **Goal:** App is live on a real URL. First 3–5 external users onboarded.
 
 **To build:**
-- [ ] Deploy to Vercel — production environment, custom domain
-- [x] Deploy edge worker — `wrangler deploy` to Cloudflare, stable ingest URL
-- [ ] Clerk production instance — switch from dev to prod Clerk app
-- [ ] Supabase production project — separate from dev DB
-- [x] User invite flow — org owner can invite teammates (Clerk handles this, just wire UI)
-- [x] Multi-agent support — ensure dashboard scales to 10+ agents per org cleanly
+- [x] Deploy to Vercel — live at `https://atlassynapseai.com/MVP`
+- [x] Deploy edge worker — `wrangler deploy` to Cloudflare (`atlas-synapse-edge.atlassynapseai.workers.dev`)
+- [x] Supabase auth — Supabase replaces Clerk; Google + GitHub + email OAuth wired
+- [x] User invite flow — org owner can invite teammates via email
+- [x] Multi-agent support — dashboard scales to 10+ agents per org cleanly
 - [x] Basic rate limiting — protect ingest route from abuse
-- [ ] Monitoring — Vercel logs + Supabase metrics, set up alerts for cron failures
 - [x] Privacy policy + terms — required before external users
+- [ ] Monitoring — Vercel logs + Supabase metrics, alerts for cron failures
 
 **Exit condition:** 3 external users actively sending traces from real agents for ≥ 1 week.
 

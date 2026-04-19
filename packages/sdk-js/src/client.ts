@@ -1,5 +1,4 @@
-import { createHmacSignature } from "@atlas/shared";
-import * as crypto from "crypto";
+import { sign } from "@atlas/shared";
 
 export interface ToolCall {
   name: string;
@@ -60,7 +59,7 @@ export class AtlasSynapseClient {
 
     const payload = {
       agentId: agentName,
-      traceId: crypto.randomUUID(),
+      traceId: globalThis.crypto.randomUUID(),
       timestamp: timestamp.toISOString(),
       prompt: options.prompt,
       response: options.response,
@@ -71,7 +70,7 @@ export class AtlasSynapseClient {
 
     try {
       const body = JSON.stringify(payload);
-      const signature = await createHmacSignature(this.token, body);
+      const signature = await sign(body, this.token);
 
       const res = await fetch(this.ingestUrl, {
         method: "POST",

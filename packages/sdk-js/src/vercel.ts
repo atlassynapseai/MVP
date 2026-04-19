@@ -77,15 +77,15 @@ export async function wrapVercelAI<T extends GenerateResult>(
   }));
 
   const tokenCount =
-    result.usage?.totalTokens ??
-    ((result.usage?.promptTokens ?? 0) + (result.usage?.completionTokens ?? 0)) || null;
+    (result.usage?.totalTokens ??
+    ((result.usage?.promptTokens ?? 0) + (result.usage?.completionTokens ?? 0))) || null;
 
   await client.trace({
     prompt: options.prompt,
     response: result.text,
     tokenCount,
     toolCalls,
-    agentName: options.agentName,
+    ...(options.agentName !== undefined ? { agentName: options.agentName } : {}),
     platform: "vercel-ai",
   });
 
@@ -140,8 +140,8 @@ export function vercelOnFinish(
     }));
 
     const tokenCount =
-      event.usage?.totalTokens ??
-      ((event.usage?.promptTokens ?? 0) + (event.usage?.completionTokens ?? 0)) || null;
+      (event.usage?.totalTokens ??
+      ((event.usage?.promptTokens ?? 0) + (event.usage?.completionTokens ?? 0))) || null;
 
     client
       .trace({
@@ -149,7 +149,7 @@ export function vercelOnFinish(
         response: event.text,
         tokenCount,
         toolCalls,
-        agentName: options.agentName,
+        ...(options.agentName !== undefined ? { agentName: options.agentName } : {}),
         platform: "vercel-ai",
       })
       .catch((err: unknown) => {

@@ -30,15 +30,15 @@ export const INCIDENT_CATEGORIES: IncidentCategory[] = [
 
 /** Human-readable labels for each category (for dashboard display). */
 export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
-  task_failure:        "Task Failure",
-  harmful_output:      "Harmful Output",
-  tool_misuse:         "Tool Misuse",
-  scope_violation:     "Scope Violation",
+  task_failure: "Task Failure",
+  harmful_output: "Harmful Output",
+  tool_misuse: "Tool Misuse",
+  scope_violation: "Scope Violation",
   data_handling_error: "Data Handling Error",
-  reasoning_error:     "Reasoning Error",
-  cost_anomaly:        "Cost Anomaly",
-  silent_refusal:      "Silent Refusal",
-  sla_breach:          "SLA Breach",
+  reasoning_error: "Reasoning Error",
+  cost_anomaly: "Cost Anomaly",
+  silent_refusal: "Silent Refusal",
+  sla_breach: "SLA Breach",
 };
 
 /** Output contract from evaluateTrace(). */

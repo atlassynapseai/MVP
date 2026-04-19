@@ -50,12 +50,12 @@ export async function PUT(req: NextRequest) {
 
   const rule = existing
     ? await prisma.slaRule.update({
-        where: { id: existing.id },
-        data: { maxErrorRatePct, windowMinutes, enabled },
-      })
+      where: { id: existing.id },
+      data: { maxErrorRatePct, windowMinutes, enabled },
+    })
     : await prisma.slaRule.create({
-        data: { orgId, agentId: resolvedAgentId, maxErrorRatePct, windowMinutes, enabled },
-      });
+      data: { orgId, agentId: resolvedAgentId, maxErrorRatePct, windowMinutes, enabled },
+    });
 
   return NextResponse.json(rule);
 }

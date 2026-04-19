@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut, Activity, ClipboardCheck, ScrollText } from "lucide-react";
 import { clsx } from "clsx";
@@ -51,9 +52,12 @@ export function Sidebar({ userEmail, onNavigate }: SidebarProps) {
 
   return (
     <aside className="flex h-screen w-60 flex-col border-r border-gray-800 bg-gray-900 p-4">
-      <div className="mb-8">
-        <span className="text-lg font-bold text-purple-400">Atlas Synapse</span>
-        <p className="text-xs text-gray-500">HR for Your AI</p>
+      <div className="mb-8 flex items-center gap-2">
+        <Image src="/logo.png" alt="Atlas Synapse" width={32} height={32} className="rounded" />
+        <div>
+          <span className="text-lg font-bold text-purple-400">Atlas Synapse</span>
+          <p className="text-xs text-gray-500">HR for Your AI</p>
+        </div>
       </div>
       <nav className="flex-1 space-y-1">
         {NAV.map(({ href, label, icon: Icon }) => (

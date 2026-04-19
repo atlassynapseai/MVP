@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { basePath } from "@/lib/app-path";
@@ -90,7 +91,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <p className="text-2xl font-bold text-purple-400">Atlas Synapse</p>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Image src="/logo.png" alt="Atlas Synapse" width={40} height={40} className="rounded" />
+            <p className="text-2xl font-bold text-purple-400">Atlas Synapse</p>
+          </div>
           <p className="text-xs text-gray-500 mt-1">HR for Your AI</p>
         </div>
 

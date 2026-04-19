@@ -98,4 +98,5 @@ export const CATEGORY_DESCRIPTIONS: Record<IncidentCategory, string> = {
   reasoning_error: "The agent made a clear logical or factual error",
   cost_anomaly: "The agent consumed unexpectedly high resources",
   silent_refusal: "The agent stopped without completing the task or explaining why",
+  sla_breach: "The agent exceeded the configured error rate SLA threshold",
 };

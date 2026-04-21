@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -89,7 +89,7 @@ export default async function EvaluationsPage({
     const active = outcomeFilter === value;
     return (
       <Link
-        href={`${basePath}/dashboard/evaluations${value !== "all" ? `?outcome=${value}` : ""}`}
+        href={`/dashboard/evaluations${value !== "all" ? `?outcome=${value}` : ""}`}
         className={`px-3 py-1.5 text-xs rounded border transition-colors ${
           active
             ? "bg-purple-900/50 text-purple-300 border-purple-700"
@@ -141,7 +141,7 @@ export default async function EvaluationsPage({
                 >
                   <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
                     <Link
-                      href={`${basePath}/dashboard/agents/${ev.trace.agent.id}`}
+                      href={`/dashboard/agents/${ev.trace.agent.id}`}
                       className="hover:text-purple-300 transition-colors"
                     >
                       {ev.trace.agent.displayName}
@@ -185,7 +185,7 @@ export default async function EvaluationsPage({
                     <div className="flex gap-2 text-xs">
                       {ev.trace.incident && (
                         <Link
-                          href={`${basePath}/dashboard/incidents/${ev.trace.incident.id}`}
+                          href={`/dashboard/incidents/${ev.trace.incident.id}`}
                           className="text-purple-400 hover:text-purple-300 transition-colors"
                         >
                           Incident

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { basePath } from "@/lib/app-path";
 import Link from "next/link";
 
 export default function DashboardError({
@@ -30,7 +29,7 @@ export default function DashboardError({
           Try again
         </button>
         <Link
-          href={`${basePath}/dashboard`}
+          href={`/dashboard`}
           className="px-4 py-2 text-sm rounded border border-gray-700 text-gray-400 hover:text-gray-200 transition-colors"
         >
           Back to Dashboard

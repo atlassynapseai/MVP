@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 
 interface AuditLogRow {

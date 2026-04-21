@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import Link from "next/link";
 
@@ -104,7 +104,7 @@ export default async function AgentsComparePage() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <Link
-            href={`${basePath}/dashboard/agents`}
+            href={`/dashboard/agents`}
             className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
           >
             Agents
@@ -140,7 +140,7 @@ export default async function AgentsComparePage() {
                       }`}
                     >
                       <Link
-                        href={`${basePath}/dashboard/agents/${agent.id}`}
+                        href={`/dashboard/agents/${agent.id}`}
                         className="hover:text-purple-300 transition-colors"
                       >
                         {agent.displayName}

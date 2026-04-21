@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect, notFound } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -161,7 +161,7 @@ export default async function AgentDetailPage({
         <div>
           <div className="flex items-center gap-3 mb-1">
             <Link
-              href={`${basePath}/dashboard/agents`}
+              href={`/dashboard/agents`}
               className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
             >
               Agents
@@ -218,7 +218,7 @@ export default async function AgentDetailPage({
             {recentIncidents.map((inc) => (
               <Link
                 key={inc.id}
-                href={`${basePath}/dashboard/incidents/${inc.id}`}
+                href={`/dashboard/incidents/${inc.id}`}
                 className="flex items-center gap-3 p-3 rounded-lg border border-gray-800 bg-gray-900 hover:border-gray-700 transition-colors"
               >
                 <span className={`px-2 py-0.5 text-xs rounded border shrink-0 ${inc.severity === "critical" ? "bg-red-900/40 text-red-400 border-red-800" : "bg-yellow-900/40 text-yellow-400 border-yellow-800"}`}>

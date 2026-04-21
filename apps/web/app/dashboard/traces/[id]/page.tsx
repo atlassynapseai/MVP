@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect, notFound } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -53,7 +53,7 @@ export default async function TraceDetailPage({
     <div className="max-w-3xl space-y-6">
       {/* Back */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href={`${basePath}/dashboard/traces`} className="hover:text-gray-300 transition-colors">
+        <Link href={`/dashboard/traces`} className="hover:text-gray-300 transition-colors">
           ← Traces
         </Link>
         <span className="text-gray-700">/</span>
@@ -65,7 +65,7 @@ export default async function TraceDetailPage({
         <div>
           <div className="flex items-center gap-3 mb-1">
             <Link
-              href={`${basePath}/dashboard/agents/${trace.agent.id}`}
+              href={`/dashboard/agents/${trace.agent.id}`}
               className="text-xl font-bold text-gray-100 hover:text-purple-300 transition-colors"
             >
               {trace.agent.displayName}
@@ -158,7 +158,7 @@ export default async function TraceDetailPage({
             <p className="text-xs text-gray-400 mt-1">{trace.incident.summary.slice(0, 120)}{trace.incident.summary.length > 120 && "…"}</p>
           </div>
           <Link
-            href={`${basePath}/dashboard/incidents/${trace.incident.id}`}
+            href={`/dashboard/incidents/${trace.incident.id}`}
             className="shrink-0 ml-4 px-3 py-1.5 text-xs rounded border border-yellow-800 text-yellow-400 hover:bg-yellow-900/30 transition-colors"
           >
             View Incident →

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { basePath } from "@/lib/app-path";
 import Link from "next/link";
 
 interface Props {
@@ -166,13 +165,13 @@ with atlas.trace() as trace:
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <Link
-              href={`${basePath}/dashboard`}
+              href={`/dashboard`}
               className="px-5 py-2 rounded bg-purple-700 hover:bg-purple-600 text-white text-sm font-medium transition-colors"
             >
               Go to Dashboard →
             </Link>
             <Link
-              href={`${basePath}/dashboard/traces`}
+              href={`/dashboard/traces`}
               className="px-5 py-2 rounded border border-gray-700 text-gray-400 text-sm hover:text-gray-200 transition-colors"
             >
               View Traces
@@ -185,7 +184,7 @@ with atlas.trace() as trace:
       {step < 3 && (
         <p className="text-xs text-gray-600">
           Already set up?{" "}
-          <Link href={`${basePath}/dashboard`} className="text-gray-500 hover:text-gray-300 underline">
+          <Link href={`/dashboard`} className="text-gray-500 hover:text-gray-300 underline">
             Skip to dashboard
           </Link>
         </p>

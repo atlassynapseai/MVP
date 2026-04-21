@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -70,7 +70,7 @@ export default async function AgentsPage() {
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-bold text-gray-100">AI Workforce</h1>
         <Link
-          href={`${basePath}/dashboard/agents/compare`}
+          href={`/dashboard/agents/compare`}
           className="px-3 py-1.5 text-sm rounded border border-purple-800 bg-purple-900/30 text-purple-300 hover:bg-purple-900/60 transition-colors"
         >
           Compare

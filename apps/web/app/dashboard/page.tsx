@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { ActivityFeed } from "./activity-feed";
 import Link from "next/link";
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center space-y-3">
           <p className="text-gray-400">No agents connected yet.</p>
           <Link
-            href={`${basePath}/dashboard/onboarding`}
+            href={`/dashboard/onboarding`}
             className="inline-block px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-white text-sm font-medium transition-colors"
           >
             Get started →

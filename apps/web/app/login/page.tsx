@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { basePath } from "@/lib/app-path";
 
 type Mode = "signin" | "signup";
 
@@ -61,7 +60,7 @@ export default function LoginPage() {
       setErrorMsg(error.message);
       setStatus("error");
     } else {
-      router.push(`${basePath}/dashboard`);
+      router.push("/dashboard");
       router.refresh();
     }
   }

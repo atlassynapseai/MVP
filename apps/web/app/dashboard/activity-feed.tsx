@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { basePath } from "@/lib/app-path";
 interface ActivityTrace {
   id: string;
   createdAt: string;
@@ -74,7 +73,7 @@ export function ActivityFeed() {
       {traces.map((trace) => (
         <a
           key={trace.id}
-          href={`${basePath}/dashboard/traces/${trace.id}`}
+          href={`/dashboard/traces/${trace.id}`}
           className="flex items-start gap-3 p-3 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors"
         >          <div className="flex-1 min-w-0">
             <span className="font-medium text-gray-200 text-sm">{trace.agent.displayName}</span>

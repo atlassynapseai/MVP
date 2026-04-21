@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { basePath } from "@/lib/app-path";
 import Link from "next/link";
 
 interface TraceRow {
@@ -142,12 +141,12 @@ export function TracesTable({ traces, agentNames }: { traces: TraceRow[]; agentN
               {filtered.map((trace) => (
                 <tr key={trace.id} className="border-b border-gray-800 bg-gray-950 hover:bg-gray-900 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
-                    <Link href={`${basePath}/dashboard/agents/${trace.agent.id}`} className="hover:text-purple-300 transition-colors">
+                    <Link href={`/dashboard/agents/${trace.agent.id}`} className="hover:text-purple-300 transition-colors">
                       {trace.agent.displayName}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
-                    <Link href={`${basePath}/dashboard/traces/${trace.id}`} className="hover:text-purple-300 transition-colors">
+                    <Link href={`/dashboard/traces/${trace.id}`} className="hover:text-purple-300 transition-colors">
                       {timeAgo(trace.createdAt)}
                     </Link>
                   </td>

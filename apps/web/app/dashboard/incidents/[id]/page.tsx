@@ -7,7 +7,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { FeedbackForm } from "./feedback-form";
 import { ResolveButton } from "./resolve-button";
-import { basePath } from "@/lib/app-path";
 
 function SeverityBadge({ severity }: { severity: "warning" | "critical" }) {
   if (severity === "critical") {
@@ -64,7 +63,7 @@ export default async function IncidentDetailPage({ params }: Props) {
     <div className="max-w-3xl">
       <div className="mb-4">
         <Link
-          href={`${basePath}/dashboard/incidents`}
+          href={`/dashboard/incidents`}
           className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
         >
           ← Back to incidents

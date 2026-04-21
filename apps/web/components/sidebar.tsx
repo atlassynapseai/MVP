@@ -5,18 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Bot, AlertTriangle, Settings, Shield, Plug, LogOut, Activity, ClipboardCheck, ScrollText } from "lucide-react";
 import { clsx } from "clsx";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { basePath } from "@/lib/app-path";
 
 const NAV = [
-  { href: `${basePath}/dashboard`, label: "Overview", icon: LayoutDashboard },
-  { href: `${basePath}/dashboard/agents`, label: "Agents", icon: Bot },
-  { href: `${basePath}/dashboard/traces`, label: "Traces", icon: Activity },
-  { href: `${basePath}/dashboard/evaluations`, label: "Evaluations", icon: ClipboardCheck },
-  { href: `${basePath}/dashboard/incidents`, label: "Incidents", icon: AlertTriangle },
-  { href: `${basePath}/dashboard/connections`, label: "Connections", icon: Plug },
-  { href: `${basePath}/dashboard/settings`, label: "Settings", icon: Settings },
-  { href: `${basePath}/dashboard/audit`, label: "Audit Log", icon: ScrollText },
-  { href: `${basePath}/dashboard/data-transparency`, label: "Data Transparency", icon: Shield },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/agents", label: "Agents", icon: Bot },
+  { href: "/dashboard/traces", label: "Traces", icon: Activity },
+  { href: "/dashboard/evaluations", label: "Evaluations", icon: ClipboardCheck },
+  { href: "/dashboard/incidents", label: "Incidents", icon: AlertTriangle },
+  { href: "/dashboard/connections", label: "Connections", icon: Plug },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/audit", label: "Audit Log", icon: ScrollText },
+  { href: "/dashboard/data-transparency", label: "Data Transparency", icon: Shield },
 ];
 
 interface SidebarProps {
@@ -31,23 +30,16 @@ export function Sidebar({ userEmail, onNavigate }: SidebarProps) {
   async function handleSignOut() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.push(`${basePath}/login`);
+    router.push("/login");
     router.refresh();
   }
 
-  // Active check works whether usePathname returns the full path (e.g. /MVP/dashboard)
-  // or the Vercel-rewritten path (e.g. /dashboard).
-  // Overview uses exact match; other routes also match child paths (e.g. /agents/[id]).
+  // Active check: usePathname() returns path WITHOUT basePath in Next.js App Router.
+  // e.g. pathname = "/dashboard/agents", href = "/dashboard/agents"
   function isActive(href: string): boolean {
-    const stripped = basePath && href.startsWith(basePath) ? href.slice(basePath.length) || "/" : href;
-    const isOverview = href === `${basePath}/dashboard` || href === "/dashboard";
-    if (isOverview) return pathname === href || pathname === stripped;
-    return (
-      pathname === href ||
-      pathname === stripped ||
-      pathname.startsWith(href + "/") ||
-      pathname.startsWith(stripped + "/")
-    );
+    const isOverview = href === "/dashboard";
+    if (isOverview) return pathname === href;
+    return pathname === href || pathname.startsWith(href + "/");
   }
 
   return (

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { CATEGORY_LABELS } from "@atlas/shared";
 import type { IncidentCategory } from "@atlas/shared";
@@ -101,7 +101,7 @@ export default async function IncidentsPage() {
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
-                      <Link href={`${basePath}/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
+                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
                         {incident.agent.displayName}
                       </Link>
                     </td>
@@ -109,7 +109,7 @@ export default async function IncidentsPage() {
                       <span className="text-gray-300">{label}</span>
                     </td>
                     <td className="px-4 py-3 text-gray-400 max-w-sm">
-                      <Link href={`${basePath}/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors">
+                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors">
                         {summary}
                       </Link>
                     </td>

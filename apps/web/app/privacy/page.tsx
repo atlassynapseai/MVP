@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { basePath } from "@/lib/app-path";
 
 export default function PrivacyPage() {
   const updated = "2026-04-18";
@@ -7,7 +6,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-gray-950 text-gray-300 p-6 md:p-12">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <Link href={`${basePath}/dashboard`} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">← Dashboard</Link>
+          <Link href={`/dashboard`} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">← Dashboard</Link>
           <h1 className="text-2xl font-bold text-gray-100 mt-4 mb-1">Privacy Policy</h1>
           <p className="text-xs text-gray-500">Last updated: {updated}</p>
         </div>

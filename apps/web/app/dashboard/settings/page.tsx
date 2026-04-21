@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { AlertPrefForm } from "./alert-pref-form";
 import { InviteForm } from "./invite-form";
@@ -150,17 +150,18 @@ export default async function SettingsPage() {
                   <tr key={alert.id} className="border-b border-gray-800 bg-gray-950 last:border-0 hover:bg-gray-900 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
                       <Link
-                        href={`${basePath}/dashboard/incidents/${alert.incident.id}`}
+                        href={`/dashboard/incidents/${alert.incident.id}`}
                         className="hover:text-purple-300 transition-colors"
                       >
                         {alert.incident.agent.displayName}
                       </Link>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 py-0.5 text-xs rounded border ${alert.incident.severity === "critical"
+                      <span className={`px-2 py-0.5 text-xs rounded border ${
+                        alert.incident.severity === "critical"
                           ? "bg-red-900/40 text-red-400 border-red-800"
                           : "bg-yellow-900/40 text-yellow-400 border-yellow-800"
-                        }`}>
+                      }`}>
                         {alert.incident.severity}
                       </span>
                     </td>
@@ -171,10 +172,11 @@ export default async function SettingsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 py-0.5 text-xs rounded border ${alert.status === "sent"
+                      <span className={`px-2 py-0.5 text-xs rounded border ${
+                        alert.status === "sent"
                           ? "bg-emerald-900/40 text-emerald-400 border-emerald-800"
                           : "bg-red-900/40 text-red-400 border-red-800"
-                        }`}>
+                      }`}>
                         {alert.status}
                       </span>
                     </td>

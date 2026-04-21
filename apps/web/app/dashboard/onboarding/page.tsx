@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateOrg } from "@/lib/get-auth-org";
 import { redirect } from "next/navigation";
-import { appUrl, basePath } from "@/lib/app-path";
+import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { OnboardingWizard } from "./onboarding-wizard";
 
@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   ]);
 
   // If already onboarded, redirect to dashboard
-  if (traceCount > 0) redirect(`${basePath}/dashboard`);
+  if (traceCount > 0) redirect(`/dashboard`);
 
   return (
     <div className="max-w-2xl mx-auto">

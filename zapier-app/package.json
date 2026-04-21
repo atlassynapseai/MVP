@@ -1,0 +1,16 @@
+{
+  "name": "atlas-synapse-zapier",
+  "version": "1.0.0",
+  "description": "Atlas Synapse — HR for Your AI. Monitor AI agent activity automatically.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --testPathPattern=test"
+  },
+  "dependencies": {
+    "zapier-platform-core": "18.5.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "private": true
+}

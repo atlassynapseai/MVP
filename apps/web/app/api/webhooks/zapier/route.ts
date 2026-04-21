@@ -64,7 +64,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = ZapierPayloadSchema.safeParse(body);
+  // Allow token from query param (Zapier API Key auth sends it there by default)
+  const queryToken = req.nextUrl.searchParams.get("token");
+  const bodyWithToken = (queryToken && typeof body === "object" && body !== null && !("token" in body))
+    ? { ...body as Record<string, unknown>, token: queryToken }
+    : body;
+
+  const parsed = ZapierPayloadSchema.safeParse(bodyWithToken);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }

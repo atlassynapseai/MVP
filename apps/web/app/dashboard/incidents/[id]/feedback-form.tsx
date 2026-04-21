@@ -1,4 +1,5 @@
 "use client";
+import { basePath } from "@/lib/app-path";
 
 import { useState } from "react";
 import { INCIDENT_CATEGORIES, CATEGORY_LABELS } from "@atlas/shared";

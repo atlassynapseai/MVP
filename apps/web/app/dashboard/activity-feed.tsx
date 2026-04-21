@@ -1,4 +1,5 @@
 "use client";
+import { basePath } from "@/lib/app-path";
 
 import { useEffect, useState } from "react";
 interface ActivityTrace {

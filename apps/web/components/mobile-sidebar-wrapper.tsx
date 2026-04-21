@@ -31,9 +31,8 @@ export function MobileSidebarWrapper({ userEmail }: { userEmail: string }) {
 
       {/* Sidebar — fixed on mobile (slide in), static on desktop */}
       <div
-        className={`fixed inset-y-0 left-0 z-20 transform transition-transform duration-200 md:static md:translate-x-0 md:flex md:shrink-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-20 transform transition-transform duration-200 md:static md:translate-x-0 md:flex md:shrink-0 ${open ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <Sidebar userEmail={userEmail} onNavigate={() => setOpen(false)} />
       </div>

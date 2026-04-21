@@ -90,11 +90,10 @@ export default async function EvaluationsPage({
     return (
       <Link
         href={`/dashboard/evaluations${value !== "all" ? `?outcome=${value}` : ""}`}
-        className={`px-3 py-1.5 text-xs rounded border transition-colors ${
-          active
+        className={`px-3 py-1.5 text-xs rounded border transition-colors ${active
             ? "bg-purple-900/50 text-purple-300 border-purple-700"
             : "text-gray-400 border-gray-700 hover:text-gray-200 hover:border-gray-600"
-        }`}
+          }`}
       >
         {label}
       </Link>
@@ -161,8 +160,8 @@ export default async function EvaluationsPage({
                         ev.confidence >= 0.85
                           ? "text-red-400"
                           : ev.confidence >= 0.6
-                          ? "text-yellow-400"
-                          : "text-emerald-400"
+                            ? "text-yellow-400"
+                            : "text-emerald-400"
                       }
                     >
                       {Math.round(ev.confidence * 100)}%

@@ -47,22 +47,20 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackW
           <button
             type="button"
             onClick={() => setMode("immediate")}
-            className={`px-4 py-2 text-sm rounded border transition-colors ${
-              mode === "immediate"
+            className={`px-4 py-2 text-sm rounded border transition-colors ${mode === "immediate"
                 ? "bg-purple-900/60 border-purple-700 text-purple-300"
                 : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"
-            }`}
+              }`}
           >
             Immediate
           </button>
           <button
             type="button"
             onClick={() => setMode("off")}
-            className={`px-4 py-2 text-sm rounded border transition-colors ${
-              mode === "off"
+            className={`px-4 py-2 text-sm rounded border transition-colors ${mode === "off"
                 ? "bg-gray-800 border-gray-600 text-gray-300"
                 : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"
-            }`}
+              }`}
           >
             Off
           </button>
@@ -81,22 +79,20 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackW
             <button
               type="button"
               onClick={() => setSeverityFloor("warning")}
-              className={`px-4 py-2 text-sm rounded border transition-colors ${
-                severityFloor === "warning"
+              className={`px-4 py-2 text-sm rounded border transition-colors ${severityFloor === "warning"
                   ? "bg-yellow-900/40 border-yellow-800 text-yellow-400"
                   : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"
-              }`}
+                }`}
             >
               Warning &amp; above
             </button>
             <button
               type="button"
               onClick={() => setSeverityFloor("critical")}
-              className={`px-4 py-2 text-sm rounded border transition-colors ${
-                severityFloor === "critical"
+              className={`px-4 py-2 text-sm rounded border transition-colors ${severityFloor === "critical"
                   ? "bg-red-900/40 border-red-800 text-red-400"
                   : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"
-              }`}
+                }`}
             >
               Critical only
             </button>

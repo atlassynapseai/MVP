@@ -46,20 +46,18 @@ export function OnboardingWizard({ hasConnection }: Props) {
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-sm">
             <span
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border ${
-                s.done
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border ${s.done
                   ? "bg-emerald-900/60 text-emerald-400 border-emerald-700"
                   : step === i + 1
-                  ? "bg-purple-900/60 text-purple-300 border-purple-700"
-                  : "bg-gray-800 text-gray-500 border-gray-700"
-              }`}
+                    ? "bg-purple-900/60 text-purple-300 border-purple-700"
+                    : "bg-gray-800 text-gray-500 border-gray-700"
+                }`}
             >
               {s.done ? "✓" : i + 1}
             </span>
             <span
-              className={`hidden sm:inline ${
-                s.done ? "text-emerald-400" : step === i + 1 ? "text-gray-200" : "text-gray-600"
-              }`}
+              className={`hidden sm:inline ${s.done ? "text-emerald-400" : step === i + 1 ? "text-gray-200" : "text-gray-600"
+                }`}
             >
               {s.label}
             </span>
@@ -102,12 +100,12 @@ export function OnboardingWizard({ hasConnection }: Props) {
 
           <p className="text-sm text-gray-400">Install the Python SDK:</p>
           <pre className="text-xs bg-gray-950 rounded p-3 border border-gray-800 text-gray-300 overflow-x-auto">
-{`pip install atlas-synapse`}
+            {`pip install atlas-synapse`}
           </pre>
 
           <p className="text-sm text-gray-400">Send your first trace:</p>
           <pre className="text-xs bg-gray-950 rounded p-3 border border-gray-800 text-gray-300 overflow-x-auto whitespace-pre-wrap">
-{`import anthropic
+            {`import anthropic
 from atlas_synapse import AtlasSynapseClient
 
 atlas = AtlasSynapseClient(token="${token ?? "YOUR_TOKEN_HERE"}")

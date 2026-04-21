@@ -31,7 +31,10 @@
       "name": "AtlasSynapse Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "notes": "Step 1 of 3: Configure Atlas Synapse.\n\nSet these env vars in N8N Settings → Environment:\n  ATLAS_PROJECT_TOKEN — your project token from Atlas Synapse dashboard → Connections\n  ATLAS_INGEST_URL    — your edge worker URL (e.g. https://your-worker.workers.dev)\n\nOptionally change ATLAS_AGENT_NAME to identify this workflow in the dashboard."
     },
     {
@@ -47,7 +50,10 @@
       "name": "AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
-      "position": [220, 300],
+      "position": [
+        220,
+        300
+      ],
       "notes": "Step 2 of 3: Your AI Agent.\n\nConnect your LLM model and tools to this node.\nEnable 'Return Intermediate Steps' to capture tool calls in Atlas Synapse."
     },
     {
@@ -80,7 +86,10 @@
       "name": "AtlasSynapse Report",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 300],
+      "position": [
+        440,
+        300
+      ],
       "continueOnFail": true,
       "notes": "Step 3 of 3: Report to Atlas Synapse.\n\nThis node posts the agent trace automatically.\n'Continue On Fail' is enabled — reporting failures will never block your workflow.\n\nTool calls are captured if the AI Agent node has 'Return Intermediate Steps' enabled.\nTokenCount is null for n8n (n8n does not expose token usage natively)."
     }
@@ -88,12 +97,24 @@
   "connections": {
     "AtlasSynapse Config": {
       "main": [
-        [{"node": "AI Agent", "type": "main", "index": 0}]
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "AI Agent": {
       "main": [
-        [{"node": "AtlasSynapse Report", "type": "main", "index": 0}]
+        [
+          {
+            "node": "AtlasSynapse Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -109,6 +130,10 @@
     "instanceId": "atlas-synapse-reporter-v2"
   },
   "id": "atlas-reporter-template",
-  "tags": ["atlassynapse", "monitoring", "observability"],
+  "tags": [
+    "atlassynapse",
+    "monitoring",
+    "observability"
+  ],
   "versionId": "v2"
 }

@@ -98,23 +98,21 @@ export default async function TraceDetailPage({
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
               <p className="text-xs text-gray-500 mb-1">Outcome</p>
-              <span className={`px-2 py-0.5 text-xs rounded border ${
-                trace.evaluation.outcome === "pass"
+              <span className={`px-2 py-0.5 text-xs rounded border ${trace.evaluation.outcome === "pass"
                   ? "bg-emerald-900/40 text-emerald-400 border-emerald-800"
                   : trace.evaluation.outcome === "anomaly"
-                  ? "bg-yellow-900/40 text-yellow-400 border-yellow-800"
-                  : "bg-red-900/40 text-red-400 border-red-800"
-              }`}>
+                    ? "bg-yellow-900/40 text-yellow-400 border-yellow-800"
+                    : "bg-red-900/40 text-red-400 border-red-800"
+                }`}>
                 {trace.evaluation.outcome}
               </span>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Confidence</p>
-              <p className={`text-lg font-bold ${
-                trace.evaluation.confidence >= 0.85 ? "text-red-400"
-                : trace.evaluation.confidence >= 0.6 ? "text-yellow-400"
-                : "text-emerald-400"
-              }`}>
+              <p className={`text-lg font-bold ${trace.evaluation.confidence >= 0.85 ? "text-red-400"
+                  : trace.evaluation.confidence >= 0.6 ? "text-yellow-400"
+                    : "text-emerald-400"
+                }`}>
                 {Math.round(trace.evaluation.confidence * 100)}%
               </p>
             </div>
@@ -145,11 +143,10 @@ export default async function TraceDetailPage({
       {trace.incident && (
         <div className="rounded-lg border border-yellow-800/50 bg-yellow-950/10 p-4 flex items-center justify-between">
           <div>
-            <span className={`px-2 py-0.5 text-xs rounded border mr-2 ${
-              trace.incident.severity === "critical"
+            <span className={`px-2 py-0.5 text-xs rounded border mr-2 ${trace.incident.severity === "critical"
                 ? "bg-red-900/40 text-red-400 border-red-800"
                 : "bg-yellow-900/40 text-yellow-400 border-yellow-800"
-            }`}>
+              }`}>
               {trace.incident.severity}
             </span>
             <span className="text-sm text-gray-300">

@@ -29,11 +29,10 @@ export function ResolveButton({ incidentId, initialResolved }: Props) {
     <button
       onClick={toggle}
       disabled={loading}
-      className={`px-3 py-1.5 text-xs rounded border transition-colors disabled:opacity-50 ${
-        resolved
+      className={`px-3 py-1.5 text-xs rounded border transition-colors disabled:opacity-50 ${resolved
           ? "bg-emerald-900/40 text-emerald-400 border-emerald-800 hover:bg-emerald-900/60"
           : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-gray-200"
-      }`}
+        }`}
     >
       {loading ? "…" : resolved ? "✓ Resolved" : "Mark Resolved"}
     </button>

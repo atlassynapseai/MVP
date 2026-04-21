@@ -52,10 +52,10 @@ export default async function DashboardPage() {
             passRate === null
               ? "text-gray-500"
               : passRate >= 90
-              ? "text-emerald-400"
-              : passRate >= 70
-              ? "text-yellow-400"
-              : "text-red-400"
+                ? "text-emerald-400"
+                : passRate >= 70
+                  ? "text-yellow-400"
+                  : "text-red-400"
           }
         />
         <StatCard

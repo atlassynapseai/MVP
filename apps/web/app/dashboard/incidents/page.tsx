@@ -8,7 +8,7 @@ import type { IncidentCategory } from "@atlas/shared";
 import Link from "next/link";
 import { ExportButton } from "@/components/export-button";
 
-  interface IncidentRow {
+interface IncidentRow {
   id: string;
   severity: "warning" | "critical";
   category: string;
@@ -96,9 +96,8 @@ export default async function IncidentsPage() {
                 return (
                   <tr
                     key={incident.id}
-                    className={`border-b border-gray-800 hover:bg-gray-900 transition-colors ${
-                      incident.resolvedAt ? "bg-gray-900/50 opacity-60" : "bg-gray-950"
-                    }`}
+                    className={`border-b border-gray-800 hover:bg-gray-900 transition-colors ${incident.resolvedAt ? "bg-gray-900/50 opacity-60" : "bg-gray-950"
+                      }`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
                       <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">

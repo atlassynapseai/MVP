@@ -32,7 +32,7 @@ export function ActivityFeed() {
 
   async function fetchActivity() {
     try {
-      const res = await fetch(`/api/activity`);
+      const res = await fetch(`${basePath}/api/activity`);
       if (res.ok) {
         const data = await res.json() as { traces: ActivityTrace[] };
         setTraces(data.traces);

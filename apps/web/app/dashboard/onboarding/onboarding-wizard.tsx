@@ -20,7 +20,7 @@ export function OnboardingWizard({ hasConnection }: Props) {
     setCreating(true);
     setError(null);
     try {
-      const res = await fetch("/api/connections", { method: "POST" });
+      const res = await fetch(`${basePath}/api/connections`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to create token");
       const data = (await res.json()) as { token: string };
       setToken(data.token);

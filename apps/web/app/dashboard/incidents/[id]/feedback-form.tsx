@@ -28,7 +28,7 @@ export function FeedbackForm({ incidentId, alreadySubmitted }: FeedbackFormProps
     setStatus("submitting");
 
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await fetch(`${basePath}/api/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

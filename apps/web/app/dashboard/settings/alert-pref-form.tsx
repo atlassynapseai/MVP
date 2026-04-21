@@ -21,7 +21,7 @@ export function AlertPrefForm({ initialMode, initialSeverityFloor, initialSlackW
     setStatus("saving");
 
     try {
-      const res = await fetch("/api/alert-prefs", {
+      const res = await fetch(`${basePath}/api/alert-prefs`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode, severityFloor, slackWebhookUrl, customEvalCriteria }),

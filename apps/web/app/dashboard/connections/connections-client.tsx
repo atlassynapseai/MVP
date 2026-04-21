@@ -35,7 +35,7 @@ export function ConnectionsClient({ initialConnections }: Props) {
     setError(null);
     setNewToken(null);
     try {
-      const res = await fetch("/api/connections", { method: "POST" });
+      const res = await fetch(`${basePath}/api/connections`, { method: "POST" });
       if (!res.ok) { setError("Failed to create connection."); return; }
       const data = await res.json() as { connection: Connection; token: string };
       setConnections((prev) => [data.connection, ...prev]);
@@ -51,7 +51,7 @@ export function ConnectionsClient({ initialConnections }: Props) {
     setRevoking(id);
     setError(null);
     try {
-      const res = await fetch(`/api/connections/${id}`, { method: "DELETE" });
+      const res = await fetch(`${basePath}/api/connections/${id}`, { method: "DELETE" });
       if (!res.ok) { setError("Failed to revoke connection."); return; }
       setConnections((prev) =>
         prev.map((c) => c.id === id ? { ...c, status: "revoked", revokedAt: new Date() } : c)

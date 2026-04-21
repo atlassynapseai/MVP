@@ -26,7 +26,7 @@ export function SlaRuleForm({ initialRules }: Props) {
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/sla-rules", {
+      const res = await fetch(`${basePath}/api/sla-rules`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ maxErrorRatePct, windowMinutes, agentId: null, enabled: true }),
@@ -46,14 +46,14 @@ export function SlaRuleForm({ initialRules }: Props) {
 
   async function deleteRule(agentId: string | null) {
     const params = agentId ? `?agentId=${agentId}` : "";
-    const res = await fetch(`/api/sla-rules${params}`, { method: "DELETE" });
+    const res = await fetch(`${basePath}/api/sla-rules${params}`, { method: "DELETE" });
     if (res.ok) {
       setRules((prev) => prev.filter((r) => r.agentId !== agentId));
     }
   }
 
   async function toggle(rule: SlaRule) {
-    const res = await fetch("/api/sla-rules", {
+    const res = await fetch(`${basePath}/api/sla-rules`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

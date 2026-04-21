@@ -14,7 +14,7 @@ export function InviteForm() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/invite", {
+      const res = await fetch(`${basePath}/api/invite`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),

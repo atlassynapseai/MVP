@@ -14,7 +14,7 @@ export function ResolveButton({ incidentId, initialResolved }: Props) {
   async function toggle() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/incidents/${incidentId}/resolve`, { method: "POST" });
+      const res = await fetch(`${basePath}/api/incidents/${incidentId}/resolve`, { method: "POST" });
       if (res.ok) {
         const data = (await res.json()) as { resolved: boolean };
         setResolved(data.resolved);

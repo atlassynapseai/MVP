@@ -49,7 +49,7 @@ export function WebhookForm({ initialWebhooks }: WebhookFormProps) {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/webhooks", {
+      const res = await fetch(`${basePath}/api/webhooks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, events: selectedEvents }),
@@ -77,7 +77,7 @@ export function WebhookForm({ initialWebhooks }: WebhookFormProps) {
   async function handleDelete(id: string) {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/webhooks/${id}`, { method: "DELETE" });
+      const res = await fetch(`${basePath}/api/webhooks/${id}`, { method: "DELETE" });
       if (res.ok) {
         setWebhooks((prev) => prev.filter((wh) => wh.id !== id));
         if (revealedSecret?.id === id) setRevealedSecret(null);

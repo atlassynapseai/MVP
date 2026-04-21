@@ -75,7 +75,7 @@ pnpm test
 - Edge routes in `apps/edge/src/index.ts` (Hono)
 - Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
-- Client-side API calls: use plain `/api/...` paths (no basePath prefix) — basePath only for `<Link href>` and `redirect()`
+- Client-side `fetch()` calls: use `\`${basePath}/api/...\`` — Next.js does NOT auto-prepend basePath to raw fetch. `<Link href>` and `router.push()` use plain `/path` (Next.js auto-prepends). Server-side `redirect()` uses full `${appUrl}/path`.
 - Python SDK: mapper transforms Anthropic SDK events → AtlasSynapse ingest payload
 - N8N: import `public/templates/n8n-atlas-reporter.json`; set `tokenCount: null` (n8n has no native token count)
 - Auth middleware: API routes with their own auth (HMAC, bearer) must be in public routes list in `apps/web/middleware.ts`

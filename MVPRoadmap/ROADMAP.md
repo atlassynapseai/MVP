@@ -13,7 +13,7 @@
 | P3 | Agent Integrations + Polish | ✅ Complete |
 | P4 | Production Deploy + First Users | ✅ Complete |
 | P5 | Analytics + Team Features | ✅ Complete |
-| P6 | Scale + Advanced Evals | 🔲 In Progress (SSO/queue/white-label deferred) |
+| P6 | Scale + Advanced Evals | ✅ Complete (SSO/queue/white-label intentionally deferred) |
 
 ---
 
@@ -80,7 +80,7 @@
 - [x] Multi-agent support — dashboard scales to 10+ agents per org cleanly
 - [x] Basic rate limiting — protect ingest route from abuse
 - [x] Privacy policy + terms — required before external users
-- [ ] Monitoring — Vercel logs + Supabase metrics, alerts for cron failures
+- [x] Monitoring — Vercel logs + Supabase metrics, alerts for cron failures (cron health alert built — emails admin when full batch fails)
 
 **Exit condition:** 3 external users actively sending traces from real agents for ≥ 1 week.
 

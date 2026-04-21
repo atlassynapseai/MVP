@@ -8,6 +8,10 @@ export const maxDuration = 60;
 
 const BATCH_SIZE = 5;
 const MAX_ATTEMPTS = 3;
+/** Max evaluations per org per calendar day before sampling kicks in. */
+const ORG_DAILY_EVAL_LIMIT = 500;
+/** Above the limit, evaluate 1 in every SAMPLE_RATE traces. */
+const SAMPLE_RATE = 5;
 
 /** Exponential backoff: 2^n minutes, capped at 60 minutes. */
 function backoffMinutes(attempts: number): number {
@@ -83,8 +87,43 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   let alerted = 0;
   let errors = 0;
 
+  // Per-org daily eval counts — checked once per trace, incremented in-memory
+  // to avoid N+1 DB queries inside the hot loop.
+  const orgEvalCounts: Map<string, number> = new Map();
+  const dayStart = new Date(now);
+  dayStart.setUTCHours(0, 0, 0, 0);
+
+  // Pre-load today's eval counts for each org in the batch (single query per org).
+  const batchOrgIds = [...new Set(traces.map((t) => t.orgId))];
+  await Promise.all(
+    batchOrgIds.map(async (orgId) => {
+      const count = await prisma.evaluation.count({
+        where: { trace: { orgId, createdAt: { gte: dayStart } } },
+      });
+      orgEvalCounts.set(orgId, count);
+    }),
+  );
+
   for (const trace of traces) {
     try {
+      // ── Per-org rate limiting ─────────────────────────────────────────────
+      // Above ORG_DAILY_EVAL_LIMIT, only evaluate 1 in SAMPLE_RATE traces.
+      const orgCount = orgEvalCounts.get(trace.orgId) ?? 0;
+      if (orgCount >= ORG_DAILY_EVAL_LIMIT) {
+        // Use the trace's DB integer ID as a stable, deterministic sampler.
+        const traceIndex = candidates.indexOf(trace.id);
+        if (traceIndex % SAMPLE_RATE !== 0) {
+          // Skip — re-queue as received so it will be sampled on a future run
+          await prisma.trace.update({
+            where: { id: trace.id },
+            data: { status: "received", statusUpdatedAt: new Date(), nextEvaluationAt: addMinutes(now, 60) },
+          });
+          continue;
+        }
+      }
+      orgEvalCounts.set(trace.orgId, orgCount + 1);
+      // ─────────────────────────────────────────────────────────────────────
+
       // Build tool calls from JSON
       const toolCalls = Array.isArray(trace.toolCalls) ? trace.toolCalls as Array<{ name: string; input: Record<string, unknown>; output?: unknown }> : [];
 
@@ -140,10 +179,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       const category = evalResult.category as IncidentCategory;
       const dedupKey = buildDedupKey(trace.agent.externalId, category);
 
-      // Window: one incident per category per agent per day
-      const dayStart = new Date(now);
-      dayStart.setUTCHours(0, 0, 0, 0);
-
+      // Window: one incident per category per agent per day (dayStart declared above loop)
       const existingIncident = await prisma.incident.findFirst({
         where: {
           dedupKey,
@@ -322,13 +358,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  const slaBreaches = await checkSlaRules(traces.map((t) => ({ orgId: t.orgId, agentId: t.agentId })));
+
+  // Health monitoring: if every trace in the batch failed, the eval pipeline is broken.
+  // Send a one-per-hour deduped alert to ADMIN_ALERT_EMAIL (if set).
+  if (errors > 0 && errors === candidates.length) {
+    await sendCronHealthAlert(errors).catch(() => undefined);
+  }
+
   return NextResponse.json({
     processed: candidates.length,
     passed,
     incidents,
     alerted,
     errors,
-    slaBreaches: await checkSlaRules(traces.map((t) => ({ orgId: t.orgId, agentId: t.agentId }))),
+    slaBreaches,
   });
 }
 
@@ -441,4 +485,39 @@ async function checkSlaRules(
     // Outer errors must never kill the cron
   }
   return breaches;
+}
+
+/**
+ * Send a health alert to ADMIN_ALERT_EMAIL when the entire eval batch fails.
+ * Deduped to once per hour via a simple KV-in-DB approach (incident dedupKey).
+ */
+async function sendCronHealthAlert(failedCount: number): Promise<void> {
+  const adminEmail = process.env.ADMIN_ALERT_EMAIL;
+  if (!adminEmail) return;
+
+  // Dedup: one health alert per hour
+  const hourKey = `cron_health:${Math.floor(Date.now() / (60 * 60_000))}`;
+  const existing = await prisma.incident.findFirst({ where: { dedupKey: hourKey } }).catch(() => null);
+  if (existing) return;
+
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://atlassynapseai.com/MVP";
+
+  await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "api-key": apiKey },
+    body: JSON.stringify({
+      sender: {
+        email: process.env.BREVO_FROM_EMAIL ?? "alerts@atlassynapseai.com",
+        name: process.env.BREVO_FROM_NAME ?? "Atlas Synapse",
+      },
+      to: [{ email: adminEmail }],
+      subject: "[AtlasSynapse] CRON HEALTH ALERT — eval pipeline failing",
+      htmlContent: `<p>The /api/cron/evaluate job just failed all ${failedCount} traces in a batch.</p>
+<p>Check Vercel function logs for details: <a href="${appUrl}">${appUrl}</a></p>
+<p>Possible causes: Anthropic API down, DATABASE_URL misconfigured, CRON_SECRET mismatch.</p>`,
+    }),
+  }).catch(() => undefined);
 }

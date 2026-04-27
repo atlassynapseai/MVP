@@ -89,13 +89,12 @@ These features were tested manually and confirmed working:
 
 ---
 
-## Pending Actions
+## Additional Tests (2026-04-27)
 
-1. **Redeploy edge worker** — `wrangler.toml` `WEB_INGEST_URL` was updated from stale Vercel preview URL to `https://atlassynapseai.com/MVP/api/ingest`. Must run from Cloudflare-authenticated machine:
-   ```bash
-   cd apps/edge
-   wrangler deploy
-   ```
-   Until redeployed, the edge worker forwards to the wrong URL and traces sent via the edge worker will fail with 502.
+| Feature | Result |
+|---------|--------|
+| Signup confirmation email (Gmail SMTP via Supabase) | ✅ Working |
+| Edge worker → ingest → eval → incident end-to-end | ✅ Working |
+| Brevo alert email on critical incident | ✅ Working |
 
-2. **Verify incidents flow end-to-end** after edge worker redeployment — send a trace via the edge worker, wait 60s for cron, confirm incident appears in dashboard.
+All pending actions from 2026-04-21 resolved. No open issues.

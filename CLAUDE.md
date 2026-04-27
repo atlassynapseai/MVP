@@ -73,7 +73,7 @@ pnpm test
 - HMAC token verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
 - Edge routes in `apps/edge/src/index.ts` (Hono)
-- Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
+- Evaluator deps (`@anthropic-ai/sdk`, `@getbrevo/brevo`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
 - Client-side `fetch()` calls: use `\`${basePath}/api/...\`` — Next.js does NOT auto-prepend basePath to raw fetch. `<Link href>` and `router.push()` use plain `/path` (Next.js auto-prepends). Server-side `redirect()` uses full `${appUrl}/path`.
 - Python SDK: mapper transforms Anthropic SDK events → AtlasSynapse ingest payload

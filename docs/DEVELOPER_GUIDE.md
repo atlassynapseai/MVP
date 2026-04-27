@@ -22,7 +22,7 @@ Supabase (Postgres)
 Anthropic Claude (Evaluator)
     ↓  classifies traces → creates Incidents
 Dashboard
-    ↓  (optional) email alert via Resend
+    ↓  (optional) email alert via Brevo
 ```
 
 ---
@@ -36,7 +36,7 @@ Dashboard
 | Security gateway | Cloudflare Workers + Hono | Strip PII from traces, HMAC-sign before forwarding |
 | Database | Supabase (Postgres) + Prisma ORM | All persistent data: agents, traces, incidents, orgs |
 | AI Evaluator | Anthropic Claude Sonnet | Read traces, classify severity + category, create Incidents |
-| Email alerts | Resend | Send email when a critical incident is detected |
+| Email alerts | Brevo | Send email when a critical incident is detected |
 | Agent connectors | n8n template / Python SDK / Zapier / Make.com | Pre-built ways to send traces from real agents |
 
 ---
@@ -138,8 +138,8 @@ Edit `apps/web/.env.local`:
 | `WEB_INGEST_URL` | `http://localhost:3000/MVP/api/ingest` | Yes |
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Yes |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) | Yes (for incidents) |
-| `RESEND_API_KEY` | [resend.com](https://resend.com) | No (email alerts only) |
-| `RESEND_FROM_EMAIL` | Your verified Resend sender | No |
+| `BREVO_API_KEY` | [brevo.com](https://brevo.com) | No (email alerts only) |
+| `BREVO_FROM_EMAIL` | Your verified Brevo sender | No |
 | `ADMIN_ALERT_EMAIL` | Your email address | No (cron health alerts) |
 
 Also create `apps/edge/.dev.vars` (edge worker local secrets):
@@ -278,7 +278,7 @@ Schema defined in `packages/shared/src/schemas.ts`.
 4. **Claude returns** severity (`warning`/`critical`) + category (e.g. `task_failure`, `policy_violation`)
 5. **Dedup check** — if same issue already has an open incident, skips
 6. **Creates Incident row** in DB
-7. **Sends email alert** via Resend if severity is `critical` (requires `RESEND_API_KEY`)
+7. **Sends email alert** via Brevo if severity is `critical` (requires `BREVO_API_KEY`)
 8. **Cron health alert** — if entire batch fails, emails `ADMIN_ALERT_EMAIL` (deduped hourly)
 9. Dashboard shows incidents under `/dashboard/incidents`
 

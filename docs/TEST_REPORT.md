@@ -72,6 +72,12 @@ Two GitHub Dependabot alerts were resolved:
 | GHSA-67mh-4wv8-2f99 | esbuild ≤0.24.2 | Moderate | Pinned via `pnpm.overrides`: `"esbuild": ">=0.25.0"` |
 | GHSA-4w7w-66w2-5vf9 | vite ≤6.4.1 | Moderate | **Accepted risk** — vite is a devDependency (vitest peer), never used as a production dev server. vitest@2.x requires vite@5.x; upgrading vite to 6.x breaks vitest. Impact: nil in production. |
 
+## Security Vulnerabilities Fixed (2026-04-28)
+
+| CVE | Package | Severity | Fix |
+|-----|---------|----------|-----|
+| GHSA-qx2v-qp2m-jg93 | postcss <8.5.10 | Moderate | Pinned via `pnpm.overrides`: `"postcss": ">=8.5.10"` — XSS via unescaped `</style>` in CSS stringify output |
+
 ---
 
 ## Manual Tests Completed (by user)

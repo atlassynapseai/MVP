@@ -107,7 +107,7 @@ class AtlasSynapseClient:
                 payload = TracePayload(
                     agent_id=ctx._agent_id,
                     external_trace_id=secrets.token_hex(16),
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                     prompt=ctx._prompt,
                     response=ctx._response,
                     tool_calls=ctx._tool_calls,

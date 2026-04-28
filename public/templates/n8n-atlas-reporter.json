@@ -71,7 +71,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  projectToken: $('AtlasSynapse Config').first().json.ATLAS_PROJECT_TOKEN,\n  agentId: $('AtlasSynapse Config').first().json.ATLAS_AGENT_NAME,\n  externalTraceId: $execution.id + '-' + Date.now(),\n  timestamp: new Date().toISOString(),\n  prompt: $('AI Agent').first().json.input?.input || $json.chatInput || '',\n  response: $('AI Agent').first().json.output || '',\n  toolCalls: ($('AI Agent').first().json.intermediateSteps || []).map(step => ({\n    name: step.action?.tool || 'unknown',\n    input: step.action?.toolInput || {},\n    output: step.observation ? String(step.observation).slice(0, 5000) : undefined\n  })),\n  tokenCount: null,\n  platform: 'n8n'\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  projectToken: $('AtlasSynapse Config').first().json.ATLAS_PROJECT_TOKEN,\n  agentId: $('AtlasSynapse Config').first().json.ATLAS_AGENT_NAME,\n  externalTraceId: $execution.id + '-' + Date.now(),\n  timestamp: new Date().toISOString(),\n  prompt: $('AI Agent').first().json.input?.input || $('AI Agent').first().json.input || $json.chatInput || $json.prompt || 'Hello, how can you help?',\n  response: $('AI Agent').first().json.output || '',\n  toolCalls: ($('AI Agent').first().json.intermediateSteps || []).map(step => ({\n    name: step.action?.tool || 'unknown',\n    input: step.action?.toolInput || {},\n    output: step.observation ? String(step.observation).slice(0, 5000) : undefined\n  })),\n  platform: 'n8n'\n}) }}",
         "options": {
           "response": {
             "response": {

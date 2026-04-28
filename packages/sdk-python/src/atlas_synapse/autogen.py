@@ -201,5 +201,3 @@ class AtlasSynapseAutoGenObserver:
                 )
         except Exception as exc:  # noqa: BLE001
             logger.warning("AtlasSynapse: failed to post AutoGen stream trace: %s", exc)
-
-        return last_result

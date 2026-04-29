@@ -16,7 +16,7 @@ const RedactedIngestSchema = z.object({
   toolCalls: z.array(ToolCallSchema).optional().default([]),
   tokenCount: z.number().int().nonnegative().optional(),
   costCents: z.number().nonnegative().optional(),
-  platform: z.enum(["anthropic", "n8n", "generic"]).optional(),
+  platform: z.string().max(64).optional(),
   rawRedactedPayload: z.record(z.unknown()),
 });
 

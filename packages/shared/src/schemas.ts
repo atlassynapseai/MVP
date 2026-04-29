@@ -17,7 +17,7 @@ export const TraceIngestSchema = z.object({
   tokenCount: z.number().int().nonnegative().optional(),
   costCents: z.number().nonnegative().optional(),
   /** Connector adapter identifier — not evaluated, used for display and routing. */
-  platform: z.enum(["anthropic", "n8n", "autogen", "langchain", "openai", "generic"]).optional(),
+  platform: z.string().max(64).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 

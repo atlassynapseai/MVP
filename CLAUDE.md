@@ -59,7 +59,7 @@ pnpm test
 - **Database**: `packages/db/` — Prisma schema + client re-export (`@atlas/db`)
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
-- **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`
+- **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`, `autogen.py`
 - **Scripts**: `scripts/test-anthropic-agent.py`, `scripts/seed-connection.mjs`
 - **N8N template**: `public/templates/n8n-atlas-reporter.json`
 - **Deployment**: `vercel.json` — cron schedule (`* * * * *` → `/api/cron/evaluate`)
@@ -76,8 +76,12 @@ pnpm test
 - Evaluator deps (`@anthropic-ai/sdk`, `@getbrevo/brevo`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
 - Client-side `fetch()` calls: use `\`${basePath}/api/...\`` — Next.js does NOT auto-prepend basePath to raw fetch. `<Link href>` and `router.push()` use plain `/path` (Next.js auto-prepends). Server-side `redirect()` uses full `${appUrl}/path`.
-- Python SDK: mapper transforms Anthropic SDK events → AtlasSynapse ingest payload
-- N8N: import `public/templates/n8n-atlas-reporter.json`; set `tokenCount: null` (n8n has no native token count)
+- Python SDK: mapper transforms Anthropic SDK events → AtlasSynapse ingest payload; AutoGen 0.2.x via `wrap_agent()` in `autogen.py`
+- N8N: import `public/templates/n8n-atlas-reporter.json`; omit `tokenCount` (n8n has no native token count)
+- Platform field: `z.string().max(64).optional()` — open string, not enum; any value accepted
+- Outbound webhooks: `deliverWebhook` must be awaited (not fire-and-forget) in serverless — Vercel kills function before HTTP completes
+- SLA monitoring: `checkSlaRules` in cron — counts `Evaluation.outcome` in rolling window; min 5 evals required; deduped hourly
+- Data isolation: ALL DB queries scoped to `orgId` from authenticated session — no cross-org leakage possible
 - Auth middleware: API routes with their own auth (HMAC, bearer) must be in public routes list in `apps/web/middleware.ts`
 
 ## Conventions

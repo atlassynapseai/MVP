@@ -104,3 +104,24 @@ These features were tested manually and confirmed working:
 | Brevo alert email on critical incident | ✅ Working |
 
 All pending actions from 2026-04-21 resolved. No open issues.
+
+---
+
+## Additional Tests (2026-04-30)
+
+| Feature | Result | Notes |
+|---------|--------|-------|
+| AutoGen 0.2.x SDK integration | ✅ Working | Fixed: async generator `return` bug + platform enum too narrow |
+| Slack alerts | ✅ Working | Webhook URL saved in Settings → alert fired on critical incident |
+| Outbound webhooks | ✅ Working | Fixed: fire-and-forget lost in Vercel serverless — now `await Promise.allSettled` |
+| SLA monitoring | ✅ Working | Fixed: silent swallowed error in `checkSlaRules` — breach detected at 100% failure rate |
+| Data isolation | ✅ Verified | All dashboard queries and API routes scoped to `orgId`; no cross-org data leakage |
+| Evaluator outcomes | ✅ Verified | Real Claude Sonnet calls, `temperature=0` (deterministic); no random outcomes |
+
+### Bugs found and fixed
+| Bug | Fix |
+|-----|-----|
+| `deliverWebhook` fire-and-forget — Vercel kills function before HTTP completes | Changed to `await Promise.allSettled(webhooks.map(...))` |
+| `checkSlaRules` inner catch swallowed errors silently — `slaBreaches` always 0 | Added error logging to inner catch; identified and unblocked |
+| AutoGen `run_stream_team` had `return value` in async generator (SyntaxError) | Removed `return last_result` |
+| Platform field in web ingest and shared schema was closed enum — rejected `autogen` | Changed to `z.string().max(64).optional()` |

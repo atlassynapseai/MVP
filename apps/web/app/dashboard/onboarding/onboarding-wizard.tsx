@@ -456,8 +456,8 @@ export function OnboardingWizard({ hasConnection }: Props) {
           <h2 className="text-xl font-semibold text-gray-100">You&apos;re live!</h2>
           <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
             Your agent is now monitored by Atlas Synapse. Every conversation is logged,
-            PII is stripped automatically, and your team gets alerted in Slack when something
-            goes wrong.
+            PII is stripped automatically, and your team gets alerted instantly when something
+            goes wrong — via Slack, email, or webhook.
           </p>
           <div className="flex flex-wrap gap-3 justify-center pt-2">
             <Link href="/dashboard" className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">
@@ -467,7 +467,7 @@ export function OnboardingWizard({ hasConnection }: Props) {
               View Traces
             </Link>
             <Link href="/dashboard/settings" className="px-5 py-2.5 rounded-lg border border-gray-700 text-gray-400 text-sm hover:text-gray-200 transition-colors">
-              Set up Slack alerts
+              Set up alerts
             </Link>
           </div>
         </div>

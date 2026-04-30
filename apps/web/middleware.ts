@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 function getPublicPrefixes(): string[] {
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").trim();
   const base = appUrl ? new URL(appUrl).pathname.replace(/\/$/, "") : "";
-  const routes = ["/login", "/auth/callback", "/api/ingest", "/api/cron/", "/privacy", "/terms", "/api/webhooks/zapier"];
+  const routes = ["/login", "/auth/callback", "/api/ingest", "/api/cron/", "/privacy", "/terms", "/api/webhooks/zapier", "/demo"];
   if (base) {
     return [...routes, ...routes.map((r) => `${base}${r}`)];
   }

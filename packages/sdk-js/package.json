@@ -19,7 +19,7 @@
   "devDependencies": {
     "@atlas/shared": "workspace:*",
     "typescript": "^5.5.0",
-    "vitest": "^2.1.9"
+    "vitest": "^3.0.0"
   },
   "peerDependencies": {
     "ai": ">=3.0.0"

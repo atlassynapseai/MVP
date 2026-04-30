@@ -50,7 +50,18 @@ export async function GET(req: NextRequest) {
     const passRate = evalTotal > 0 ? Math.round((evalPassed / evalTotal) * 100) : null;
 
     function escHtml(s: string) {
-      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // Validates http/https-only URL before use in href attributes
+    function safeHref(url: string): string {
+      if (!/^https?:\/\//.test(url)) return "#";
+      return escHtml(url);
     }
 
     const incidentRows = topIncidents.map((inc) => `
@@ -99,14 +110,14 @@ export async function GET(req: NextRequest) {
     <tbody>${incidentRows}</tbody>
   </table>` : `<p style="color:#6b7280;font-size:14px;">No incidents this week. ✓</p>`}
 
-  <a href="${escHtml(appUrl)}/dashboard"
+  <a href="${safeHref(appUrl)}/dashboard"
      style="display:inline-block;background:#7c3aed;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">
     View Full Dashboard
   </a>
 
   <p style="color:#9ca3af;font-size:11px;margin-top:32px;">
     AtlasSynapse — HR for Your AI<br>
-    <a href="${escHtml(appUrl)}/dashboard/settings" style="color:#9ca3af;">Manage notification settings</a>
+    <a href="${safeHref(appUrl)}/dashboard/settings" style="color:#9ca3af;">Manage notification settings</a>
   </p>
 </body>
 </html>`;

@@ -40,12 +40,13 @@ export function MobileSidebarWrapper({ userEmail }: { userEmail: string }) {
 
       {/* Sidebar — spring slide on mobile, static on desktop */}
       <div
-        className="fixed inset-y-0 left-0 z-20 md:static md:translate-x-0 md:flex md:shrink-0"
+        className={`fixed inset-y-0 left-0 z-20 md:static md:translate-x-0 md:flex md:shrink-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
         style={{
-          transform: open ? "translateX(0)" : "translateX(-100%)",
-          transition: open
-            ? "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)"
-            : "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: `transform ${open
+            ? "0.35s cubic-bezier(0.34, 1.56, 0.64, 1)"
+            : "0.25s cubic-bezier(0.4, 0, 0.2, 1)"}`,
         }}
       >
         <Sidebar userEmail={userEmail} onNavigate={() => setOpen(false)} />

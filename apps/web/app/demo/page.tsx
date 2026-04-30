@@ -27,9 +27,17 @@ const STEPS = [
     step: "01",
     title: "Connect in 3 lines",
     description: "Install the SDK and wrap your agent. Works with any AI framework — no architecture changes required.",
-    code: `sdk = AtlasSynapseSdk(token=..., url=...)
-sdk.post_trace(prompt=input, response=output)
-# that's it.`,
+    code: `from atlas_synapse import AtlasSynapseSdk, TracePayload
+
+sdk = AtlasSynapseSdk(
+    project_token="your-token",
+    ingest_url="https://atlas-synapse-edge...",
+    agent_name="my-agent",
+)
+sdk.post_trace(TracePayload(
+    prompt=user_input, response=agent_output,
+    agent_id="my-agent", platform="anthropic",
+))`,
     color: "text-violet-400",
     border: "border-violet-500/30",
     glow: "shadow-violet-500/10",
@@ -115,7 +123,7 @@ export default function DemoPage() {
 
         <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           Monitor your AI agents like employees. Catch policy violations, data leaks,
-          and harmful outputs before your customers do — with alerts straight to Slack.
+          and harmful outputs before your customers do — with instant alerts to Slack, email, or webhook.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

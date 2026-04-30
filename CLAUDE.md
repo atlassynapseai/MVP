@@ -71,7 +71,7 @@ pnpm test
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
 - **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`, `autogen.py`, `crewai.py`, `langchain.py`, `llamaindex.py`, `openai.py`, `simple.py`
 - **JS SDK**: `packages/sdk-js/src/` — `client.ts`, `vercel.ts` (Vercel AI SDK wrapper)
-- **Scripts**: `scripts/test-anthropic-agent.py`, `scripts/seed-connection.mjs`
+- **Scripts**: `scripts/test-anthropic-agent.py`, `scripts/seed-connection.mjs`, `scripts/slack-demo-bot/` — Slack demo bot for live presentations
 - **N8N template**: `public/templates/n8n-atlas-reporter.json`
 - **Deployment**: `vercel.json` — cron schedules (`0 2 * * *` → `/api/cron/evaluate`; `0 9 * * 1` → `/api/cron/weekly-digest`)
 

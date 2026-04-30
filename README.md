@@ -84,11 +84,12 @@ cd packages/sdk-python && PYTHONPATH=src python3 -m pytest tests/
 
 ## Architecture
 
-See `docs/DEVELOPER_GUIDE.md` for extended documentation.
+See `docs/DEVELOPER_GUIDE.md` for extended documentation and `docs/USER_GUIDE.md` for end-user guide.
 
 ```
+zapier-app/              # Zapier integration app
 packages/
-  sdk-python/          # Python SDK (atlas-synapse v0.2.0) — client, hooks, mapper, autogen
+  sdk-python/          # Python SDK — client, hooks, mapper; Anthropic, OpenAI, AutoGen, CrewAI, LangChain, LlamaIndex
   sdk-js/              # JS/TS SDK (atlas-synapse) — Node.js, Vercel AI SDK support
   evaluator/           # eval, alert, dedup, translate (@atlas/evaluator)
   db/                  # Prisma schema + client (@atlas/db)

@@ -1,0 +1,13 @@
+{
+  "name": "atlas-slack-demo-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Demo Slack bot for Atlas Synapse — shows live AI monitoring in action",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@slack/bolt": "^3.22.0"
+  }
+}

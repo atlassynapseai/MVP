@@ -348,6 +348,7 @@ async function checkSlaRules(
 ): Promise<number> {
   // Collect unique orgIds from the processed batch
   const orgIds = [...new Set(processed.map((t) => t.orgId).filter(Boolean))] as string[];
+  console.log("[cron/sla] orgIds:", orgIds);
   if (orgIds.length === 0) return 0;
 
   let breaches = 0;
@@ -355,10 +356,12 @@ async function checkSlaRules(
     const rules = await prisma.slaRule.findMany({
       where: { orgId: { in: orgIds }, enabled: true },
     });
+    console.log("[cron/sla] rules found:", rules.length);
 
     for (const rule of rules) {
       try {
         const windowStart = new Date(Date.now() - rule.windowMinutes * 60_000);
+        console.log("[cron/sla] windowStart:", windowStart.toISOString(), "windowMinutes:", rule.windowMinutes);
 
         // Count evaluations in window for this org/agent scope
         const evalFilter = {
@@ -376,7 +379,8 @@ async function checkSlaRules(
           }),
         ]);
 
-        if (total < 5) continue; // too few data points — skip
+        console.log(`[cron/sla] total=${total} failures=${failures} threshold=${rule.maxErrorRatePct}%`);
+        if (total < 5) { console.log("[cron/sla] skip: total < 5"); continue; }
 
         const errorRatePct = Math.round((failures / total) * 100);
         if (errorRatePct <= rule.maxErrorRatePct) continue;

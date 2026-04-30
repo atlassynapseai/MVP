@@ -2,7 +2,7 @@
 import { basePath } from "@/lib/app-path";
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle, Copy, Check } from "lucide-react";
+import { CheckCircle, Copy, Check, Mail, Sparkles } from "lucide-react";
 
 interface Props {
   hasConnection: boolean;
@@ -10,16 +10,17 @@ interface Props {
 }
 
 type Step = 1 | 2 | 3;
-type Tab = "python" | "nodejs" | "n8n" | "zapier" | "http";
+type Tab = "python" | "nodejs" | "n8n" | "zapier" | "http" | "vibecoded";
 
 const INGEST_URL = "https://atlas-synapse-edge.atlassynapseai.workers.dev";
 
 const TABS: { id: Tab; label: string; sub: string }[] = [
-  { id: "python",  label: "Python",   sub: "Anthropic · OpenAI · LangChain · CrewAI · more" },
-  { id: "nodejs",  label: "Node.js",  sub: "Vercel AI SDK · OpenAI · any JS agent"           },
-  { id: "n8n",     label: "n8n",      sub: "no-code workflow automation"                      },
-  { id: "zapier",  label: "Zapier",   sub: "no-code · any Zap"                                },
-  { id: "http",    label: "Any HTTP", sub: "Make.com · curl · any language"                   },
+  { id: "python",    label: "Python",       sub: "Anthropic · OpenAI · LangChain · CrewAI · more" },
+  { id: "nodejs",    label: "Node.js",      sub: "Vercel AI SDK · OpenAI · any JS agent"           },
+  { id: "n8n",       label: "n8n",          sub: "no-code workflow automation"                      },
+  { id: "zapier",    label: "Zapier",       sub: "no-code · any Zap"                                },
+  { id: "http",      label: "Any HTTP",     sub: "Make.com · curl · any language"                   },
+  { id: "vibecoded", label: "✨ Vibe coded", sub: "built with AI — paste a prompt and you're done"  },
 ];
 
 function CodeBlock({ code, onCopy }: { code: string; onCopy?: () => void }) {
@@ -298,6 +299,55 @@ Body:
     </div>
   );
 
+  if (tab === "vibecoded") return (
+    <div className="space-y-4">
+      <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-4">
+        <p className="text-sm text-violet-300 font-medium mb-1 flex items-center gap-2">
+          <Sparkles className="w-4 h-4" /> Built your agent with AI? No problem.
+        </p>
+        <p className="text-sm text-gray-400">
+          Copy the prompt below and paste it into Claude, ChatGPT, or whatever AI you used to build your agent.
+          It will add Atlas Synapse monitoring automatically — no manual coding needed.
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Paste this into your AI</p>
+        <CodeBlock code={`I want to add Atlas Synapse monitoring to my AI agent.
+
+Atlas Synapse tracks every conversation my agent has, strips PII,
+and alerts me when something goes wrong.
+
+My project token is: ${t}
+The ingest URL is: ${url}
+
+Please add the Atlas Synapse SDK to my agent code so that after
+every response it posts a trace. Use the correct SDK for my language:
+
+- Python: pip install atlas-synapse
+  from atlas_synapse import AtlasSynapseSdk, TracePayload
+  sdk = AtlasSynapseSdk(project_token="${t}", ingest_url="${url}", agent_name="my-agent")
+  sdk.post_trace(TracePayload(agent_id="my-agent", external_trace_id=..., timestamp=..., prompt=user_input, response=agent_output, platform="..."))
+
+- Node.js: npm install atlas-synapse
+  const atlas = new AtlasSynapseClient({ token: "${t}", agentName: "my-agent" })
+  await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" })
+
+Here is my current agent code:
+[PASTE YOUR AGENT CODE HERE]`} />
+      </div>
+
+      <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
+        <p className="text-xs font-semibold text-gray-300">What happens next</p>
+        <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
+          <li>Your AI reads the prompt and adds the 3-4 lines to your agent code</li>
+          <li>Run your agent once to send a test trace</li>
+          <li>Come back here and click &quot;I&apos;ve sent a trace →&quot;</li>
+        </ol>
+      </div>
+    </div>
+  );
+
   return null;
 }
 
@@ -430,6 +480,20 @@ export function OnboardingWizard({ hasConnection }: Props) {
 
             {/* Tab content */}
             <TabContent tab={tab} token={token} />
+          </div>
+
+          {/* Forward to developer */}
+          <div className="rounded-lg bg-gray-800/40 border border-gray-700/50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-gray-200">Not the developer?</p>
+              <p className="text-xs text-gray-500 mt-0.5">Forward this setup to whoever built your agent — they&apos;ll have it connected in minutes.</p>
+            </div>
+            <a
+              href={`mailto:?subject=Please connect our AI agent to Atlas Synapse&body=Hi,%0A%0APlease add Atlas Synapse monitoring to our AI agent.%0A%0AIt takes about 10 minutes — just follow the setup guide here:%0Ahttps://atlassynapseai.com/MVP/dashboard/onboarding%0A%0AProject token: ${token ?? "— create one at the link above"}%0AIngest URL: ${INGEST_URL}%0A%0AAtlas Synapse tracks every agent conversation, strips PII automatically, and alerts us when something goes wrong.%0A%0AThanks`}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-600 text-gray-300 text-sm hover:border-violet-500 hover:text-violet-300 transition-colors whitespace-nowrap shrink-0"
+            >
+              <Mail className="w-3.5 h-3.5" /> Forward to developer
+            </a>
           </div>
 
           <div className="flex gap-3 pt-2 border-t border-gray-800">

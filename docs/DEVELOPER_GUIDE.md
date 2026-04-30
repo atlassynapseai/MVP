@@ -8,21 +8,65 @@ A complete reference for anyone picking up this project. Read this before touchi
 
 AtlasSynapse is "HR for Your AI" — a monitoring platform for AI agents. Just as HR tracks employee performance, AtlasSynapse tracks what your AI agents are doing, flags problems, and alerts you when something goes wrong.
 
-**Data flow:**
+**Data flow (high level):**
 
 ```
-Your AI Agent
-    ↓  (HTTP POST with projectToken)
-Edge Worker (Cloudflare)
-    ↓  strips PII, signs payload with HMAC
-Next.js Web App (Vercel)
-    ↓  verifies signature, saves to DB
-Supabase (Postgres)
-    ↓  cron runs every 60s
-Anthropic Claude (Evaluator)
-    ↓  classifies traces → creates Incidents
-Dashboard
-    ↓  (optional) email alert via Brevo
+ YOUR REAL AGENT
+ (any language / framework)
+       │
+       │  HTTP POST  { projectToken, agentId, prompt, response, toolCalls }
+       ▼
+┌─────────────────────────────────────────────────────────┐
+│  CLOUDFLARE EDGE WORKER  (atlas-synapse-edge.*.workers.dev) │
+│  • Validate payload (Zod schema)                        │
+│  • Rate limit: 60 req/min per token                     │
+│  • Strip PII from prompt, response, tool call outputs   │
+│    (emails → [EMAIL], phones → [PHONE], cards → [CC])   │
+│  • HMAC-sign redacted payload (Web Crypto)              │
+└─────────────────────────────────────────────────────────┘
+       │
+       │  POST  redacted payload + X-Atlas-Signature header
+       ▼
+┌─────────────────────────────────────────────────────────┐
+│  VERCEL WEB APP  (Next.js 15 — /api/ingest)             │
+│  • Verify HMAC signature                                │
+│  • SHA-256 hash token → look up Connection in DB        │
+│  • Upsert Agent row (auto-creates on first trace)       │
+│  • Insert Trace row  status=received                    │
+└─────────────────────────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────────────────┐
+│  SUPABASE POSTGRES                                      │
+│  Organization → Connection → Agent → Trace              │
+│                                    ↓ (async)            │
+│                               Evaluation                │
+│                                    ↓ (if fail/anomaly)  │
+│                               Incident → Alert          │
+└─────────────────────────────────────────────────────────┘
+       │
+       │  Vercel Cron — daily 2am UTC  (+ weekly digest Mon 9am)
+       ▼
+┌─────────────────────────────────────────────────────────┐
+│  ANTHROPIC CLAUDE EVALUATOR  (claude-sonnet-4-5)        │
+│  • Batch 5 unreviewed traces                            │
+│  • Classify: pass / anomaly / failure                   │
+│  • Category: scope_violation / harmful_output /         │
+│    policy_violation / sla_breach / ...                  │
+│  • Dedup: 1 incident per category per agent per day     │
+│  • Create Incident + Evaluation rows                    │
+└─────────────────────────────────────────────────────────┘
+       │
+       ├──────────────────────────┐
+       ▼                          ▼
+┌─────────────┐        ┌──────────────────────┐
+│  DASHBOARD  │        │  ALERTS              │
+│  (Vercel)   │        │  • Slack webhook      │
+│  Agents     │        │    → #your-channel   │
+│  Traces     │        │  • Email via Brevo   │
+│  Incidents  │        │  • Outbound webhooks │
+│  Analytics  │        │    (Zapier / n8n)    │
+└─────────────┘        └──────────────────────┘
 ```
 
 ---
@@ -37,7 +81,7 @@ Dashboard
 | Database | Supabase (Postgres) + Prisma ORM | All persistent data: agents, traces, incidents, orgs |
 | AI Evaluator | Anthropic Claude Sonnet | Read traces, classify severity + category, create Incidents |
 | Email alerts | Brevo | Send email when a critical incident is detected |
-| Agent connectors | n8n template / Python SDK / Zapier / Make.com | Pre-built ways to send traces from real agents |
+| Agent connectors | Python SDK / JS SDK / n8n / Zapier / raw HTTP | Pre-built ways to send traces from real agents |
 
 ---
 
@@ -77,22 +121,34 @@ MVP/
 │   ├── evaluator/                  # AI evaluation engine (@atlas/evaluator)
 │   │   └── src/
 │   │       ├── evaluate.ts         # Anthropic call — classify trace
-│   │       ├── alert.ts            # Send email alert via Resend
+│   │       ├── alert.ts            # Send email (Brevo) + Slack webhook alerts
 │   │       ├── dedup.ts            # Dedup logic (same issue = one incident)
 │   │       └── translate.ts        # Business-friendly language translation
 │   └── sdk-python/                 # Python SDK for agent integration
 │       └── src/atlas_synapse/
-│           ├── client.py           # Main client
-│           ├── hooks.py            # Anthropic SDK hooks
+│           ├── client.py           # Main client (AtlasSynapseSdk)
+│           ├── hooks.py            # Anthropic SDK hooks (wrap_agent)
 │           ├── mapper.py           # Maps Anthropic events → ingest payload
-│           └── autogen.py          # AutoGen 0.2.x + 0.4+ integration
+│           ├── autogen.py          # AutoGen 0.2.x + 0.4+ integration
+│           ├── crewai.py           # CrewAI integration
+│           ├── langchain.py        # LangChain integration
+│           ├── llamaindex.py       # LlamaIndex integration
+│           ├── openai.py           # OpenAI SDK integration
+│           └── simple.py          # Simple wrapper (any framework)
+├── packages/sdk-js/                # JS/TS SDK for agent integration
+│   └── src/
+│       ├── client.ts               # AtlasSynapseClient (Node 18+, edge runtimes)
+│       └── vercel.ts               # wrapVercelAI + vercelOnFinish helpers
 ├── zapier-app/                     # Zapier Platform CLI app
 │   └── index.js                    # Auth + Send Agent Trace action
 ├── public/
 │   └── templates/
 │       └── n8n-atlas-reporter.json # n8n workflow template for trace reporting
 ├── scripts/
-│   └── seed-connection.mjs         # Seeds a test Connection + prints curl example
+│   ├── seed-connection.mjs         # Seeds a test Connection + prints curl example
+│   ├── seed-demo.mjs               # Populates dashboard with 4 agents + 30 traces (client demo)
+│   ├── demo-live-ingest.mjs        # Live ingest script for pitch demos (triggers alert in ~10s)
+│   └── slack-demo-bot/             # Slack bot: @mention → Claude reply → Atlas trace → #alerts
 ├── .env.example                    # All env vars with comments
 ├── vercel.json                     # Cron schedule + Vercel config
 └── CLAUDE.md                       # AI agent context (architecture, conventions)
@@ -108,7 +164,7 @@ MVP/
 - pnpm ≥ 9 (`npm install -g pnpm`)
 - A [Supabase](https://supabase.com) project (free tier works) — need connection strings + anon key
 - An [Anthropic](https://console.anthropic.com) API key (for incidents to generate)
-- A [Resend](https://resend.com) account (optional — only needed for email alerts)
+- A [Brevo](https://brevo.com) account (optional — only needed for email alerts)
 
 ### Step 1: Install dependencies
 
@@ -199,7 +255,7 @@ curl -X POST http://localhost:<edge-port>/ingest \
   }'
 ```
 
-Refresh the dashboard → agent card appears. Wait 60s → cron evaluates the trace → incident appears in `/dashboard/incidents` (requires `ANTHROPIC_API_KEY`).
+Refresh the dashboard → agent card appears. Wait for the next 2am UTC cron (or trigger manually: `curl -H "Authorization: Bearer $CRON_SECRET" $NEXT_PUBLIC_APP_URL/api/cron/evaluate`) → evaluation runs → incident appears in `/dashboard/incidents` (requires `ANTHROPIC_API_KEY`).
 
 ---
 
@@ -220,17 +276,57 @@ Refresh the dashboard → agent card appears. Wait 60s → cron evaluates the tr
 pip install atlas-synapse
 ```
 
+**Anthropic (auto-wrap — zero code change):**
 ```python
-from atlas_synapse import AtlasSynapseClient
-import anthropic
+from atlas_synapse import AtlasSynapseSdk, wrap_agent
 
-atlas = AtlasSynapseClient(
-    ingest_url="https://atlas-synapse-edge.<account>.workers.dev/ingest",
+sdk = AtlasSynapseSdk(
     project_token="your-project-token",
+    ingest_url="https://atlas-synapse-edge.<account>.workers.dev",
+    agent_name="my-agent",
 )
+agent = wrap_agent(your_anthropic_agent, sdk)
+# Every agent run now auto-posts a trace
+```
 
-client = atlas.wrap(anthropic.Anthropic())
-# Use `client` exactly like the normal Anthropic client — traces sent automatically
+**Any framework (manual):**
+```python
+from atlas_synapse import AtlasSynapseSdk, TracePayload
+from datetime import datetime, timezone
+
+sdk = AtlasSynapseSdk(project_token="...", ingest_url="...", agent_name="my-agent")
+sdk.post_trace(TracePayload(
+    agent_id="my-agent",
+    external_trace_id="run-abc123",
+    timestamp=datetime.now(timezone.utc).isoformat(),
+    prompt=user_input,
+    response=agent_output,
+    platform="langchain",  # or "openai", "crewai", etc.
+))
+```
+
+### Option 3: JS / Node.js SDK
+
+```bash
+npm install atlas-synapse
+```
+
+**Vercel AI SDK (generateText):**
+```ts
+import { AtlasSynapseClient, wrapVercelAI } from "atlas-synapse";
+
+const atlas = new AtlasSynapseClient({ token: "your-token", agentName: "my-agent" });
+
+const { text } = await wrapVercelAI(atlas,
+  () => generateText({ model: openai("gpt-4o"), prompt: userPrompt }),
+  { prompt: userPrompt }
+);
+```
+
+**Any Node.js agent (manual):**
+```ts
+const atlas = new AtlasSynapseClient({ token: "your-token", agentName: "my-agent" });
+await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" });
 ```
 
 ### Option 3: Zapier
@@ -272,15 +368,16 @@ Schema defined in `packages/shared/src/schemas.ts`.
 
 ## How Incidents Are Generated
 
-1. **Cron fires** every 60 seconds (`/api/cron/evaluate` — scheduled in `vercel.json`)
-2. **Fetches** up to 5 unevaluated traces from DB (rate-limited: 500/day per org, then 1-in-5 sampling)
+1. **Cron fires** daily at 2am UTC — `/api/cron/evaluate` (+ weekly digest Mondays 9am UTC)
+2. **Fetches** up to 5 unevaluated traces from DB
 3. **Sends each** to Anthropic Claude Sonnet with a classification prompt
-4. **Claude returns** severity (`warning`/`critical`) + category (e.g. `task_failure`, `policy_violation`)
-5. **Dedup check** — if same issue already has an open incident, skips
-6. **Creates Incident row** in DB
-7. **Sends email alert** via Brevo if severity is `critical` (requires `BREVO_API_KEY`)
-8. **Cron health alert** — if entire batch fails, emails `ADMIN_ALERT_EMAIL` (deduped hourly)
-9. Dashboard shows incidents under `/dashboard/incidents`
+4. **Claude returns** outcome (`pass`/`anomaly`/`failure`) + category (e.g. `scope_violation`, `harmful_output`, `policy_violation`) + confidence
+5. **Dedup check** — 1 incident per category per agent per calendar day
+6. **Creates Incident + Evaluation rows** in DB
+7. **Sends Slack alert** if `slackWebhookUrl` configured in Settings → Alert Prefs
+8. **Sends email alert** via Brevo if severity is `critical` (requires `BREVO_API_KEY`)
+9. **Fires outbound webhooks** to any registered webhook URLs
+10. Dashboard shows incidents under `/dashboard/incidents`
 
 **Requires:** `ANTHROPIC_API_KEY` in env. Without it, cron runs but produces no incidents.
 
@@ -335,7 +432,7 @@ Use the Cloudflare Workers URL as `ATLAS_INGEST_URL` in n8n or Python SDK.
 - **Branches**: `feat/<slug>` or `fix/<slug>` off `main`
 - **Client-side fetch**: use `` `${basePath}/api/...` `` — Next.js does NOT auto-prepend basePath to raw `fetch()`
 - **Link href / router.push**: use plain `/path` — Next.js auto-prepends basePath
-- **Public API routes** (HMAC/bearer auth) must be listed in `isPublicRoute` in `apps/web/middleware.ts`
+- **Public API routes** (HMAC/bearer auth) must be listed in `PUBLIC_PREFIXES` in `apps/web/middleware.ts`
 - **Prisma compound unique with nullable field** — use `findFirst` not `findUnique`
-- **Evaluator deps** (`@anthropic-ai/sdk`, `resend`) live in `packages/evaluator/` — do not add them to `apps/web/`
+- **Evaluator deps** (`@anthropic-ai/sdk`, `@getbrevo/brevo`) live in `packages/evaluator/` — do not add them to `apps/web/`
 - **HMAC**: `packages/shared/src/hmac.ts` uses pure Web Crypto (no Node.js built-ins) so it runs in both Cloudflare Workers and Node.js

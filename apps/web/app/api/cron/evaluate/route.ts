@@ -270,22 +270,28 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         data: { status: "alerted", statusUpdatedAt: new Date() },
       });
 
-      // 7. Fire outbound webhooks (fire-and-forget — never fail cron)
+      // 7. Fire outbound webhooks — await all concurrently so Vercel doesn't kill
+      // the function before the HTTP requests complete (fire-and-forget loses
+      // the promise in a serverless context without awaiting).
       const outboundWebhooks = await prisma.webhook.findMany({
         where: { orgId: trace.orgId, active: true, events: { has: "incident.created" } },
         select: { url: true, secret: true },
       });
-      for (const wh of outboundWebhooks) {
-        deliverWebhook(wh.url, wh.secret, {
-          event: "incident.created",
-          timestamp: new Date().toISOString(),
-          data: {
-            incidentId: incident.id,
-            severity,
-            category,
-            agentName: trace.agent.displayName,
-          },
-        }).catch(() => undefined);
+      if (outboundWebhooks.length > 0) {
+        await Promise.allSettled(
+          outboundWebhooks.map((wh) =>
+            deliverWebhook(wh.url, wh.secret, {
+              event: "incident.created",
+              timestamp: new Date().toISOString(),
+              data: {
+                incidentId: incident.id,
+                severity,
+                category,
+                agentName: trace.agent.displayName,
+              },
+            }),
+          ),
+        );
       }
 
     } catch (err) {

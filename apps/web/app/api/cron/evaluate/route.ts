@@ -439,8 +439,8 @@ async function checkSlaRules(
         }
 
         breaches++;
-      } catch {
-        // Per-rule errors must never kill the loop
+      } catch (ruleErr) {
+        console.error("[cron/sla] rule error:", ruleErr instanceof Error ? ruleErr.message.slice(0, 200) : String(ruleErr));
       }
     }
   } catch {

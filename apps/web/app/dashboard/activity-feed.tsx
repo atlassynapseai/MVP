@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { basePath } from "@/lib/app-path";
 import { useEffect, useState } from "react";
 
@@ -83,7 +84,7 @@ export function ActivityFeed() {
   return (
     <div className="space-y-2">
       {traces.map((trace, index) => (
-        <a
+        <Link
           key={trace.id}
           href={`/dashboard/traces/${trace.id}`}
           className="flex items-center gap-3 p-3 rounded-xl bg-gray-900 border border-gray-800 activity-item animate-slide-left"
@@ -103,7 +104,7 @@ export function ActivityFeed() {
             <span className={`text-xs font-medium ${statusColor(trace.status)}`}>{trace.status}</span>
             <span className="text-xs text-gray-600">{timeAgo(trace.createdAt)}</span>
           </div>
-        </a>
+        </Link>
       ))}
     </div>
   );

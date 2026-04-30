@@ -33,12 +33,12 @@ function OutcomeBadge({ outcome }: { outcome: string }) {
     );
   if (outcome === "anomaly")
     return (
-      <span className="px-2 py-0.5 text-xs rounded border bg-yellow-900/40 text-yellow-400 border-yellow-800">
+      <span className="px-2 py-0.5 text-xs rounded border bg-yellow-900/40 text-yellow-400 border-yellow-800 badge-warning">
         Anomaly
       </span>
     );
   return (
-    <span className="px-2 py-0.5 text-xs rounded border bg-red-900/40 text-red-400 border-red-800">
+    <span className="px-2 py-0.5 text-xs rounded border bg-red-900/40 text-red-400 border-red-800 badge-critical">
       Failure
     </span>
   );
@@ -90,10 +90,10 @@ export default async function EvaluationsPage({
     return (
       <Link
         href={`/dashboard/evaluations${value !== "all" ? `?outcome=${value}` : ""}`}
-        className={`px-3 py-1.5 text-xs rounded border transition-colors ${active
-            ? "bg-purple-900/50 text-purple-300 border-purple-700"
-            : "text-gray-400 border-gray-700 hover:text-gray-200 hover:border-gray-600"
-          }`}
+        className={`px-3 py-1.5 text-xs rounded-lg border transition-all duration-200 ${active
+          ? "bg-purple-900/50 text-purple-300 border-purple-700 filter-btn-active"
+          : "text-gray-400 border-gray-700 hover:text-gray-200 hover:border-gray-600 hover:bg-gray-800/50"
+        }`}
       >
         {label}
       </Link>
@@ -101,13 +101,13 @@ export default async function EvaluationsPage({
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-100 mb-1">Evaluations</h1>
-      <p className="text-gray-400 text-sm mb-6">
+    <div className="animate-fade-in-up">
+      <h1 className="text-2xl font-bold text-gradient-purple mb-1">Evaluations</h1>
+      <p className="text-gray-500 text-sm mb-6">
         AI-powered quality scores for every agent trace.
       </p>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-5 animate-fade-in" style={{ animationDelay: "100ms" }}>
         {filterBtn("all", "All")}
         {filterBtn("pass", "Pass")}
         {filterBtn("anomaly", "Anomaly")}
@@ -115,33 +115,34 @@ export default async function EvaluationsPage({
       </div>
 
       {evaluations.length === 0 ? (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-500 animate-scale-in">
           No evaluations yet. Traces are evaluated automatically within ~60 seconds of ingestion.
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+        <div className="rounded-xl border border-gray-800 overflow-hidden animate-scale-in">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Agent</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Outcome</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Category</th>
-                <th className="text-right px-4 py-3 text-gray-400 font-medium">Confidence</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Business Impact</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">When</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Links</th>
+              <tr className="border-b border-gray-800 bg-gray-900/80">
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Agent</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Outcome</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Category</th>
+                <th className="text-right px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Confidence</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Business Impact</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">When</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Links</th>
               </tr>
             </thead>
             <tbody>
-              {(evaluations as unknown as EvalRow[]).map((ev) => (
+              {(evaluations as unknown as EvalRow[]).map((ev, index) => (
                 <tr
                   key={ev.id}
-                  className="border-b border-gray-800 bg-gray-950 hover:bg-gray-900 transition-colors"
+                  className="border-b border-gray-800 bg-gray-950 hover:bg-gray-900/80 table-row-accent animate-fade-in-up"
+                  style={{ animationDelay: `${index * 35}ms` }}
                 >
                   <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
                     <Link
                       href={`/dashboard/agents/${ev.trace.agent.id}`}
-                      className="hover:text-purple-300 transition-colors"
+                      className="hover:text-purple-300 transition-colors duration-150"
                     >
                       {ev.trace.agent.displayName}
                     </Link>
@@ -152,17 +153,17 @@ export default async function EvaluationsPage({
                   <td className="px-4 py-3 text-gray-400">
                     {ev.category
                       ? CATEGORY_LABELS[ev.category as IncidentCategory] ?? ev.category
-                      : <span className="text-gray-600">—</span>}
+                      : <span className="text-gray-700">—</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span
-                      className={
+                      className={`tabular-nums font-medium ${
                         ev.confidence >= 0.85
                           ? "text-red-400"
                           : ev.confidence >= 0.6
                             ? "text-yellow-400"
                             : "text-emerald-400"
-                      }
+                      }`}
                     >
                       {Math.round(ev.confidence * 100)}%
                     </span>
@@ -174,10 +175,10 @@ export default async function EvaluationsPage({
                     >
                       {ev.businessImpact
                         ? ev.businessImpact.slice(0, 120) + (ev.businessImpact.length > 120 ? "…" : "")
-                        : <span className="text-gray-600">—</span>}
+                        : <span className="text-gray-700">—</span>}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
                     {timeAgo(new Date(ev.createdAt))}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -185,9 +186,9 @@ export default async function EvaluationsPage({
                       {ev.trace.incident && (
                         <Link
                           href={`/dashboard/incidents/${ev.trace.incident.id}`}
-                          className="text-purple-400 hover:text-purple-300 transition-colors"
+                          className="text-purple-400 hover:text-purple-300 transition-colors duration-150 hover:underline"
                         >
-                          Incident
+                          Incident →
                         </Link>
                       )}
                     </div>

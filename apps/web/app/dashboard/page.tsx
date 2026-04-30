@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { appUrl } from "@/lib/app-path";
 import { prisma } from "@atlas/db";
 import { ActivityFeed } from "./activity-feed";
+import { AnimatedStatCard } from "@/components/animated-stat-card";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -35,43 +36,62 @@ export default async function DashboardPage() {
     evalStats.total > 0 ? Math.round((evalStats.passed / evalStats.total) * 100) : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl font-bold text-gray-100 mb-1">Your AI Workforce</h1>
-        <p className="text-gray-400 text-sm">Monitor your AI agents — last 7 days.</p>
+        <h1 className="text-2xl font-bold text-gradient-purple mb-1">Your AI Workforce</h1>
+        <p className="text-gray-500 text-sm">Monitor your AI agents — last 7 days.</p>
       </div>
 
       {/* Stats row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Agents" value={agentCount.toString()} />
-        <StatCard label="Traces Today" value={tracesToday.toString()} />
-        <StatCard
-          label="Pass Rate"
-          value={passRate !== null ? `${passRate}%` : "—"}
-          valueClass={
-            passRate === null
-              ? "text-gray-500"
-              : passRate >= 90
+        <AnimatedStatCard
+          label="Total Agents"
+          numericValue={agentCount}
+          delay={0}
+        />
+        <AnimatedStatCard
+          label="Traces Today"
+          numericValue={tracesToday}
+          delay={80}
+        />
+        {passRate !== null ? (
+          <AnimatedStatCard
+            label="Pass Rate"
+            numericValue={passRate}
+            suffix="%"
+            delay={160}
+            valueClass={
+              passRate >= 90
                 ? "text-emerald-400"
                 : passRate >= 70
                   ? "text-yellow-400"
                   : "text-red-400"
-          }
-        />
-        <StatCard
+            }
+          />
+        ) : (
+          <AnimatedStatCard
+            label="Pass Rate"
+            displayValue="—"
+            delay={160}
+            valueClass="text-gray-500"
+          />
+        )}
+        <AnimatedStatCard
           label="Active Incidents (7d)"
-          value={activeIncidents.toString()}
+          numericValue={activeIncidents}
+          delay={240}
           valueClass={activeIncidents > 0 ? "text-yellow-400" : "text-gray-100"}
         />
       </div>
 
       {/* Empty state */}
       {agentCount === 0 && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center space-y-3">
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-10 text-center space-y-4 animate-scale-in">
+          <div className="text-4xl">🤖</div>
           <p className="text-gray-400">No agents connected yet.</p>
           <Link
             href={`/dashboard/onboarding`}
-            className="inline-block px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-white text-sm font-medium transition-colors"
+            className="inline-block px-5 py-2.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-white text-sm font-medium btn-glow transition-colors"
           >
             Get started →
           </Link>
@@ -79,27 +99,10 @@ export default async function DashboardPage() {
       )}
 
       {/* Recent Activity */}
-      <div>
+      <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
         <h2 className="text-lg font-semibold text-gray-100 mb-3">Recent Activity</h2>
         <ActivityFeed />
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  valueClass = "text-gray-100",
-}: {
-  label: string;
-  value: string;
-  valueClass?: string;
-}) {
-  return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</p>
-      <p className={`text-3xl font-bold ${valueClass}`}>{value}</p>
     </div>
   );
 }

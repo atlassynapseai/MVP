@@ -21,13 +21,13 @@ interface IncidentRow {
 function SeverityBadge({ severity }: { severity: "warning" | "critical" }) {
   if (severity === "critical") {
     return (
-      <span className="px-2 py-0.5 text-xs rounded border bg-red-900/40 text-red-400 border-red-800">
+      <span className="px-2 py-0.5 text-xs rounded border bg-red-900/40 text-red-400 border-red-800 badge-critical">
         Critical
       </span>
     );
   }
   return (
-    <span className="px-2 py-0.5 text-xs rounded border bg-yellow-900/40 text-yellow-400 border-yellow-800">
+    <span className="px-2 py-0.5 text-xs rounded border bg-yellow-900/40 text-yellow-400 border-yellow-800 badge-warning">
       Warning
     </span>
   );
@@ -61,32 +61,32 @@ export default async function IncidentsPage() {
   });
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold text-gray-100">Active Issues</h1>
+        <h1 className="text-2xl font-bold text-gradient-purple">Active Issues</h1>
         <ExportButton type="incidents" />
       </div>
-      <p className="text-gray-400 text-sm mb-6">Agent failures in plain English — click any row to see details.</p>
+      <p className="text-gray-500 text-sm mb-6">Agent failures in plain English — click any row to see details.</p>
 
       {incidents.length === 0 ? (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-500 animate-scale-in">
           No incidents. When agents fail silently, they appear here.
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+        <div className="rounded-xl border border-gray-800 overflow-hidden animate-scale-in">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Agent</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Issue Type</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">What Happened</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Severity</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">When</th>
+              <tr className="border-b border-gray-800 bg-gray-900/80">
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Agent</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Issue Type</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">What Happened</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Severity</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Status</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">When</th>
               </tr>
             </thead>
             <tbody>
-              {(incidents as unknown as IncidentRow[]).map((incident) => {
+              {(incidents as unknown as IncidentRow[]).map((incident, index) => {
                 const category = incident.category as IncidentCategory;
                 const label = CATEGORY_LABELS[category] ?? incident.category;
                 const summary = incident.summary.length > 120
@@ -96,11 +96,13 @@ export default async function IncidentsPage() {
                 return (
                   <tr
                     key={incident.id}
-                    className={`border-b border-gray-800 hover:bg-gray-900 transition-colors ${incident.resolvedAt ? "bg-gray-900/50 opacity-60" : "bg-gray-950"
-                      }`}
+                    className={`border-b border-gray-800 table-row-accent animate-fade-in-up ${
+                      incident.resolvedAt ? "bg-gray-900/40 opacity-70" : "bg-gray-950 hover:bg-gray-900/80"
+                    }`}
+                    style={{ animationDelay: `${index * 45}ms` }}
                   >
                     <td className="px-4 py-3 font-medium text-gray-100 whitespace-nowrap">
-                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors">
+                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-purple-300 transition-colors duration-150">
                         {incident.agent.displayName}
                       </Link>
                     </td>
@@ -108,7 +110,7 @@ export default async function IncidentsPage() {
                       <span className="text-gray-300">{label}</span>
                     </td>
                     <td className="px-4 py-3 text-gray-400 max-w-sm">
-                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors">
+                      <Link href={`/dashboard/incidents/${incident.id}`} className="hover:text-gray-200 transition-colors duration-150">
                         {summary}
                       </Link>
                     </td>
@@ -122,7 +124,7 @@ export default async function IncidentsPage() {
                         <span className="px-2 py-0.5 text-xs rounded border bg-gray-800 text-gray-500 border-gray-700">Open</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
                       {timeAgo(new Date(incident.createdAt))}
                     </td>
                   </tr>

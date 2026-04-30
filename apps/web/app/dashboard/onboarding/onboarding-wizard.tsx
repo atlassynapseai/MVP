@@ -205,7 +205,7 @@ Body:
   if (tab === "zapier") return (
     <div className="space-y-4">
       <p className="text-sm text-gray-400">
-        Use the Atlas Synapse "Send Agent Trace" Zapier action. Add it as the last step in any Zap that runs an AI agent.
+        Use the Atlas Synapse &quot;Send Agent Trace&quot; Zapier action. Add it as the last step in any Zap that runs an AI agent.
       </p>
 
       <div>

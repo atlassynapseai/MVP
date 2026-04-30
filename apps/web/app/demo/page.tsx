@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { basePath } from "@/lib/app-path";
 import {
   Shield, Bell, Activity, Zap, Eye, AlertTriangle,
   CheckCircle, ArrowRight, Code2, Users, Bot,
@@ -94,7 +93,7 @@ export default function DemoPage() {
         <div className="flex items-center gap-4">
           <span className="text-xs text-gray-500 hidden sm:block">HR for Your AI</span>
           <Link
-            href={`${basePath}/login`}
+            href="/login"
             className="btn-glow text-sm px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
           >
             Sign In
@@ -121,7 +120,7 @@ export default function DemoPage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href={`${basePath}/login`}
+            href="/login"
             className="btn-glow flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-colors"
           >
             Get started free <ArrowRight className="w-4 h-4" />
@@ -389,7 +388,7 @@ export default function DemoPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href={`${basePath}/login`}
+              href="/login"
               className="btn-glow flex items-center gap-2 px-8 py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-lg transition-colors"
             >
               Get started free <ArrowRight className="w-5 h-5" />
@@ -402,9 +401,9 @@ export default function DemoPage() {
       <footer className="border-t border-gray-800/60 px-6 py-8 text-center text-gray-600 text-sm">
         <span className="text-gradient-purple font-semibold">Atlas Synapse</span>
         {" "}— HR for Your AI · {" "}
-        <Link href={`${basePath}/privacy`} className="hover:text-gray-400 transition-colors">Privacy</Link>
+        <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy</Link>
         {" · "}
-        <Link href={`${basePath}/terms`} className="hover:text-gray-400 transition-colors">Terms</Link>
+        <Link href="/terms" className="hover:text-gray-400 transition-colors">Terms</Link>
       </footer>
 
     </div>

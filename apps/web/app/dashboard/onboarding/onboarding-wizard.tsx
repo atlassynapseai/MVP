@@ -19,7 +19,7 @@ const TABS: { id: Tab; label: string; sub: string }[] = [
   { id: "nodejs",    label: "Node.js",      sub: "Vercel AI SDK · OpenAI · any JS agent"           },
   { id: "n8n",       label: "n8n",          sub: "no-code workflow automation"                      },
   { id: "zapier",    label: "Zapier",       sub: "no-code · any Zap"                                },
-  { id: "http",      label: "Any HTTP",     sub: "Make.com · curl · any language"                   },
+  { id: "http",      label: "Any HTTP",     sub: "Flowise · Dify · Make.com · curl · any language"  },
   { id: "vibecoded", label: "✨ Vibe coded", sub: "built with AI — paste a prompt and you're done"  },
 ];
 
@@ -234,9 +234,30 @@ Body:
   if (tab === "http") return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {["Make.com", "curl", "Go", "Ruby", "PHP", "Java", "any language"].map((f) => (
+        {["Make.com", "Flowise", "Dify", "curl", "Go", "Ruby", "PHP", "Java", "any language"].map((f) => (
           <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-gray-700/60 text-gray-300 border border-gray-700">{f}</span>
         ))}
+      </div>
+
+      {/* Flowise */}
+      <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
+        <p className="text-xs font-semibold text-gray-300">Flowise</p>
+        <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
+          <li>Open your Flowise chatflow</li>
+          <li>Add an <strong className="text-gray-200">HTTP Request</strong> node at the end</li>
+          <li>Set Method: <code className="text-violet-300 bg-gray-800 px-1 rounded">POST</code>, URL: <code className="text-violet-300 bg-gray-800 px-1 rounded">{url}/ingest</code></li>
+          <li>Set Body to the JSON payload below (map your input/output variables)</li>
+        </ol>
+      </div>
+
+      {/* Dify */}
+      <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
+        <p className="text-xs font-semibold text-gray-300">Dify</p>
+        <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
+          <li>In your Dify workflow, add an <strong className="text-gray-200">HTTP Request</strong> node after your LLM node</li>
+          <li>Method: POST, URL: <code className="text-violet-300 bg-gray-800 px-1 rounded">{url}/ingest</code></li>
+          <li>Body: JSON payload below — use <code className="text-violet-300 bg-gray-800 px-1 rounded">{"{{"}sys.query{"}}"}</code> for prompt and <code className="text-violet-300 bg-gray-800 px-1 rounded">{"{{"}text{"}}"}</code> for response</li>
+        </ol>
       </div>
 
       <div>
@@ -253,7 +274,7 @@ Body:
   "timestamp":       "2026-04-30T10:00:00Z",
   "prompt":          "user message here",
   "response":        "agent reply here",
-  "platform":        "custom",            // any string, e.g. "make", "ruby"
+  "platform":        "custom",            // any string, e.g. "flowise", "dify"
 
   // optional:
   "toolCalls": [

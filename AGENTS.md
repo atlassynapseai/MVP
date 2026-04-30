@@ -10,8 +10,9 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
 - Evaluator: eval, alert, dedup, translate — Anthropic + Brevo email (`@atlas/evaluator`)
-- Python SDK: `packages/sdk-python/` — `atlas-synapse` Python client (`@atlas/sdk-python`)
+- Python SDK: `packages/sdk-python/` — `atlas-synapse` Python client; Anthropic, OpenAI, AutoGen, CrewAI, LangChain, LlamaIndex
 - JS SDK: `packages/sdk-js/` — `atlas-synapse` Node.js client, Vercel AI SDK support (`@atlas/sdk-js`)
+- Zapier App: `zapier-app/` — Zapier integration app
 - Tests: Vitest + pytest
 
 ## Commands
@@ -35,27 +36,36 @@ pnpm test
 - `CLAUDE.md` — Claude Code context
 - `AGENTS.md` — this file (Codex context)
 - `docs/DEVELOPER_GUIDE.md` — extended developer documentation
+- `docs/USER_GUIDE.md` — end-user guide
 - `MVPRoadmap/ROADMAP.md` — project roadmap
 - `vercel.json` — Vercel env bindings + cron schedule
 - `apps/web/` — Next.js 15 web app
   - `.eslintrc.json` — ESLint config; required for `next lint` to run non-interactively in CI
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
+    - `app/dashboard/agents/compare/` — agent comparison page
+    - `app/dashboard/audit/` — audit log page
     - `app/dashboard/incidents/[id]/` — incident detail page with feedback form
-    - `app/dashboard/settings/` — alert preference form (`alert-pref-form.tsx`)
+    - `app/dashboard/onboarding/` — onboarding wizard
+    - `app/dashboard/settings/` — `alert-pref-form.tsx`, `sla-rule-form.tsx`, `webhook-form.tsx`, `invite-form.tsx`
   - `app/api/ingest/` — ingest API route
   - `app/api/alert-prefs/` — alert preferences API route
+  - `app/api/connections/` — connection CRUD (`[id]/` for individual ops)
+  - `app/api/export/` — data export route
   - `app/api/feedback/` — feedback submission API route
-  - `app/api/webhooks/` — Supabase webhook handler
+  - `app/api/incidents/[id]/resolve/` — incident resolution
+  - `app/api/invite/` — team member invite
+  - `app/api/sla-rules/` — SLA rule CRUD
+  - `app/api/webhooks/` — webhook handlers: Supabase, Clerk, Zapier; `[id]/` per-webhook config
   - `app/api/cron/` — Vercel Cron handlers: evaluate (daily 2am UTC), weekly-digest (Monday 9am UTC)
   - `app/login/` — Supabase auth sign-in page
   - `app/auth/callback/` — Supabase OAuth callback
-  - `components/` — shared UI components
+  - `components/` — Sidebar, MobileSidebarWrapper, ExportButton, CountUp, AnimatedStatCard
   - `middleware.ts` — Supabase auth middleware
 - `apps/edge/src/` — Hono edge worker (ingest + PII strip)
 - `packages/db/` — Prisma schema + client
 - `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts`
 - `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts`
-- `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`, `autogen.py`
+- `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`, `autogen.py`, `crewai.py`, `langchain.py`, `llamaindex.py`, `openai.py`, `simple.py`
 - `packages/sdk-js/src/` — JS SDK: `client.ts`, `vercel.ts`
 - `packages/sdk-python/tests/` — Python SDK tests (pytest)
 - `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
@@ -76,9 +86,10 @@ pnpm test
 - HMAC verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
 - Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
+- Zapier webhooks: `apps/web/app/api/webhooks/zapier/route.ts` — Zapier trigger; `zapier/test/` for connection test
 - Evaluator deps (`@anthropic-ai/sdk`, `@getbrevo/brevo`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
-- Python SDK: `packages/sdk-python/src/atlas_synapse/` — mapper transforms Anthropic SDK events to AtlasSynapse ingest payload; hooks wrap Anthropic client
+- Python SDK: Anthropic (mapper+hooks), AutoGen (`autogen.py`), CrewAI (`crewai.py`), LangChain (`langchain.py`), LlamaIndex (`llamaindex.py`), OpenAI (`openai.py`), simple (`simple.py`)
 - N8N: use `public/templates/n8n-atlas-reporter.json` template; add HTTP Request reporter node to each workflow; set `tokenCount: null` (n8n exposes no native token counts)
 - Auth middleware: any API route with its own auth (HMAC, bearer) must be added to `PUBLIC_PREFIXES` in `apps/web/middleware.ts`
 

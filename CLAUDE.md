@@ -12,6 +12,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 - **AI**: Anthropic Claude Sonnet 4.5 (eval + translate)
 - **Evaluator**: `packages/evaluator/` — eval, alert, dedup, translate (`@atlas/evaluator`)
 - **Python SDK**: `packages/sdk-python/` — `atlas-synapse` Python client with hooks, mapper, Anthropic agent support
+- **JS SDK**: `packages/sdk-js/` — `atlas-synapse` Node.js client with Vercel AI SDK support (`@atlas/sdk-js`)
 - **Testing**: Vitest + pytest
 - **Hosting**: Vercel (web), Cloudflare (worker), Supabase (db)
 
@@ -52,7 +53,7 @@ pnpm test
   - `apps/web/app/api/alert-prefs/` — alert preferences API route
   - `apps/web/app/api/feedback/` — feedback submission API route
   - `apps/web/app/api/webhooks/` — Supabase webhook handler
-  - `apps/web/app/api/cron/` — Vercel Cron handler (evaluate, every 60s)
+  - `apps/web/app/api/cron/` — Vercel Cron handlers: evaluate (daily 2am UTC), weekly-digest (Monday 9am UTC)
   - `apps/web/components/` — Sidebar, MobileSidebarWrapper
   - `apps/web/middleware.ts` — Supabase auth middleware
 - **Edge worker**: `apps/edge/src/` — Hono ingest handler + PII strip (`@atlas/edge`)
@@ -60,9 +61,10 @@ pnpm test
 - **Shared**: `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts` (`@atlas/shared`)
 - **Evaluator**: `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts` (`@atlas/evaluator`)
 - **Python SDK**: `packages/sdk-python/src/atlas_synapse/` — `client.py`, `hooks.py`, `mapper.py`, `autogen.py`
+- **JS SDK**: `packages/sdk-js/src/` — `client.ts`, `vercel.ts` (Vercel AI SDK wrapper)
 - **Scripts**: `scripts/test-anthropic-agent.py`, `scripts/seed-connection.mjs`
 - **N8N template**: `public/templates/n8n-atlas-reporter.json`
-- **Deployment**: `vercel.json` — cron schedule (`* * * * *` → `/api/cron/evaluate`)
+- **Deployment**: `vercel.json` — cron schedules (`0 2 * * *` → `/api/cron/evaluate`; `0 9 * * 1` → `/api/cron/weekly-digest`)
 
 ## Key Patterns
 - Add dashboard pages: `apps/web/app/dashboard/<page>/page.tsx`

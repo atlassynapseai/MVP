@@ -5,12 +5,13 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 
 ## Stack
 - Monorepo: pnpm + Turborepo
-- Web: Next.js 15 App Router, TypeScript strict, Tailwind, Clerk auth (`@atlas/web`)
+- Web: Next.js 15 App Router, TypeScript strict, Tailwind, Supabase auth (`@atlas/web`)
 - Edge: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
-- Evaluator: eval, alert, dedup, translate — Anthropic + Resend (`@atlas/evaluator`)
+- Evaluator: eval, alert, dedup, translate — Anthropic + Brevo email (`@atlas/evaluator`)
 - Python SDK: `packages/sdk-python/` — `atlas-synapse` Python client (`@atlas/sdk-python`)
+- JS SDK: `packages/sdk-js/` — `atlas-synapse` Node.js client, Vercel AI SDK support (`@atlas/sdk-js`)
 - Tests: Vitest + pytest
 
 ## Commands
@@ -44,17 +45,18 @@ pnpm test
   - `app/api/ingest/` — ingest API route
   - `app/api/alert-prefs/` — alert preferences API route
   - `app/api/feedback/` — feedback submission API route
-  - `app/api/webhooks/` — Clerk webhook handler
-  - `app/api/cron/` — Vercel Cron evaluate route (every 60s)
-  - `app/sign-in/` — Clerk sign-in page
-  - `app/sign-up/` — Clerk sign-up page
+  - `app/api/webhooks/` — Supabase webhook handler
+  - `app/api/cron/` — Vercel Cron handlers: evaluate (daily 2am UTC), weekly-digest (Monday 9am UTC)
+  - `app/login/` — Supabase auth sign-in page
+  - `app/auth/callback/` — Supabase OAuth callback
   - `components/` — shared UI components
-  - `middleware.ts` — Clerk auth middleware
+  - `middleware.ts` — Supabase auth middleware
 - `apps/edge/src/` — Hono edge worker (ingest + PII strip)
 - `packages/db/` — Prisma schema + client
 - `packages/shared/src/` — `hmac.ts`, `pii.ts`, `schemas.ts`, `types.ts`
 - `packages/evaluator/src/` — `evaluate.ts`, `alert.ts`, `dedup.ts`, `translate.ts`, `prompts.ts`
-- `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`
+- `packages/sdk-python/src/atlas_synapse/` — Python SDK: `client.py`, `hooks.py`, `mapper.py`, `autogen.py`
+- `packages/sdk-js/src/` — JS SDK: `client.ts`, `vercel.ts`
 - `packages/sdk-python/tests/` — Python SDK tests (pytest)
 - `scripts/test-anthropic-agent.py` — Anthropic agent integration smoke test
 - `scripts/test-n8n-scenario.md` — n8n integration scenario doc
@@ -74,11 +76,11 @@ pnpm test
 - HMAC verification: `packages/shared/src/hmac.ts`
 - Shared types: `packages/shared/src/types.ts`
 - Clerk webhooks: `apps/web/app/api/webhooks/clerk/route.ts` — always upsert Org before User; membership events can arrive before org.created
-- Evaluator deps (`@anthropic-ai/sdk`, `resend`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
+- Evaluator deps (`@anthropic-ai/sdk`, `@getbrevo/brevo`) in `packages/evaluator/`, not `apps/web/`; import as `@atlas/evaluator`
 - Vercel Cron: `apps/web/app/api/cron/evaluate/route.ts` — batch 5, `maxDuration=60`, auth via `CRON_SECRET`
 - Python SDK: `packages/sdk-python/src/atlas_synapse/` — mapper transforms Anthropic SDK events to AtlasSynapse ingest payload; hooks wrap Anthropic client
 - N8N: use `public/templates/n8n-atlas-reporter.json` template; add HTTP Request reporter node to each workflow; set `tokenCount: null` (n8n exposes no native token counts)
-- Clerk middleware: any API route with its own auth (HMAC, Svix, bearer) must be added to `isPublicRoute` in `apps/web/middleware.ts`
+- Auth middleware: any API route with its own auth (HMAC, bearer) must be added to `PUBLIC_PREFIXES` in `apps/web/middleware.ts`
 
 ## Conventions
 - Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`

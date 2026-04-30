@@ -6,10 +6,10 @@ HR for Your AI — monitor AI agents like employees.
 
 - Node >= 20
 - pnpm >= 9
-- Python >= 3.12 (for Python SDK)
+- Python >= 3.10 (for Python SDK)
 - Postgres (Supabase free tier or local)
 - Cloudflare account (for edge worker)
-- Clerk account (auth)
+- Supabase account (auth + database)
 
 ## Setup
 
@@ -38,7 +38,7 @@ HR for Your AI — monitor AI agents like employees.
 
 Run web app (localhost:3000):
 ```bash
-pnpm --filter @atlas/web dev
+NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter @atlas/web dev
 ```
 
 Run edge worker (localhost:8787):
@@ -84,11 +84,12 @@ cd packages/sdk-python && PYTHONPATH=src python3 -m pytest tests/
 
 ## Architecture
 
-See `.claude/plans/` for full architecture decisions.
+See `docs/DEVELOPER_GUIDE.md` for extended documentation.
 
 ```
 packages/
-  sdk-python/          # Python SDK (atlas-synapse) — client, hooks, mapper
+  sdk-python/          # Python SDK (atlas-synapse v0.2.0) — client, hooks, mapper, autogen
+  sdk-js/              # JS/TS SDK (atlas-synapse) — Node.js, Vercel AI SDK support
   evaluator/           # eval, alert, dedup, translate (@atlas/evaluator)
   db/                  # Prisma schema + client (@atlas/db)
   shared/              # HMAC, PII, Zod schemas, types (@atlas/shared)
@@ -96,8 +97,8 @@ apps/
   web/                 # Next.js 15 App Router (@atlas/web)
   edge/                # Cloudflare Worker + Hono (@atlas/edge)
 scripts/
-  test-anthropic-agent.py  # Anthropic agent integration smoke test
-  test-n8n-scenario.md     # n8n integration scenario doc
+  test-anthropic-agent.py   # Anthropic agent integration smoke test
+  seed-connection.mjs        # Seed a Connection row for local testing
 public/
   templates/
     n8n-atlas-reporter.json  # n8n HTTP reporter workflow template
@@ -105,4 +106,12 @@ public/
 
 ## CI
 
-GitHub Actions runs on every PR: typecheck -> lint -> test -> prisma validate.
+GitHub Actions runs on every push/PR: typecheck → lint → test → prisma validate.
+Workflow has `permissions: contents: read` (least-privilege).
+
+## Cron Jobs (Vercel)
+
+| Path | Schedule | Purpose |
+|------|----------|---------|
+| `/api/cron/evaluate` | `0 2 * * *` (2am UTC daily) | Batch evaluate pending traces |
+| `/api/cron/weekly-digest` | `0 9 * * 1` (9am UTC Mondays) | Send weekly email digest |

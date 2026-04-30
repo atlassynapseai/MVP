@@ -59,8 +59,12 @@ export async function POST(req: NextRequest) {
       events: true,
       active: true,
       createdAt: true,
-      secret: true, // returned once on creation so the user can copy it
+      secret: true,
     },
+  });
+
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: "webhook.created", details: { webhookId: webhook.id, url, events } },
   });
 
   return NextResponse.json({ webhook }, { status: 201 });

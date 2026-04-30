@@ -57,6 +57,10 @@ export async function PUT(req: NextRequest) {
       data: { orgId, agentId: resolvedAgentId, maxErrorRatePct, windowMinutes, enabled },
     });
 
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: existing ? "sla_rule.updated" : "sla_rule.created", details: { maxErrorRatePct, windowMinutes, agentId: resolvedAgentId } },
+  });
+
   return NextResponse.json(rule);
 }
 
@@ -72,5 +76,8 @@ export async function DELETE(req: NextRequest) {
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await prisma.slaRule.delete({ where: { id: existing.id } });
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: "sla_rule.deleted", details: { agentId } },
+  });
   return NextResponse.json({ deleted: true });
 }

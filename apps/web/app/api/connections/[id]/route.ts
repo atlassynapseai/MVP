@@ -23,5 +23,8 @@ export async function DELETE(
   if (connection.status === "revoked") return NextResponse.json({ error: "Already revoked" }, { status: 409 });
 
   await prisma.connection.update({ where: { id }, data: { status: "revoked", revokedAt: new Date() } });
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: "connection.revoked", details: { connectionId: id } },
+  });
   return NextResponse.json({ ok: true });
 }

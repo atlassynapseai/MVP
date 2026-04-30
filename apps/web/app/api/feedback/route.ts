@@ -53,5 +53,9 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  await prisma.auditLog.create({
+    data: { orgId, userId, action: "incident.feedback", details: { incidentId, correct, correctCategory, correctSeverity } },
+  });
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }

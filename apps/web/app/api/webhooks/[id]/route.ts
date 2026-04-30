@@ -25,6 +25,9 @@ export async function DELETE(
   }
 
   await prisma.webhook.delete({ where: { id: webhook.id } });
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: "webhook.deleted", details: { webhookId: id } },
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -33,5 +33,9 @@ export async function POST(_req: NextRequest): Promise<NextResponse> {
     select: { id: true, type: true, status: true, createdAt: true },
   });
 
+  await prisma.auditLog.create({
+    data: { orgId, userId: user.id, action: "connection.created", details: { connectionId: connection.id, type: "builder" } },
+  });
+
   return NextResponse.json({ connection, token: rawToken }, { status: 201 });
 }

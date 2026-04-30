@@ -17,9 +17,10 @@ export default async function DashboardPage() {
   today.setUTCHours(0, 0, 0, 0);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [agentCount, tracesToday, evalStats, activeIncidents] = await Promise.all([
+  const [agentCount, tracesToday, traceTotal, evalStats, activeIncidents] = await Promise.all([
     prisma.agent.count({ where: { orgId } }),
     prisma.trace.count({ where: { orgId, createdAt: { gte: today } } }),
+    prisma.trace.count({ where: { orgId } }),
     prisma.evaluation.aggregate({
       where: { trace: { orgId } },
       _count: { id: true },
@@ -95,6 +96,25 @@ export default async function DashboardPage() {
           >
             Get started →
           </Link>
+        </div>
+      )}
+
+      {/* What happens next — shown after first trace arrives but before any evaluations */}
+      {agentCount > 0 && evalStats.total === 0 && traceTotal > 0 && (
+        <div className="rounded-xl border border-violet-800/40 bg-violet-950/20 p-5 flex gap-4 items-start animate-fade-in-up">
+          <div className="text-2xl mt-0.5">⏳</div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-violet-300">Traces received — evaluation is next</p>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Claude will analyse your traces and flag anything unusual. Evaluations run daily at <strong className="text-gray-200">2am UTC</strong> — or you can trigger one now from the terminal:
+            </p>
+            <code className="block mt-2 text-xs bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-300 font-mono">
+              curl -H &quot;Authorization: Bearer $CRON_SECRET&quot; $NEXT_PUBLIC_APP_URL/api/cron/evaluate
+            </code>
+            <p className="text-xs text-gray-500 mt-1">
+              Once complete, incidents appear in <strong className="text-gray-400">Incidents</strong> and alerts fire to Slack / email.
+            </p>
+          </div>
         </div>
       )}
 

@@ -12,13 +12,9 @@ export default async function OnboardingPage() {
   const { orgId } = await getOrCreateOrg(user);
 
   // Check what's already done
-  const [connectionCount, traceCount] = await Promise.all([
+  const [connectionCount] = await Promise.all([
     prisma.connection.count({ where: { orgId } }),
-    prisma.trace.count({ where: { orgId } }),
   ]);
-
-  // If already onboarded, redirect to dashboard
-  if (traceCount > 0) redirect(`/dashboard`);
 
   return (
     <div className="max-w-2xl mx-auto">

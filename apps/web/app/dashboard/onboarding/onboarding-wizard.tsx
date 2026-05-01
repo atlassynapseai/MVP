@@ -65,6 +65,12 @@ function TabContent({ tab, token }: { tab: Tab; token: string | null }) {
 
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">2 — Add to your agent (works with any framework)</p>
+        <div className="rounded-lg bg-amber-950/30 border border-amber-700/40 px-3 py-2 mb-3">
+          <p className="text-xs text-amber-300 font-medium">Where to paste this</p>
+          <p className="text-xs text-amber-200/70 mt-0.5">
+            Find the line where your AI call returns a response — e.g. <code className="bg-gray-900 px-1 rounded">response = client.messages.create(...)</code> or <code className="bg-gray-900 px-1 rounded">output = agent.run(...)</code>. Paste the <code className="bg-gray-900 px-1 rounded">sdk.post_trace()</code> call immediately after that line, before anything else uses the response.
+          </p>
+        </div>
         <CodeBlock code={`from atlas_synapse import AtlasSynapseSdk, TracePayload
 from datetime import datetime, timezone
 import secrets
@@ -75,13 +81,16 @@ sdk = AtlasSynapseSdk(
     agent_name="my-agent",         # name shown in your dashboard
 )
 
-# ── After your agent runs — add these 3 lines ──────────────
+# ── Paste right after your AI call returns ─────────────────
+# Before:  response = client.messages.create(...)
+# After:   response = client.messages.create(...)
+#          sdk.post_trace(...)      ← add this
 sdk.post_trace(TracePayload(
     agent_id="my-agent",
     external_trace_id=secrets.token_hex(8),   # unique per run
     timestamp=datetime.now(timezone.utc).isoformat(),
     prompt=user_input,                         # what the user sent
-    response=agent_output,                     # what your agent replied
+    response=agent_output,                     # what your agent replied back
     platform="anthropic",                      # or "openai", "langchain", etc.
     # optional — helps the evaluator grade tool usage:
     # tool_calls=[{"name": "search", "input": {"query": "..."}, "output": "..."}],
@@ -120,6 +129,12 @@ agent = wrap_agent(your_existing_agent, sdk)`} />
 
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">2 — Any Node.js agent</p>
+        <div className="rounded-lg bg-amber-950/30 border border-amber-700/40 px-3 py-2 mb-3">
+          <p className="text-xs text-amber-300 font-medium">Where to paste this</p>
+          <p className="text-xs text-amber-200/70 mt-0.5">
+            Find the line where your AI call resolves — e.g. <code className="bg-gray-900 px-1 rounded">const reply = await openai.chat.completions.create(...)</code>. Add the <code className="bg-gray-900 px-1 rounded">await atlas.trace()</code> call on the very next line, before the response is sent back to the user.
+          </p>
+        </div>
         <CodeBlock code={`import { AtlasSynapseClient } from "atlas-synapse";
 
 const atlas = new AtlasSynapseClient({
@@ -127,7 +142,9 @@ const atlas = new AtlasSynapseClient({
   agentName: "my-agent",
 });
 
-// After your agent runs — add this one line:
+// Before:  return agentReply;
+// After:   await atlas.trace(...);   ← add this line
+//          return agentReply;
 await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" });`} />
       </div>
 
@@ -163,8 +180,14 @@ const stream = streamText({
   if (tab === "n8n") return (
     <div className="space-y-4">
       <p className="text-sm text-gray-400">
-        Import our ready-made n8n workflow template. Add a single HTTP Request node to the end of any existing workflow — no code required.
+        Add a single HTTP Request node to the end of any existing workflow — no code required.
       </p>
+      <div className="rounded-lg bg-amber-950/30 border border-amber-700/40 px-3 py-2">
+        <p className="text-xs text-amber-300 font-medium">Where to add the node</p>
+        <p className="text-xs text-amber-200/70 mt-0.5">
+          In your n8n workflow, find the AI Agent or LLM node that produces the response. Connect the Atlas Synapse HTTP Request node <strong className="text-amber-200">directly after it</strong>, as the last node before the workflow ends.
+        </p>
+      </div>
 
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">1 — Download the template</p>
@@ -249,6 +272,13 @@ Body:
         {["Make.com", "Flowise", "Dify", "curl", "Go", "Ruby", "PHP", "Java", "any language"].map((f) => (
           <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-gray-700/60 text-gray-300 border border-gray-700">{f}</span>
         ))}
+      </div>
+
+      <div className="rounded-lg bg-amber-950/30 border border-amber-700/40 px-3 py-2">
+        <p className="text-xs text-amber-300 font-medium">Where to add the HTTP call</p>
+        <p className="text-xs text-amber-200/70 mt-0.5">
+          Add the POST to Atlas Synapse as the <strong className="text-amber-200">last step</strong> in your workflow or function — right after your AI node/call produces a response, before you return or end the flow.
+        </p>
       </div>
 
       {/* Flowise */}

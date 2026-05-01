@@ -219,7 +219,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           (alertPref.severityFloor === "warning" || severity === "critical"));
 
       if (shouldAlert) {
-        // Get org owner email — use first User in the org
+        const incidentPayload = {
+          id: incident.id,
+          severity,
+          category,
+          summary: rendering.incidentSummary,
+          agentName: trace.agent.displayName,
+        };
+
+        // Email alert
         const orgUser = await prisma.user.findFirst({
           where: { orgId: trace.orgId },
           select: { email: true },
@@ -227,13 +235,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         if (orgUser?.email) {
           const alertResult = await sendImmediateAlert(
-            {
-              id: incident.id,
-              severity,
-              category,
-              summary: rendering.incidentSummary,
-              agentName: trace.agent.displayName,
-            },
+            incidentPayload,
             orgUser.email,
             rendering.alertCopy,
           );
@@ -248,20 +250,29 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           });
 
           if (alertResult.status === "sent") alerted++;
+        }
 
-          // Send Slack alert if webhook configured
-          if (alertPref?.slackWebhookUrl) {
-            await sendSlackAlert(
-              {
-                id: incident.id,
-                severity,
-                category,
-                summary: rendering.incidentSummary,
-                agentName: trace.agent.displayName,
-              },
-              alertPref.slackWebhookUrl,
-            ).catch(() => undefined); // fire-and-forget, never fail cron
-          }
+        // Slack alert — independent of email; fires whenever webhook is configured
+        if (alertPref?.slackWebhookUrl) {
+          const slackResult = await sendSlackAlert(
+            incidentPayload,
+            alertPref.slackWebhookUrl,
+          ).catch((err: unknown) => {
+            const msg = err instanceof Error ? err.name + ": " + err.message.slice(0, 200) : "unknown error";
+            console.error(`[cron/evaluate] Slack alert failed for incident ${incident.id}: ${msg}`);
+            return { status: "failed" as const, error: msg };
+          });
+
+          await prisma.alert.create({
+            data: {
+              incidentId: incident.id,
+              channel: "slack",
+              sentAt: new Date(),
+              status: slackResult.status,
+            },
+          });
+
+          if (slackResult.status === "sent") alerted++;
         }
       }
 

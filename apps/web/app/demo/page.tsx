@@ -39,34 +39,34 @@ function useCountUp(target: number, duration = 1200, active = false) {
 
 // ── Data ──────────────────────────────────────────────────────────────────
 const INTEGRATIONS = [
-  { name: "Slack",       color: "bg-[#4A154B] text-white"              },
-  { name: "Anthropic",   color: "bg-[#CC785C]/20 text-[#CC785C]"       },
-  { name: "OpenAI",      color: "bg-emerald-500/20 text-emerald-300"   },
-  { name: "LangChain",   color: "bg-blue-500/20 text-blue-300"         },
-  { name: "Vercel AI",   color: "bg-white/10 text-gray-200"            },
-  { name: "n8n",         color: "bg-[#EA4B71]/20 text-[#EA4B71]"       },
-  { name: "Zapier",      color: "bg-[#FF4A00]/20 text-orange-300"      },
-  { name: "Make.com",    color: "bg-purple-500/20 text-purple-300"     },
-  { name: "CrewAI",      color: "bg-cyan-500/20 text-cyan-300"         },
-  { name: "LlamaIndex",  color: "bg-yellow-500/20 text-yellow-300"     },
-  { name: "AutoGen",     color: "bg-indigo-500/20 text-indigo-300"     },
-  { name: "Raw HTTP",    color: "bg-gray-700 text-gray-300"            },
+  { name: "Slack", color: "bg-[#4A154B] text-white" },
+  { name: "Anthropic", color: "bg-[#CC785C]/20 text-[#CC785C]" },
+  { name: "OpenAI", color: "bg-emerald-500/20 text-emerald-300" },
+  { name: "LangChain", color: "bg-blue-500/20 text-blue-300" },
+  { name: "Vercel AI", color: "bg-white/10 text-gray-200" },
+  { name: "n8n", color: "bg-[#EA4B71]/20 text-[#EA4B71]" },
+  { name: "Zapier", color: "bg-[#FF4A00]/20 text-orange-300" },
+  { name: "Make.com", color: "bg-purple-500/20 text-purple-300" },
+  { name: "CrewAI", color: "bg-cyan-500/20 text-cyan-300" },
+  { name: "LlamaIndex", color: "bg-yellow-500/20 text-yellow-300" },
+  { name: "AutoGen", color: "bg-indigo-500/20 text-indigo-300" },
+  { name: "Raw HTTP", color: "bg-gray-700 text-gray-300" },
 ];
 
 const FLOW = [
-  { label: "Your Agent",       sub: "any framework",          icon: Bot,      color: "bg-violet-500/20 border-violet-500/40 text-violet-300",  glow: "shadow-violet-500/30" },
-  { label: "Edge Worker",      sub: "PII strip + HMAC sign",  icon: Shield,   color: "bg-blue-500/20 border-blue-500/40 text-blue-300",        glow: "shadow-blue-500/30" },
-  { label: "Postgres",         sub: "trace stored",           icon: Activity, color: "bg-cyan-500/20 border-cyan-500/40 text-cyan-300",        glow: "shadow-cyan-500/30" },
-  { label: "Claude AI",        sub: "pass / flag / alert",    icon: Zap,      color: "bg-yellow-500/20 border-yellow-500/40 text-yellow-300",  glow: "shadow-yellow-500/30" },
-  { label: "Dashboard+Alerts", sub: "Slack · email · webhook",icon: Bell,     color: "bg-emerald-500/20 border-emerald-500/40 text-emerald-300", glow: "shadow-emerald-500/30" },
+  { label: "Your Agent", sub: "any framework", icon: Bot, color: "bg-violet-500/20 border-violet-500/40 text-violet-300", glow: "shadow-violet-500/30" },
+  { label: "Edge Worker", sub: "PII strip + HMAC sign", icon: Shield, color: "bg-blue-500/20 border-blue-500/40 text-blue-300", glow: "shadow-blue-500/30" },
+  { label: "Postgres", sub: "trace stored", icon: Activity, color: "bg-cyan-500/20 border-cyan-500/40 text-cyan-300", glow: "shadow-cyan-500/30" },
+  { label: "Claude AI", sub: "pass / flag / alert", icon: Zap, color: "bg-yellow-500/20 border-yellow-500/40 text-yellow-300", glow: "shadow-yellow-500/30" },
+  { label: "Dashboard+Alerts", sub: "Slack · email · webhook", icon: Bell, color: "bg-emerald-500/20 border-emerald-500/40 text-emerald-300", glow: "shadow-emerald-500/30" },
 ];
 
 const MOCK_ACTIVITY = [
-  { agent: "customer-support-bot", summary: "Return policy inquiry — handled correctly",                  status: "pass",    time: "2m ago"  },
-  { agent: "booking-assistant",    summary: "Flight search completed, options presented",                  status: "pass",    time: "5m ago"  },
-  { agent: "customer-support-bot", summary: "Agent exposed bulk customer PII to unauthenticated request", status: "alerted", time: "8m ago"  },
-  { agent: "hr-assistant",         summary: "Parental leave policy inquiry answered accurately",           status: "pass",    time: "12m ago" },
-  { agent: "analytics-bot",        summary: "Exported 847K records including customer PII",               status: "alerted", time: "18m ago" },
+  { agent: "customer-support-bot", summary: "Return policy inquiry — handled correctly", status: "pass", time: "2m ago" },
+  { agent: "booking-assistant", summary: "Flight search completed, options presented", status: "pass", time: "5m ago" },
+  { agent: "customer-support-bot", summary: "Agent exposed bulk customer PII to unauthenticated request", status: "alerted", time: "8m ago" },
+  { agent: "hr-assistant", summary: "Parental leave policy inquiry answered accurately", status: "pass", time: "12m ago" },
+  { agent: "analytics-bot", summary: "Exported 847K records including customer PII", status: "alerted", time: "18m ago" },
 ];
 
 const CODE = `from atlas_synapse import AtlasSynapseSdk, TracePayload
@@ -158,9 +158,8 @@ function FlowDiagram({ active }: { active: boolean }) {
       {FLOW.map((f, i) => (
         <div key={f.label} className="flex flex-col md:flex-row items-center gap-2">
           <div
-            className={`flex flex-col items-center gap-2 p-5 rounded-2xl border min-w-[130px] text-center transition-all duration-500 ${f.color} bg-gray-900 ${
-              lit >= i ? `shadow-lg ${f.glow} scale-105` : "opacity-50 scale-100"
-            }`}
+            className={`flex flex-col items-center gap-2 p-5 rounded-2xl border min-w-[130px] text-center transition-all duration-500 ${f.color} bg-gray-900 ${lit >= i ? `shadow-lg ${f.glow} scale-105` : "opacity-50 scale-100"
+              }`}
           >
             <f.icon className="w-6 h-6" />
             <span className="font-semibold text-sm">{f.label}</span>
@@ -216,10 +215,10 @@ export default function DemoPage() {
     return () => obs.disconnect();
   }, []);
 
-  const c1 = useCountUp(4,   800, statsActive);
+  const c1 = useCountUp(4, 800, statsActive);
   const c2 = useCountUp(127, 1200, statsActive);
-  const c3 = useCountUp(94,  1000, statsActive);
-  const c4 = useCountUp(2,   600,  statsActive);
+  const c3 = useCountUp(94, 1000, statsActive);
+  const c4 = useCountUp(2, 600, statsActive);
 
   // Re-trigger flow animation on re-enter
   useEffect(() => {
@@ -340,7 +339,7 @@ export default function DemoPage() {
                 PII is stripped at the edge before storage. Claude AI evaluates every trace for policy violations, harmful outputs, and anomalies.
               </p>
               <div className="space-y-3">
-                {["PII stripped before storage","Claude evaluates every trace","Deduped incidents — 1 per issue per day","Full audit trail"].map((f, i) => (
+                {["PII stripped before storage", "Claude evaluates every trace", "Deduped incidents — 1 per issue per day", "Full audit trail"].map((f, i) => (
                   <div key={f} className="flex items-center gap-2 text-sm text-gray-300"
                     style={{ opacity: codeActive ? 1 : 0, transform: codeActive ? "translateX(0)" : "translateX(-12px)", transition: `all 0.4s ease ${300 + i * 100}ms` }}>
                     <CheckCircle className="w-3.5 h-3.5 text-blue-400 shrink-0" />
@@ -365,7 +364,7 @@ export default function DemoPage() {
               <div className="space-y-2">
                 {[
                   { label: "Slack", color: "bg-[#4A154B] text-white" },
-                  { label: "Email",  color: "bg-blue-500/20 text-blue-300" },
+                  { label: "Email", color: "bg-blue-500/20 text-blue-300" },
                   { label: "Webhook / Zapier / n8n", color: "bg-gray-700 text-gray-300" },
                 ].map((c, i) => (
                   <span key={c.label}
@@ -396,9 +395,9 @@ export default function DemoPage() {
 
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-center text-gray-400">
             {[
-              { icon: Shield,  color: "text-blue-400",    title: "PII stripped at the edge",       desc: "Emails, phones, credit cards redacted before storage" },
-              { icon: Zap,     color: "text-yellow-400",  title: "Claude evaluates every trace",   desc: "Classifies: pass · anomaly · failure · scope violation · harmful output" },
-              { icon: Users,   color: "text-emerald-400", title: "Org-scoped data isolation",      desc: "Every query scoped to your org — zero cross-tenant data leakage" },
+              { icon: Shield, color: "text-blue-400", title: "PII stripped at the edge", desc: "Emails, phones, credit cards redacted before storage" },
+              { icon: Zap, color: "text-yellow-400", title: "Claude evaluates every trace", desc: "Classifies: pass · anomaly · failure · scope violation · harmful output" },
+              { icon: Users, color: "text-emerald-400", title: "Org-scoped data isolation", desc: "Every query scoped to your org — zero cross-tenant data leakage" },
             ].map((item, i) => (
               <FadeIn key={item.title} delay={i * 100}>
                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 h-full">
@@ -457,10 +456,10 @@ export default function DemoPage() {
         {/* Stats row — count up */}
         <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           {[
-            { label: "Agents monitored", value: c1,  suffix: "",  sub: "across 3 platforms" },
-            { label: "Traces today",     value: c2,  suffix: "",  sub: "↑ 23% vs yesterday" },
-            { label: "Pass rate",        value: c3,  suffix: "%", sub: "↑ 2pts this week"   },
-            { label: "Open incidents",   value: c4,  suffix: "",  sub: "1 critical"         },
+            { label: "Agents monitored", value: c1, suffix: "", sub: "across 3 platforms" },
+            { label: "Traces today", value: c2, suffix: "", sub: "↑ 23% vs yesterday" },
+            { label: "Pass rate", value: c3, suffix: "%", sub: "↑ 2pts this week" },
+            { label: "Open incidents", value: c4, suffix: "", sub: "1 critical" },
           ].map((s, i) => (
             <FadeIn key={s.label} delay={i * 80}>
               <div className="card-hover bg-gray-900 border border-gray-800 rounded-2xl p-4">
@@ -541,12 +540,12 @@ export default function DemoPage() {
         </FadeIn>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { icon: Shield,        title: "Data leaks",        desc: "Agent sharing another customer's PII, account data, or internal records.",                    color: "text-red-400",     border: "hover:border-red-500/40"    },
-            { icon: AlertTriangle, title: "Policy violations", desc: "Approving refunds above limit, making promises outside scope, bypassing controls.",           color: "text-orange-400",  border: "hover:border-orange-500/40" },
-            { icon: Zap,           title: "Harmful outputs",   desc: "Dangerous advice, discriminatory language, or content that could cause harm.",                color: "text-yellow-400",  border: "hover:border-yellow-500/40" },
-            { icon: Eye,           title: "Scope violations",  desc: "Agent acting outside its defined purpose or attempting unauthorised actions.",                 color: "text-blue-400",    border: "hover:border-blue-500/40"   },
-            { icon: Activity,      title: "Anomalies",         desc: "Unusual patterns — unexpected refusals, hallucinated facts, format drift.",                   color: "text-violet-400",  border: "hover:border-violet-500/40" },
-            { icon: CheckCircle,   title: "SLA breaches",      desc: "Error rate exceeds your configured threshold over a rolling time window.",                    color: "text-emerald-400", border: "hover:border-emerald-500/40"},
+            { icon: Shield, title: "Data leaks", desc: "Agent sharing another customer's PII, account data, or internal records.", color: "text-red-400", border: "hover:border-red-500/40" },
+            { icon: AlertTriangle, title: "Policy violations", desc: "Approving refunds above limit, making promises outside scope, bypassing controls.", color: "text-orange-400", border: "hover:border-orange-500/40" },
+            { icon: Zap, title: "Harmful outputs", desc: "Dangerous advice, discriminatory language, or content that could cause harm.", color: "text-yellow-400", border: "hover:border-yellow-500/40" },
+            { icon: Eye, title: "Scope violations", desc: "Agent acting outside its defined purpose or attempting unauthorised actions.", color: "text-blue-400", border: "hover:border-blue-500/40" },
+            { icon: Activity, title: "Anomalies", desc: "Unusual patterns — unexpected refusals, hallucinated facts, format drift.", color: "text-violet-400", border: "hover:border-violet-500/40" },
+            { icon: CheckCircle, title: "SLA breaches", desc: "Error rate exceeds your configured threshold over a rolling time window.", color: "text-emerald-400", border: "hover:border-emerald-500/40" },
           ].map((item, i) => (
             <FadeIn key={item.title} delay={i * 70}>
               <div className={`card-hover p-5 rounded-2xl bg-gray-900 border border-gray-800 ${item.border} transition-colors h-full`}>

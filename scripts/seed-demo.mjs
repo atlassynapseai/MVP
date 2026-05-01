@@ -31,10 +31,10 @@ function dedupKey(agentId, category, date) {
 
 // ── Demo agents ────────────────────────────────────────────────────────────
 const AGENTS = [
-  { externalId: "customer-support-bot",  displayName: "Customer Support Bot",  platform: "anthropic" },
-  { externalId: "booking-assistant",     displayName: "Booking Assistant",      platform: "openai"    },
-  { externalId: "hr-assistant",          displayName: "HR Assistant",           platform: "anthropic" },
-  { externalId: "analytics-bot",         displayName: "Analytics Bot",          platform: "langchain" },
+  { externalId: "customer-support-bot", displayName: "Customer Support Bot", platform: "anthropic" },
+  { externalId: "booking-assistant", displayName: "Booking Assistant", platform: "openai" },
+  { externalId: "hr-assistant", displayName: "HR Assistant", platform: "anthropic" },
+  { externalId: "analytics-bot", displayName: "Analytics Bot", platform: "langchain" },
 ];
 
 // ── Trace scenarios ────────────────────────────────────────────────────────

@@ -170,7 +170,7 @@ export function ConnectionsClient({ initialConnections }: Props) {
       {/* Usage snippet */}
       <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
         <h2 className="text-sm font-semibold text-gray-300 mb-3">Quick start</h2>
-        <pre className="text-xs text-gray-400 overflow-x-auto leading-relaxed">{`curl -X POST https://edge.atlassynapse.com/ingest \\
+        <pre className="text-xs text-gray-400 overflow-x-auto leading-relaxed">{`curl -X POST https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest \\
   -H "Content-Type: application/json" \\
   -d '{
     "projectToken": "<your-token>",

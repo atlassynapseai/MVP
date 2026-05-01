@@ -1,8 +1,9 @@
 "use client";
+import { basePath } from "@/lib/app-path";
 
 export function ExportButton({ type }: { type: "incidents" | "traces" }) {
   function handleClick() {
-    window.location.href = `/api/export?type=${type}`;
+    window.location.href = `${basePath}/api/export?type=${type}`;
   }
   return (
     <button

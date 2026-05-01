@@ -47,7 +47,7 @@ Your token looks like: `proj_a1b2c3d4e5f6...` (48 characters, hex-encoded).
 The fastest way to verify your setup — a single cURL command:
 
 ```bash
-curl -X POST https://edge.atlassynapse.com/ingest \
+curl -X POST https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest \
   -H "Content-Type: application/json" \
   -d '{
     "projectToken": "<your-token>",
@@ -119,7 +119,7 @@ from atlas_synapse import AtlasSynapseSdk, wrap_agent
 
 sdk = AtlasSynapseSdk(
     project_token="proj_...",
-    ingest_url="https://edge.atlassynapse.com",
+    ingest_url="https://atlas-synapse-edge.atlassynapseai.workers.dev",
     agent_name="research-agent",
 )
 
@@ -325,12 +325,40 @@ Each workflow execution sends one trace automatically.
 
 ---
 
+### Zapier / Make.com / n8n (Simple Webhook)
+
+The simplest way to connect any no-code tool — no SDK needed. Send a POST to the webhook endpoint with your project token in the body:
+
+```
+POST https://atlassynapseai.com/MVP/api/webhooks/zapier
+Content-Type: application/json
+```
+
+**Payload fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `token` | string | Yes | Your project token |
+| `agent_name` | string | No | Display name (default: `zapier-agent`) |
+| `trace_id` | string | No | Unique ID (auto-generated if omitted) |
+| `input` | string | No | User message / prompt |
+| `output` | string | No | Agent response |
+| `timestamp` | string | No | ISO 8601 datetime (default: now) |
+| `platform` | string | No | Label e.g. `"n8n"`, `"zapier"` |
+| `token_count` | integer | No | Tokens consumed |
+
+**Returns:** `{ "ok": true, "trace_id": "..." }` on success.
+
+> No HMAC or special headers required — authentication is via the `token` field.
+
+---
+
 ### Raw HTTP API
 
 Send traces directly via HTTP POST:
 
 ```
-POST https://edge.atlassynapse.com/ingest
+POST https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest
 Content-Type: application/json
 ```
 
@@ -365,7 +393,7 @@ Four animated cards at the top show your 7-day snapshot:
 | Card | What It Shows | How to Read It |
 |------|---------------|----------------|
 | **Total Agents** | Number of connected AI agents | Growing = more agents reporting in |
-| **Traces Today** | Executions recorded in the last 24 hours | Volume of agent activity |
+| **Total Traces** | Total executions recorded, with today's count shown below | Growing = agents are active |
 | **Pass Rate** | Percentage of traces that passed evaluation | Green (≥90%) = healthy. Yellow (≥70%) = watch it. Red (<70%) = investigate |
 | **Active Incidents (7d)** | Issues detected in the last 7 days | 0 = smooth sailing. Rising = something needs attention |
 
@@ -888,5 +916,5 @@ An immutable record of all actions in your workspace. Every configuration change
 | Resource | Purpose |
 |----------|---------|
 | Dashboard | Your Atlas Synapse web app URL |
-| Ingest Endpoint | `https://edge.atlassynapse.com/ingest` |
+| Ingest Endpoint | `https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest` |
 | Slack Webhook Setup | [api.slack.com/messaging/webhooks](https://api.slack.com/messaging/webhooks) |

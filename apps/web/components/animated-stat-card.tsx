@@ -8,6 +8,7 @@ interface AnimatedStatCardProps {
   displayValue?: string;
   valueClass?: string;
   delay?: number;
+  sub?: string;
 }
 
 export function AnimatedStatCard({
@@ -17,6 +18,7 @@ export function AnimatedStatCard({
   displayValue,
   valueClass = "text-gray-100",
   delay = 0,
+  sub,
 }: AnimatedStatCardProps) {
   return (
     <div
@@ -34,6 +36,7 @@ export function AnimatedStatCard({
       ) : (
         <p className={`text-3xl font-bold ${valueClass}`}>{displayValue ?? "—"}</p>
       )}
+      {sub && <p className="text-xs text-gray-600 mt-1">{sub}</p>}
     </div>
   );
 }

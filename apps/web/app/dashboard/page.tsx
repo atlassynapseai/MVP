@@ -51,9 +51,10 @@ export default async function DashboardPage() {
           delay={0}
         />
         <AnimatedStatCard
-          label="Traces Today"
-          numericValue={tracesToday}
+          label="Total Traces"
+          numericValue={traceTotal}
           delay={80}
+          sub={tracesToday > 0 ? `${tracesToday} today` : "none today"}
         />
         {passRate !== null ? (
           <AnimatedStatCard

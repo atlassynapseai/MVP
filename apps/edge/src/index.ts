@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { TraceIngestSchema, piiStrip, sign } from "@atlas/shared";
 
 type Env = {
@@ -7,6 +8,12 @@ type Env = {
 };
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use("*", cors({
+  origin: "*",
+  allowMethods: ["POST", "GET", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization", "X-Project-Token"],
+}));
 
 // In-memory rate limiter: 60 req/min per project token
 // Uses a sliding window stored per isolate instance — resets on cold start.

@@ -83,6 +83,9 @@ sdk.post_trace(TracePayload(
     prompt=user_input,                         # what the user sent
     response=agent_output,                     # what your agent replied
     platform="anthropic",                      # or "openai", "langchain", etc.
+    # optional — helps the evaluator grade tool usage:
+    # tool_calls=[{"name": "search", "input": {"query": "..."}, "output": "..."}],
+    # token_count=response.usage.input_tokens + response.usage.output_tokens,
 ))`} />
       </div>
 
@@ -206,28 +209,37 @@ Body:
   if (tab === "zapier") return (
     <div className="space-y-4">
       <p className="text-sm text-gray-400">
-        Use the Atlas Synapse &quot;Send Agent Trace&quot; Zapier action. Add it as the last step in any Zap that runs an AI agent.
+        Add a <strong className="text-gray-200">Webhooks by Zapier</strong> POST action as the last step in any Zap that runs an AI agent. No custom app needed.
       </p>
 
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Steps</p>
         <ol className="text-sm text-gray-400 space-y-2 list-decimal list-inside">
           <li>In your Zap, add a new action step</li>
-          <li>Search for <strong className="text-gray-200">Atlas Synapse AI</strong></li>
-          <li>Choose action: <strong className="text-gray-200">Send Agent Trace</strong></li>
-          <li>Authenticate with your project token</li>
-          <li>Map your Zap&apos;s fields to: Agent Name, Prompt, Response</li>
+          <li>Choose <strong className="text-gray-200">Webhooks by Zapier → POST</strong></li>
+          <li>Set URL to: <code className="text-violet-300 bg-gray-800 px-1 rounded text-xs">{url}/ingest</code></li>
+          <li>Set Payload Type to <strong className="text-gray-200">JSON</strong></li>
+          <li>Map the fields below from your Zap&apos;s previous steps</li>
         </ol>
+      </div>
+
+      <div>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">JSON body to map</p>
+        <CodeBlock code={`{
+  "projectToken":    "${t}",
+  "agentId":         "my-zapier-agent",
+  "externalTraceId": "{{zap_meta_humanized_id}}",
+  "timestamp":       "{{zap_meta_timestamp}}",
+  "prompt":          "{{input_field_from_your_zap}}",
+  "response":        "{{output_field_from_your_zap}}",
+  "platform":        "zapier"
+}`} />
       </div>
 
       <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4">
         <p className="text-xs font-semibold text-gray-300 mb-2">Your project token</p>
         <code className="text-sm text-gray-100 break-all font-mono">{t}</code>
       </div>
-
-      <p className="text-sm text-gray-500">
-        Alternatively, use a <strong className="text-gray-400">Webhooks by Zapier</strong> POST step with the HTTP payload shown in the &quot;Any HTTP&quot; tab.
-      </p>
     </div>
   );
 

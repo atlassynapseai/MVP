@@ -2,6 +2,7 @@
 import { basePath } from "@/lib/app-path";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface Connection {
   id: string;
@@ -94,6 +95,14 @@ export function ConnectionsClient({ initialConnections }: Props) {
           <p className="text-xs text-gray-500 mt-2">
             Use this token as <code className="text-gray-400">projectToken</code> in your SDK or ingest payload.
           </p>
+          <div className="mt-3 pt-3 border-t border-emerald-800/40">
+            <Link
+              href="/dashboard/onboarding"
+              className="inline-flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 font-medium transition-colors"
+            >
+              Next: connect your agent in the setup guide →
+            </Link>
+          </div>
         </div>
       )}
 
@@ -173,7 +182,7 @@ export function ConnectionsClient({ initialConnections }: Props) {
         <pre className="text-xs text-gray-400 overflow-x-auto leading-relaxed">{`curl -X POST https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest \\
   -H "Content-Type: application/json" \\
   -d '{
-    "projectToken": "<your-token>",
+    "projectToken": "${newToken ?? "<your-token>"}",
     "agentId": "my-agent",
     "externalTraceId": "trace-001",
     "timestamp": "2024-01-01T00:00:00Z",
@@ -182,6 +191,12 @@ export function ConnectionsClient({ initialConnections }: Props) {
     "toolCalls": [],
     "platform": "generic"
   }'`}</pre>
+        <p className="text-xs text-gray-600 mt-3">
+          For Python, Node.js, n8n, Zapier, Flowise, and more —{" "}
+          <Link href="/dashboard/onboarding" className="text-violet-500 hover:text-violet-400 underline transition-colors">
+            see the full setup guide
+          </Link>
+        </p>
       </div>
     </div>
   );

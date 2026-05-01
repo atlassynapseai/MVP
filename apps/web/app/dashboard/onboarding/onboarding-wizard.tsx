@@ -369,42 +369,71 @@ Body:
           <Sparkles className="w-4 h-4" /> Built your agent with AI? No problem.
         </p>
         <p className="text-sm text-gray-400">
-          Copy the prompt below and paste it into Claude, ChatGPT, or whatever AI you used to build your agent.
-          It will add Atlas Synapse monitoring automatically — no manual coding needed.
+          Copy the prompt below, paste it into Claude, ChatGPT, or whatever AI you used to build your agent, then paste your agent code at the bottom. The AI will add Atlas Synapse monitoring in the right place automatically.
         </p>
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Paste this into your AI</p>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Paste this into your AI — then add your code at the bottom</p>
         <CodeBlock code={`I want to add Atlas Synapse monitoring to my AI agent.
 
-Atlas Synapse tracks every conversation my agent has, strips PII,
+Atlas Synapse tracks every conversation my agent has, strips PII automatically,
 and alerts me when something goes wrong.
 
 My project token is: ${t}
 The ingest URL is: ${url}
 
-Please add the Atlas Synapse SDK to my agent code so that after
-every response it posts a trace. Use the correct SDK for my language:
+Please add monitoring so that after every AI response, a trace is posted to Atlas Synapse.
+Find the exact line where the AI call returns its response and add the monitoring call
+immediately after that line — before the response is returned or used anywhere else.
 
-- Python: pip install atlas-synapse
+Use whichever approach matches the language/framework of the code below:
+
+PYTHON (pip install atlas-synapse):
   from atlas_synapse import AtlasSynapseSdk, TracePayload
+  from datetime import datetime, timezone
+  import secrets
   sdk = AtlasSynapseSdk(project_token="${t}", ingest_url="${url}", agent_name="my-agent")
-  sdk.post_trace(TracePayload(agent_id="my-agent", external_trace_id=..., timestamp=..., prompt=user_input, response=agent_output, platform="..."))
+  sdk.post_trace(TracePayload(
+      agent_id="my-agent",
+      external_trace_id=secrets.token_hex(8),
+      timestamp=datetime.now(timezone.utc).isoformat(),
+      prompt=<the variable holding the user input>,
+      response=<the variable holding the AI output>,
+      platform="anthropic",  # or "openai", "langchain", etc.
+  ))
 
-- Node.js: npm install atlas-synapse
-  const atlas = new AtlasSynapseClient({ token: "${t}", agentName: "my-agent" })
-  await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" })
+NODE.JS (npm install atlas-synapse):
+  import { AtlasSynapseClient } from "atlas-synapse";
+  const atlas = new AtlasSynapseClient({ token: "${t}", agentName: "my-agent" });
+  await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" });
 
-Here is my current agent code:
+BROWSER / SINGLE-FILE HTML (no install needed — use fetch):
+  fetch("${url}/ingest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      projectToken: "${t}",
+      agentId: "my-agent",
+      externalTraceId: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      prompt: <the variable holding the user input>,
+      response: <the variable holding the AI output>,
+      platform: "browser"
+    })
+  }).catch(function() {});
+
+Here is my agent code:
 [PASTE YOUR AGENT CODE HERE]`} />
       </div>
 
       <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
         <p className="text-xs font-semibold text-gray-300">What happens next</p>
-        <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
-          <li>Your AI reads the prompt and adds the 3-4 lines to your agent code</li>
-          <li>Run your agent once to send a test trace</li>
+        <ol className="text-sm text-gray-400 space-y-1.5 list-decimal list-inside">
+          <li>Paste your agent code where it says <code className="text-gray-300 bg-gray-900 px-1 rounded text-xs">[PASTE YOUR AGENT CODE HERE]</code></li>
+          <li>The AI finds your AI call, adds the monitoring lines right after it, and shows you the updated code</li>
+          <li>Replace your old code with the updated version</li>
+          <li>Run your agent once — it will send a test trace</li>
           <li>Come back here and click &quot;I&apos;ve sent a trace →&quot;</li>
         </ol>
       </div>

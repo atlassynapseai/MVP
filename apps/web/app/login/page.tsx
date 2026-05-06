@@ -15,7 +15,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "check_email">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const authCallbackUrl = `${window.location.origin}${basePath}/auth/callback`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const authCallbackUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${basePath}/auth/callback`
+    : `${appUrl}${basePath}/auth/callback`;
 
   async function handleGitHub() {
     setStatus("loading");
@@ -105,8 +108,8 @@ export default function LoginPage() {
             type="button"
             onClick={() => setMode("signin")}
             className={`flex-1 py-2 text-sm font-medium transition-colors ${mode === "signin"
-              ? "bg-gray-800 text-gray-100"
-              : "bg-gray-950 text-gray-500 hover:text-gray-300"
+                ? "bg-gray-800 text-gray-100"
+                : "bg-gray-950 text-gray-500 hover:text-gray-300"
               }`}
           >
             Sign in
@@ -115,8 +118,8 @@ export default function LoginPage() {
             type="button"
             onClick={() => setMode("signup")}
             className={`flex-1 py-2 text-sm font-medium transition-colors ${mode === "signup"
-              ? "bg-gray-800 text-gray-100"
-              : "bg-gray-950 text-gray-500 hover:text-gray-300"
+                ? "bg-gray-800 text-gray-100"
+                : "bg-gray-950 text-gray-500 hover:text-gray-300"
               }`}
           >
             Sign up

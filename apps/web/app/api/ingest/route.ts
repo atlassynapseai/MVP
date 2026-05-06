@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
           rawRedactedPayload: data.rawRedactedPayload as unknown as object,
           status: "received",
           ...(data.tokenCount !== undefined ? { tokenCount: data.tokenCount } : {}),
+          ...(data.costCents !== undefined ? { costMicroUsd: Math.round(data.costCents * 10_000) } : {}),
         },
       });
     }

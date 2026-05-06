@@ -4,9 +4,13 @@ import { prisma } from "@atlas/db";
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
+  // Fail-closed: if CRON_SECRET is not configured, refuse all requests
   const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
   const auth = req.headers.get("Authorization");
-  if (secret && auth !== `Bearer ${secret}`) {
+  if (auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

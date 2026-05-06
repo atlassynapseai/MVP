@@ -753,9 +753,9 @@ All traces pass through a PII stripping layer **before** any data reaches the da
 
 ### Data Retention
 
-- All trace data is **automatically deleted after 90 days**
-- Deletion on request — contact support
-- The Data Transparency page shows live stats: total stored traces, agent count, and how many traces are due for deletion
+- The **Data Transparency** page shows live stats: total stored traces, agent count, and how many traces are over 90 days old (flagged for future deletion)
+- Contact support to request manual deletion of your data
+- Automatic purging of traces older than 90 days is a planned feature
 
 ---
 

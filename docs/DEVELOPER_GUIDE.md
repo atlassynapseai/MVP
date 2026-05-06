@@ -28,7 +28,7 @@ AtlasSynapse is "HR for Your AI" — a monitoring platform for AI agents. Just a
        │  POST  redacted payload + X-Atlas-Signature header
        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  VERCEL WEB APP  (Next.js 15 — /api/ingest)             │
+│  VERCEL WEB APP  (Next.js 16 — /api/ingest)             │
 │  • Verify HMAC signature                                │
 │  • SHA-256 hash token → look up Connection in DB        │
 │  • Upsert Agent row (auto-creates on first trace)       │
@@ -76,7 +76,7 @@ AtlasSynapse is "HR for Your AI" — a monitoring platform for AI agents. Just a
 | Layer | Tech | Purpose |
 |-------|------|---------|
 | Auth | Supabase Auth | Login, sign-up, email + OAuth (Google, GitHub) |
-| Frontend + API | Next.js 15 (App Router) on Vercel | Dashboard UI + all API routes |
+| Frontend + API | Next.js 16 (App Router) on Vercel | Dashboard UI + all API routes |
 | Security gateway | Cloudflare Workers + Hono | Strip PII from traces, HMAC-sign before forwarding |
 | Database | Supabase (Postgres) + Prisma ORM | All persistent data: agents, traces, incidents, orgs |
 | AI Evaluator | Anthropic Claude Sonnet | Read traces, classify severity + category, create Incidents |
@@ -90,12 +90,12 @@ AtlasSynapse is "HR for Your AI" — a monitoring platform for AI agents. Just a
 ```
 MVP/
 ├── apps/
-│   ├── web/                        # Next.js 15 dashboard + API (@atlas/web)
+│   ├── web/                        # Next.js 16 dashboard + API (@atlas/web)
 │   │   ├── app/
 │   │   │   ├── dashboard/          # All dashboard pages (overview, agents, incidents, settings)
 │   │   │   ├── api/
 │   │   │   │   ├── ingest/         # Receives traces from edge worker
-│   │   │   │   ├── cron/evaluate/  # Evaluator cron (Vercel runs every 60s)
+│   │   │   │   ├── cron/evaluate/  # Evaluator cron (Vercel daily; external cron can call more often)
 │   │   │   │   ├── webhooks/zapier/ # Zapier + Make.com webhook receiver
 │   │   │   │   ├── connections/    # Project token management
 │   │   │   │   ├── feedback/       # Incident feedback submissions
@@ -191,7 +191,7 @@ Edit `apps/web/.env.local`:
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role key | Yes |
 | `INGEST_WORKER_SECRET` | Generate: `openssl rand -hex 32` | Yes |
 | `CRON_SECRET` | Generate: `openssl rand -hex 32` | Yes |
-| `WEB_INGEST_URL` | `http://localhost:3000/MVP/api/ingest` | Yes |
+| `WEB_INGEST_URL` | `http://localhost:3000/api/ingest` | Yes |
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Yes |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) | Yes (for incidents) |
 | `BREVO_API_KEY` | [brevo.com](https://brevo.com) | No (email alerts only) |
@@ -203,7 +203,7 @@ Also create `apps/edge/.dev.vars` (edge worker local secrets):
 ```bash
 cat > apps/edge/.dev.vars << EOF
 INGEST_WORKER_SECRET="<same value as above>"
-WEB_INGEST_URL="http://localhost:3000/MVP/api/ingest"
+WEB_INGEST_URL="http://localhost:3000/api/ingest"
 EOF
 ```
 
@@ -233,10 +233,11 @@ pnpm --filter @atlas/edge dev
 
 ### Step 5: Sign in and verify
 
-1. Go to `http://localhost:3000/MVP`
+1. Go to `http://localhost:3000/login`
 2. Sign in with email/password or OAuth (Google/GitHub — configure in Supabase → Auth → Providers)
-3. Go to `http://localhost:3000/MVP/dashboard` — should show empty dashboard
+3. Go to `http://localhost:3000/dashboard` — should show empty dashboard
 4. Go to Connections → New Connection → copy the project token
+5. Optional: open `http://localhost:3000/dashboard/onboarding` to use the built-in setup wizard
 
 ### Step 6: Send a test trace
 
@@ -414,14 +415,14 @@ Use the Cloudflare Workers URL as `ATLAS_INGEST_URL` in n8n or Python SDK.
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| Redirected to login on every page | Supabase session not set | Sign in at `/MVP/login`, check `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| Redirected to login on every page | Supabase session not set | Sign in at `/login` locally (or `/MVP/login` in production), then check `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | "Failed to create connection" | Missing basePath in fetch call | All client-side `fetch()` must use `` `${basePath}/api/...` `` |
 | Incidents not appearing after sending traces | Missing or placeholder `ANTHROPIC_API_KEY` | Add real key to `.env.local`, restart Next.js |
 | Edge worker port is not 8787 | Wrangler dev picks next available port | Check terminal output for "Ready on http://localhost:XXXX" and use that port |
 | Edge returns `Internal Server Error` | `WEB_INGEST_URL` pointing to wrong port | Check which port Next.js started on and update `apps/edge/.dev.vars` |
 | `Buffer is not defined` in edge worker | Node.js built-in unavailable in Cloudflare Workers runtime | Fixed — `packages/shared/src/hmac.ts` uses pure Web Crypto API |
 | `Unknown field 'category'` Prisma error | Stale Prisma client (generated before P2 migration) | Run `pnpm --filter @atlas/db generate` then restart Next.js |
-| `next lint` fails in CI with path error | Next.js 15 CLI change — positional arg is now dir | Fixed — lint script uses `next lint --dir .` |
+| Lint fails in CI with a Next.js CLI flag error | Stale lint script still calls the removed `next lint --dir` path | Fixed — `apps/web/package.json` uses `eslint . --ext .ts,.tsx` |
 
 ---
 

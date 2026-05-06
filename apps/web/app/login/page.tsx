@@ -1,5 +1,6 @@
 "use client";
 
+import { basePath } from "@/lib/app-path";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,13 +15,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "check_email">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const authCallbackUrl = `${window.location.origin}${basePath}/auth/callback`;
 
   async function handleGitHub() {
     setStatus("loading");
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: "github",
-      options: { redirectTo: `${window.location.origin}/MVP/auth/callback` },
+      options: { redirectTo: authCallbackUrl },
     });
   }
 
@@ -29,7 +31,7 @@ export default function LoginPage() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/MVP/auth/callback` },
+      options: { redirectTo: authCallbackUrl },
     });
   }
 
@@ -44,7 +46,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/MVP/auth/callback` },
+        options: { emailRedirectTo: authCallbackUrl },
       });
       if (error) {
         setErrorMsg(error.message);

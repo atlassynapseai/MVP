@@ -11,7 +11,7 @@ const PROJECT_TOKEN = "atlas-test-token-32chars-xxxxxxxx";
 async function main() {
   const org = await prisma.organization.findFirst();
   if (!org) {
-    console.error("No organization found. Sign in, create an org in Clerk, and ensure the webhook fired.");
+    console.error("No organization found. Sign in to the web app with Supabase Auth once so your organization is created, then run this script again.");
     process.exit(1);
   }
   console.log(`Found org: ${org.name} (${org.id})`);

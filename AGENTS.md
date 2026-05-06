@@ -5,7 +5,7 @@ AtlasSynapse MVP. "HR for Your AI" — monitor AI agents like employees.
 
 ## Stack
 - Monorepo: pnpm + Turborepo
-- Web: Next.js 15 App Router, TypeScript strict, Tailwind, Supabase auth (`@atlas/web`)
+- Web: Next.js 16 App Router, TypeScript strict, Tailwind, Supabase auth (`@atlas/web`)
 - Edge: Cloudflare Workers + Hono — ingest + PII strip (`@atlas/edge`)
 - DB: Postgres/Supabase + Prisma ORM (`@atlas/db`)
 - Shared: HMAC, PII utils, Zod schemas, types (`@atlas/shared`)
@@ -39,7 +39,7 @@ pnpm test
 - `docs/USER_GUIDE.md` — end-user guide
 - `MVPRoadmap/ROADMAP.md` — project roadmap
 - `vercel.json` — Vercel env bindings + cron schedule
-- `apps/web/` — Next.js 15 web app
+- `apps/web/` — Next.js 16 web app
   - `.eslintrc.json` — ESLint config; required for `next lint` to run non-interactively in CI
   - `app/dashboard/` — dashboard pages (agents, incidents, settings, data-transparency)
     - `app/dashboard/agents/compare/` — agent comparison page

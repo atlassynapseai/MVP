@@ -18,19 +18,27 @@ HR for Your AI — monitor AI agents like employees.
    pnpm install
    ```
 
-2. Copy env and fill values:
+2. Copy env and fill values for the web app:
    ```bash
-   cp .env.example .env.local
-   # edit .env.local
+  cp .env.example apps/web/.env.local
+  # edit apps/web/.env.local
    ```
 
-3. Push DB schema:
-   ```bash
-   pnpm --filter @atlas/db migrate
-   ```
+  For local dev, use these values without a `/MVP` prefix:
+  - `NEXT_PUBLIC_APP_URL=http://localhost:3000`
+  - `WEB_INGEST_URL=http://localhost:3000/api/ingest`
 
-4. Generate Prisma client:
+3. Create edge worker local secrets:
+  ```bash
+  cat > apps/edge/.dev.vars <<'EOF'
+  INGEST_WORKER_SECRET="replace_with_32_byte_hex_secret"
+  WEB_INGEST_URL="http://localhost:3000/api/ingest"
+  EOF
+  ```
+
+4. Apply DB migrations:
    ```bash
+  pnpm --filter @atlas/db exec prisma migrate deploy
    pnpm --filter @atlas/db generate
    ```
 
@@ -45,6 +53,8 @@ Run edge worker (localhost:8787):
 ```bash
 pnpm --filter @atlas/edge dev
 ```
+
+Local development runs at `http://localhost:3000` with no `/MVP` prefix. The `/MVP` base path is only enabled when `NEXT_PUBLIC_APP_URL` includes `/MVP` in production.
 
 ## Testing
 
@@ -66,7 +76,7 @@ cd packages/sdk-python && PYTHONPATH=src python3 -m pytest tests/
 ## End-to-End Ingest Test
 
 1. Start both dev servers.
-2. Create a Connection row in DB with `projectTokenHash = sha256(your_test_token)` and status `active`.
+2. Sign in once at `http://localhost:3000/login`, then either create a token in the dashboard or run `node scripts/seed-connection.mjs`.
 3. Send test trace:
    ```bash
    curl -X POST http://localhost:8787/ingest \
@@ -95,7 +105,7 @@ packages/
   db/                  # Prisma schema + client (@atlas/db)
   shared/              # HMAC, PII, Zod schemas, types (@atlas/shared)
 apps/
-  web/                 # Next.js 15 App Router (@atlas/web)
+  web/                 # Next.js 16 App Router (@atlas/web)
   edge/                # Cloudflare Worker + Hono (@atlas/edge)
 scripts/
   test-anthropic-agent.py   # Anthropic agent integration smoke test
@@ -104,6 +114,8 @@ public/
   templates/
     n8n-atlas-reporter.json  # n8n HTTP reporter workflow template
 ```
+
+The customer-facing onboarding wizard already exists at `/dashboard/onboarding` and includes Python, Node.js, n8n, Zapier, raw HTTP, and AI-assisted setup flows.
 
 ## CI
 

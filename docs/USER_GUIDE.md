@@ -31,7 +31,9 @@
 
 ### 1. Sign In
 
-Log in to your Atlas Synapse dashboard. You'll land on the **Overview** page showing your AI workforce at a glance.
+Open the dashboard at **[https://atlassynapseai.com/MVP](https://atlassynapseai.com/MVP)** and sign in. You'll land on the **Overview** page showing your AI workforce at a glance.
+
+> **New here?** Click **Get Started** on the Overview page (or navigate to **Onboarding** in the sidebar) for a guided setup wizard with copy-paste code snippets for every SDK.
 
 ### 2. Create a Connection Token
 
@@ -65,7 +67,7 @@ Within seconds, your agent and trace will appear on the dashboard.
 
 ### 4. Wait for Evaluation
 
-Traces are automatically evaluated within ~60 seconds. The evaluation engine reads the prompt and response, scores the interaction, and either marks it as **pass** or creates an **incident** with a plain-English explanation.
+Traces are automatically evaluated approximately every **60 seconds**. The evaluation engine reads the redacted prompt and response, scores the interaction, and either marks it as **pass** or creates an **incident** with a plain-English explanation.
 
 ---
 
@@ -822,9 +824,9 @@ Calculated over a rolling window you configure (default: 60 minutes). Triggers o
 
 ### Traces appear but no evaluations
 
-**Cause:** Evaluations run automatically via a background cron job (every few minutes).
+**Cause:** Evaluations run automatically via a background job approximately every 60 seconds.
 
-**Fix:** Wait 60 seconds. If evaluations still don't appear after 5 minutes, check the **Traces** page — the status should progress from "received" to "pass" or "alerted."
+**Fix:** Wait 60–90 seconds. If evaluations still don't appear after 5 minutes, check the **Traces** page — the status should progress from "received" to "pass" or "alerted."
 
 ### "Evaluation pending..." stuck
 
@@ -913,8 +915,9 @@ An immutable record of all actions in your workspace. Every configuration change
 
 ### Key URLs
 
-| Resource | Purpose |
-|----------|---------|
-| Dashboard | Your Atlas Synapse web app URL |
+| Resource | URL |
+|----------|-----|
+| Dashboard | [https://atlassynapseai.com/MVP](https://atlassynapseai.com/MVP) |
 | Ingest Endpoint | `https://atlas-synapse-edge.atlassynapseai.workers.dev/ingest` |
+| Zapier/Make Webhook | `https://atlassynapseai.com/MVP/api/webhooks/zapier` |
 | Slack Webhook Setup | [api.slack.com/messaging/webhooks](https://api.slack.com/messaging/webhooks) |

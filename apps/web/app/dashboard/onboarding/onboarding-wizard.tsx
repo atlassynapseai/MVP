@@ -123,55 +123,81 @@ agent = wrap_agent(your_existing_agent, sdk)`} />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">1 — Install</p>
-        <CodeBlock code="npm install atlas-synapse" />
-      </div>
-
-      <div>
-        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">2 — Any Node.js agent</p>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">1 — No install needed — use fetch (works everywhere)</p>
         <div className="rounded-lg bg-amber-950/30 border border-amber-700/40 px-3 py-2 mb-3">
           <p className="text-xs text-amber-300 font-medium">Where to paste this</p>
           <p className="text-xs text-amber-200/70 mt-0.5">
-            Find the line where your AI call resolves — e.g. <code className="bg-gray-900 px-1 rounded">const reply = await openai.chat.completions.create(...)</code>. Add the <code className="bg-gray-900 px-1 rounded">await atlas.trace()</code> call on the very next line, before the response is sent back to the user.
+            Find the line where your AI call resolves — e.g. <code className="bg-gray-900 px-1 rounded">const reply = await openai.chat.completions.create(...)</code>. Add the <code className="bg-gray-900 px-1 rounded">fetch(...)</code> call on the very next line, before the response is sent back to the user.
           </p>
         </div>
-        <CodeBlock code={`import { AtlasSynapseClient } from "atlas-synapse";
+        <CodeBlock code={`// No install needed — works in Node.js, Edge Runtime, Bun, Deno
+// Add this right after your AI call returns a response
 
-const atlas = new AtlasSynapseClient({
-  token: "${t}",
-  agentName: "my-agent",
-});
-
-// Before:  return agentReply;
-// After:   await atlas.trace(...);   ← add this line
-//          return agentReply;
-await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" });`} />
+await fetch("${url}/ingest", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    projectToken: "${t}",
+    agentId: "my-agent",          // name shown in your dashboard
+    externalTraceId: Date.now().toString(),
+    timestamp: new Date().toISOString(),
+    prompt: userMessage,          // the variable holding the user input
+    response: agentReply,         // the variable holding the AI output
+    platform: "nodejs",           // or "openai", "anthropic", "vercel-ai", etc.
+    // tokenCount: usage.total_tokens,   // optional
+    // toolCalls: [...],                 // optional
+  }),
+}).catch(() => {});  // fire-and-forget — never block your agent`} />
       </div>
 
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Vercel AI SDK — wrap generateText</p>
-        <CodeBlock code={`import { AtlasSynapseClient, wrapVercelAI } from "atlas-synapse";
-import { generateText } from "ai";
+        <CodeBlock code={`import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
-const atlas = new AtlasSynapseClient({ token: "${t}", agentName: "my-agent" });
+const { text, usage } = await generateText({ model: openai("gpt-4o"), prompt: userPrompt });
 
-// Replace generateText with wrapVercelAI — no other changes
-const { text } = await wrapVercelAI(
-  atlas,
-  () => generateText({ model: openai("gpt-4o"), prompt: userPrompt }),
-  { prompt: userPrompt },
-);`} />
+// Add monitoring right after — no extra package needed
+await fetch("${url}/ingest", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    projectToken: "${t}",
+    agentId: "my-vercel-agent",
+    externalTraceId: Date.now().toString(),
+    timestamp: new Date().toISOString(),
+    prompt: userPrompt,
+    response: text,
+    platform: "vercel-ai",
+    tokenCount: (usage?.promptTokens ?? 0) + (usage?.completionTokens ?? 0),
+  }),
+}).catch(() => {});`} />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Vercel AI SDK — streamText</p>
-        <CodeBlock code={`import { vercelOnFinish } from "atlas-synapse";
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Vercel AI SDK — streamText (onFinish callback)</p>
+        <CodeBlock code={`import { streamText } from "ai";
 
 const stream = streamText({
   model: openai("gpt-4o"),
   prompt: userPrompt,
-  onFinish: vercelOnFinish(atlas, { prompt: userPrompt }),  // add this line
+  onFinish: async ({ text, usage }) => {
+    // Called once streaming is complete
+    await fetch("${url}/ingest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        projectToken: "${t}",
+        agentId: "my-vercel-agent",
+        externalTraceId: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        prompt: userPrompt,
+        response: text,
+        platform: "vercel-ai",
+        tokenCount: (usage?.promptTokens ?? 0) + (usage?.completionTokens ?? 0),
+      }),
+    }).catch(() => {});
+  },
 });`} />
       </div>
     </div>
@@ -369,12 +395,14 @@ Body:
           <Sparkles className="w-4 h-4" /> Built your agent with AI? No problem.
         </p>
         <p className="text-sm text-gray-400">
-          Copy the prompt below, paste it into Claude, ChatGPT, or whatever AI you used to build your agent, then paste your agent code at the bottom. The AI will add Atlas Synapse monitoring in the right place automatically.
+          Copy the prompt below and paste it into the same AI you used to build your agent.
+          If you&apos;re using an AI code editor (Cursor, Windsurf, GitHub Copilot) it already knows your codebase — no need to paste any code.
+          If you&apos;re using a chat AI (Claude.ai, ChatGPT) you can optionally paste your agent code at the bottom, or just describe your setup and it will guide you.
         </p>
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Paste this into your AI — then add your code at the bottom</p>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Copy this prompt and send it to your AI</p>
         <CodeBlock code={`I want to add Atlas Synapse monitoring to my AI agent.
 
 Atlas Synapse tracks every conversation my agent has, strips PII automatically,
@@ -387,7 +415,7 @@ Please add monitoring so that after every AI response, a trace is posted to Atla
 Find the exact line where the AI call returns its response and add the monitoring call
 immediately after that line — before the response is returned or used anywhere else.
 
-Use whichever approach matches the language/framework of the code below:
+Use whichever approach matches the language/framework:
 
 PYTHON (pip install atlas-synapse):
   from atlas_synapse import AtlasSynapseSdk, TracePayload
@@ -403,13 +431,8 @@ PYTHON (pip install atlas-synapse):
       platform="anthropic",  # or "openai", "langchain", etc.
   ))
 
-NODE.JS (npm install atlas-synapse):
-  import { AtlasSynapseClient } from "atlas-synapse";
-  const atlas = new AtlasSynapseClient({ token: "${t}", agentName: "my-agent" });
-  await atlas.trace({ prompt: userMessage, response: agentReply, platform: "openai" });
-
-BROWSER / SINGLE-FILE HTML (no install needed — use fetch):
-  fetch("${url}/ingest", {
+NODE.JS / ANY HTTP (no extra install needed — use fetch):
+  await fetch("${url}/ingest", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -419,21 +442,28 @@ BROWSER / SINGLE-FILE HTML (no install needed — use fetch):
       timestamp: new Date().toISOString(),
       prompt: <the variable holding the user input>,
       response: <the variable holding the AI output>,
-      platform: "browser"
+      platform: "nodejs"
     })
-  }).catch(function() {});
+  }).catch(() => {});  // fire-and-forget, never block the agent
 
-Here is my agent code:
-[PASTE YOUR AGENT CODE HERE]`} />
+---
+
+If you can see my project files directly (e.g. you are running inside my editor), please find the agent code yourself — look for the file where the AI call is made (e.g. client.messages.create, openai.chat.completions.create, agent.run, chain.invoke, etc.) and add monitoring there.
+
+If you do not have access to my files, I will describe my setup below, or paste the relevant code:
+
+Framework / language I am using: [e.g. Python with Anthropic, Node.js with OpenAI, n8n, etc.]
+
+[OPTIONAL — paste your agent code here if you have it, or just send this prompt as-is and describe your setup in the next message]`} />
       </div>
 
       <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
         <p className="text-xs font-semibold text-gray-300">What happens next</p>
         <ol className="text-sm text-gray-400 space-y-1.5 list-decimal list-inside">
-          <li>Paste your agent code where it says <code className="text-gray-300 bg-gray-900 px-1 rounded text-xs">[PASTE YOUR AGENT CODE HERE]</code></li>
-          <li>The AI finds your AI call, adds the monitoring lines right after it, and shows you the updated code</li>
-          <li>Replace your old code with the updated version</li>
-          <li>Run your agent once — it will send a test trace</li>
+          <li><strong className="text-gray-300">AI code editor (Cursor, Windsurf, Copilot):</strong> just send the prompt — the AI already knows your codebase and will find the right file</li>
+          <li><strong className="text-gray-300">Chat AI (Claude.ai, ChatGPT):</strong> optionally paste your agent code at the bottom, or just describe your framework — e.g. &quot;I&apos;m using Python with LangChain&quot;</li>
+          <li>The AI adds the monitoring lines right after your AI call and shows you the updated code</li>
+          <li>Replace your old code with the updated version and run your agent once</li>
           <li>Come back here and click &quot;I&apos;ve sent a trace →&quot;</li>
         </ol>
       </div>
@@ -529,7 +559,7 @@ export function OnboardingWizard({ hasConnection }: Props) {
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 space-y-5">
           <h2 className="text-lg font-semibold text-gray-100">Step 2 — Connect your agent</h2>
 
-          {/* Token banner */}
+          {/* Token banner — shown only when token was just created this session */}
           {token && (
             <div className="rounded-lg border border-emerald-700/60 bg-emerald-950/30 p-4">
               <div className="flex items-center justify-between mb-1">
@@ -539,6 +569,20 @@ export function OnboardingWizard({ hasConnection }: Props) {
                 </button>
               </div>
               <code className="text-sm text-gray-100 break-all font-mono">{token}</code>
+            </div>
+          )}
+
+          {/* Guide for returning users who don't have the token in state */}
+          {!token && hasConnection && (
+            <div className="rounded-lg border border-amber-700/40 bg-amber-950/20 p-4 space-y-1.5">
+              <p className="text-xs text-amber-300 font-semibold uppercase tracking-wide">Need your project token?</p>
+              <p className="text-sm text-amber-200/70">
+                Tokens are shown only once at creation. To use an existing token, check where you saved it when you first set up.
+                If you need a new one, click{" "}
+                <button onClick={() => setStep(1)} className="underline text-amber-300 hover:text-amber-200">← Back</button>{" "}
+                and create a fresh token — or manage all your connections on the{" "}
+                <Link href="/dashboard/connections" className="underline text-amber-300 hover:text-amber-200">Connections page</Link>.
+              </p>
             </div>
           )}
 

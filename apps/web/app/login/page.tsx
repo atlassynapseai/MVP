@@ -15,7 +15,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "check_email">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const authCallbackUrl = `${window.location.origin}${basePath}/auth/callback`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const authCallbackUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${basePath}/auth/callback`
+    : `${appUrl}${basePath}/auth/callback`;
 
   async function handleGitHub() {
     setStatus("loading");

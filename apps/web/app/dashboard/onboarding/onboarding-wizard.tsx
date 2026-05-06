@@ -457,11 +457,40 @@ Framework / language I am using: [e.g. Python with Anthropic, Node.js with OpenA
 [OPTIONAL — paste your agent code here if you have it, or just send this prompt as-is and describe your setup in the next message]`} />
       </div>
 
+      <div>
+        <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">If your AI says the prompt is too long, use this short fallback</p>
+        <CodeBlock code={`Add Atlas Synapse monitoring to my AI agent.
+
+Requirements:
+- After every AI response, send one POST request to: ${url}/ingest
+- Use this JSON body:
+  {
+    "projectToken": "${t}",
+    "agentId": "my-agent",
+    "externalTraceId": "unique id per run",
+    "timestamp": "ISO timestamp",
+    "prompt": "user input text",
+    "response": "assistant output text",
+    "platform": "framework name"
+  }
+- Insert the monitoring call immediately after the AI call returns, before returning/sending the response.
+- Do not break normal agent execution if monitoring fails (use try/catch or fire-and-forget).
+
+If you can access my project files, patch the correct file directly.
+If you cannot access my files, tell me exactly which file/function to edit and show the final diff.`} />
+      </div>
+
+      <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4">
+        <p className="text-xs font-semibold text-gray-300 mb-1.5">Mini add-on line (recommended)</p>
+        <CodeBlock code={`My stack: [e.g. Python + Anthropic, Node.js + OpenAI, n8n, Zapier]`} />
+      </div>
+
       <div className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4 space-y-2">
         <p className="text-xs font-semibold text-gray-300">What happens next</p>
         <ol className="text-sm text-gray-400 space-y-1.5 list-decimal list-inside">
           <li><strong className="text-gray-300">AI code editor (Cursor, Windsurf, Copilot):</strong> just send the prompt — the AI already knows your codebase and will find the right file</li>
           <li><strong className="text-gray-300">Chat AI (Claude.ai, ChatGPT):</strong> optionally paste your agent code at the bottom, or just describe your framework — e.g. &quot;I&apos;m using Python with LangChain&quot;</li>
+          <li>If the AI says the prompt is too long, use the short fallback prompt and add the one-line stack description</li>
           <li>The AI adds the monitoring lines right after your AI call and shows you the updated code</li>
           <li>Replace your old code with the updated version and run your agent once</li>
           <li>Come back here and click &quot;I&apos;ve sent a trace →&quot;</li>

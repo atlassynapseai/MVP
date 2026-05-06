@@ -15,12 +15,12 @@ type Tab = "python" | "nodejs" | "n8n" | "zapier" | "http" | "vibecoded";
 const INGEST_URL = "https://atlas-synapse-edge.atlassynapseai.workers.dev";
 
 const TABS: { id: Tab; label: string; sub: string }[] = [
-  { id: "python",    label: "Python",       sub: "Anthropic · OpenAI · LangChain · CrewAI · more" },
-  { id: "nodejs",    label: "Node.js",      sub: "Vercel AI SDK · OpenAI · any JS agent"           },
-  { id: "n8n",       label: "n8n",          sub: "no-code workflow automation"                      },
-  { id: "zapier",    label: "Zapier",       sub: "no-code · any Zap"                                },
-  { id: "http",      label: "Any HTTP",     sub: "Flowise · Dify · Make.com · curl · any language"  },
-  { id: "vibecoded", label: "✨ Vibe coded", sub: "built with AI — paste a prompt and you're done"  },
+  { id: "python", label: "Python", sub: "Anthropic · OpenAI · LangChain · CrewAI · more" },
+  { id: "nodejs", label: "Node.js", sub: "Vercel AI SDK · OpenAI · any JS agent" },
+  { id: "n8n", label: "n8n", sub: "no-code workflow automation" },
+  { id: "zapier", label: "Zapier", sub: "no-code · any Zap" },
+  { id: "http", label: "Any HTTP", sub: "Flowise · Dify · Make.com · curl · any language" },
+  { id: "vibecoded", label: "✨ Vibe coded", sub: "built with AI — paste a prompt and you're done" },
 ];
 
 function CodeBlock({ code, onCopy }: { code: string; onCopy?: () => void }) {
@@ -534,9 +534,9 @@ export function OnboardingWizard({ hasConnection }: Props) {
   }
 
   const steps: { label: string; done: boolean }[] = [
-    { label: "Create a token",        done: step > 1 || hasConnection },
-    { label: "Connect your agent",    done: step > 2                  },
-    { label: "You're live",           done: step > 3                  },
+    { label: "Create a token", done: step > 1 || hasConnection },
+    { label: "Connect your agent", done: step > 2 },
+    { label: "You're live", done: step > 3 },
   ];
 
   return (
@@ -545,18 +545,16 @@ export function OnboardingWizard({ hasConnection }: Props) {
       <div className="flex items-center gap-2">
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-sm">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border transition-colors ${
-              s.done
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border transition-colors ${s.done
                 ? "bg-emerald-900/60 text-emerald-400 border-emerald-700"
                 : step === i + 1
-                ? "bg-violet-900/60 text-violet-300 border-violet-700"
-                : "bg-gray-800 text-gray-500 border-gray-700"
-            }`}>
+                  ? "bg-violet-900/60 text-violet-300 border-violet-700"
+                  : "bg-gray-800 text-gray-500 border-gray-700"
+              }`}>
               {s.done ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
             </span>
-            <span className={`hidden sm:inline transition-colors ${
-              s.done ? "text-emerald-400" : step === i + 1 ? "text-gray-200" : "text-gray-600"
-            }`}>
+            <span className={`hidden sm:inline transition-colors ${s.done ? "text-emerald-400" : step === i + 1 ? "text-gray-200" : "text-gray-600"
+              }`}>
               {s.label}
             </span>
             {i < steps.length - 1 && <span className="text-gray-700 mx-1 hidden sm:inline">→</span>}
@@ -627,11 +625,10 @@ export function OnboardingWizard({ hasConnection }: Props) {
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
-                    tab === t.id
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${tab === t.id
                       ? "bg-violet-600 border-violet-500 text-white"
                       : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-600"
-                  }`}
+                    }`}
                 >
                   {t.label}
                 </button>

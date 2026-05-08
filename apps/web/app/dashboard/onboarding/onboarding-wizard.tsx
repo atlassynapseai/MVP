@@ -23,6 +23,33 @@ const TABS: { id: Tab; label: string; sub: string }[] = [
   { id: "vibecoded", label: "✨ Vibe coded", sub: "built with AI — paste a prompt and you're done" },
 ];
 
+const STARTER_LIBRARY = [
+  {
+    name: "CrewAI starters",
+    notes: "Great for multi-agent workflows (email, sales, support)",
+    href: "https://github.com/ashishpatel26/500-AI-Agents-Projects#framework-name-crewai",
+    suggestedTab: "python" as const,
+  },
+  {
+    name: "LangGraph starters",
+    notes: "Great for agent graphs, retries, and orchestration",
+    href: "https://github.com/ashishpatel26/500-AI-Agents-Projects#framework-name-langgraph",
+    suggestedTab: "python" as const,
+  },
+  {
+    name: "AutoGen starters",
+    notes: "Great for collaborative/group-chat style agent systems",
+    href: "https://github.com/ashishpatel26/500-AI-Agents-Projects#framework-name-autogen",
+    suggestedTab: "python" as const,
+  },
+  {
+    name: "No-code workflow ideas",
+    notes: "Use cases you can map to n8n or Zapier quickly",
+    href: "https://github.com/ashishpatel26/500-AI-Agents-Projects",
+    suggestedTab: "n8n" as const,
+  },
+];
+
 function CodeBlock({ code, onCopy }: { code: string; onCopy?: () => void }) {
   const [copied, setCopied] = useState(false);
   function copy() {
@@ -618,6 +645,41 @@ export function OnboardingWizard({ hasConnection }: Props) {
             <p className="text-sm text-gray-400 mb-3">
               Choose how your agent is built — Atlas Synapse works with all of them:
             </p>
+
+            <div className="rounded-lg border border-gray-700/60 bg-gray-800/40 p-4 mb-5 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-300">Starter Agent Library (optional)</p>
+              <p className="text-sm text-gray-400">
+                Want ready-made agent ideas? Start from this curated open-source catalog and then connect it here.
+                You do not need to copy full projects — pick a starter, then add Atlas monitoring in this wizard.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {STARTER_LIBRARY.map((item) => (
+                  <div key={item.name} className="rounded-lg border border-gray-700 bg-gray-900/70 p-3 space-y-2">
+                    <p className="text-sm font-medium text-gray-200">{item.name}</p>
+                    <p className="text-xs text-gray-500">{item.notes}</p>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-violet-300 hover:text-violet-200 underline"
+                      >
+                        Open examples
+                      </a>
+                      <button
+                        onClick={() => setTab(item.suggestedTab)}
+                        className="text-xs text-gray-400 hover:text-gray-200 underline"
+                      >
+                        Use matching setup
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-600">
+                Source catalog: ashishpatel26/500-AI-Agents-Projects (MIT licensed)
+              </p>
+            </div>
 
             {/* Tab selector */}
             <div className="flex flex-wrap gap-2 mb-5">

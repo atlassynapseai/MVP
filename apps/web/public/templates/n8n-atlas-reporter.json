@@ -1,0 +1,139 @@
+{
+  "name": "AtlasSynapse Reporter",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "atlas-agent-name",
+              "name": "ATLAS_AGENT_NAME",
+              "value": "my-n8n-agent",
+              "type": "string"
+            },
+            {
+              "id": "atlas-project-token",
+              "name": "ATLAS_PROJECT_TOKEN",
+              "value": "={{ $env.ATLAS_PROJECT_TOKEN }}",
+              "type": "string"
+            },
+            {
+              "id": "atlas-ingest-url",
+              "name": "ATLAS_INGEST_URL",
+              "value": "={{ $env.ATLAS_INGEST_URL || 'https://your-worker.workers.dev' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "atlas-config",
+      "name": "AtlasSynapse Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Step 1 of 3: Configure Atlas Synapse.\n\nSet these env vars in N8N Settings → Environment:\n  ATLAS_PROJECT_TOKEN — your project token from Atlas Synapse dashboard → Connections\n  ATLAS_INGEST_URL    — your edge worker URL (e.g. https://your-worker.workers.dev)\n\nOptionally change ATLAS_AGENT_NAME to identify this workflow in the dashboard."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $json.input || $json.prompt || 'Hello, how can you help?' }}",
+        "options": {
+          "systemMessage": "You are a helpful AI assistant. Answer clearly and concisely.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        300
+      ],
+      "notes": "Step 2 of 3: Your AI Agent.\n\nConnect your LLM model and tools to this node.\nEnable 'Return Intermediate Steps' to capture tool calls in Atlas Synapse."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('AtlasSynapse Config').first().json.ATLAS_INGEST_URL }}/ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  projectToken: $('AtlasSynapse Config').first().json.ATLAS_PROJECT_TOKEN,\n  agentId: $('AtlasSynapse Config').first().json.ATLAS_AGENT_NAME,\n  externalTraceId: $execution.id + '-' + Date.now(),\n  timestamp: new Date().toISOString(),\n  prompt: $('AI Agent').first().json.input?.input || $('AI Agent').first().json.input || $json.chatInput || $json.prompt || 'Hello, how can you help?',\n  response: $('AI Agent').first().json.output || '',\n  toolCalls: ($('AI Agent').first().json.intermediateSteps || []).map(step => ({\n    name: step.action?.tool || 'unknown',\n    input: step.action?.toolInput || {},\n    output: step.observation ? String(step.observation).slice(0, 5000) : undefined\n  })),\n  platform: 'n8n'\n}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "atlas-reporter",
+      "name": "AtlasSynapse Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ],
+      "continueOnFail": true,
+      "notes": "Step 3 of 3: Report to Atlas Synapse.\n\nThis node posts the agent trace automatically.\n'Continue On Fail' is enabled — reporting failures will never block your workflow.\n\nTool calls are captured if the AI Agent node has 'Return Intermediate Steps' enabled.\nTokenCount is null for n8n (n8n does not expose token usage natively)."
+    }
+  ],
+  "connections": {
+    "AtlasSynapse Config": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AtlasSynapse Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "atlas-synapse-reporter-v2"
+  },
+  "id": "atlas-reporter-template",
+  "tags": [
+    "atlassynapse",
+    "monitoring",
+    "observability"
+  ],
+  "versionId": "v2"
+}

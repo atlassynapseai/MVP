@@ -261,18 +261,6 @@ const stream = streamText({
         >
           Download n8n template
         </a>
-        <p className="text-xs text-gray-500 mt-2">
-          If this fails, use{" "}
-          <a
-            href="https://raw.githubusercontent.com/atlassynapseai/MVP/main/public/templates/n8n-atlas-reporter.json"
-            target="_blank"
-            rel="noreferrer"
-            className="text-violet-300 hover:text-violet-200 underline"
-          >
-            direct download link
-          </a>
-          .
-        </p>
       </div>
 
       <div>

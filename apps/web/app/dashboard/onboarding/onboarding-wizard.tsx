@@ -1,6 +1,6 @@
 "use client";
 import { basePath } from "@/lib/app-path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle, Copy, Check, Mail, Sparkles } from "lucide-react";
 
@@ -76,6 +76,16 @@ function CodeBlock({ code, onCopy }: { code: string; onCopy?: () => void }) {
 function TabContent({ tab, token }: { tab: Tab; token: string | null }) {
   const t = token ?? "YOUR_PROJECT_TOKEN";
   const url = INGEST_URL;
+  const [runtimeBasePath, setRuntimeBasePath] = useState(basePath);
+
+  useEffect(() => {
+    if (basePath || typeof window === "undefined") return;
+    if (window.location.pathname.startsWith("/MVP")) {
+      setRuntimeBasePath("/MVP");
+    }
+  }, []);
+
+  const templateDownloadHref = `${runtimeBasePath}/templates/n8n-atlas-reporter.json`;
 
   if (tab === "python") return (
     <div className="space-y-4">
@@ -245,12 +255,24 @@ const stream = streamText({
       <div>
         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">1 — Download the template</p>
         <a
-          href={`${basePath}/templates/n8n-atlas-reporter.json`}
+          href={templateDownloadHref}
           download
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#EA4B71]/10 border border-[#EA4B71]/30 text-[#EA4B71] text-sm font-medium hover:bg-[#EA4B71]/20 transition-colors"
         >
           Download n8n template
         </a>
+        <p className="text-xs text-gray-500 mt-2">
+          If this fails, use{" "}
+          <a
+            href="https://raw.githubusercontent.com/atlassynapseai/MVP/main/public/templates/n8n-atlas-reporter.json"
+            target="_blank"
+            rel="noreferrer"
+            className="text-violet-300 hover:text-violet-200 underline"
+          >
+            direct download link
+          </a>
+          .
+        </p>
       </div>
 
       <div>
@@ -573,10 +595,10 @@ export function OnboardingWizard({ hasConnection }: Props) {
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-sm">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border transition-colors ${s.done
-                ? "bg-emerald-900/60 text-emerald-400 border-emerald-700"
-                : step === i + 1
-                  ? "bg-violet-900/60 text-violet-300 border-violet-700"
-                  : "bg-gray-800 text-gray-500 border-gray-700"
+              ? "bg-emerald-900/60 text-emerald-400 border-emerald-700"
+              : step === i + 1
+                ? "bg-violet-900/60 text-violet-300 border-violet-700"
+                : "bg-gray-800 text-gray-500 border-gray-700"
               }`}>
               {s.done ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
             </span>
@@ -688,8 +710,8 @@ export function OnboardingWizard({ hasConnection }: Props) {
                   key={t.id}
                   onClick={() => setTab(t.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${tab === t.id
-                      ? "bg-violet-600 border-violet-500 text-white"
-                      : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-600"
+                    ? "bg-violet-600 border-violet-500 text-white"
+                    : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-600"
                     }`}
                 >
                   {t.label}
